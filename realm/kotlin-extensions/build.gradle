@@ -1,6 +1,5 @@
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.android.legacy-kapt'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'org.jetbrains.dokka'
 
@@ -15,14 +14,13 @@ def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../../dependencies.list"))
 
 android {
-    compileSdkVersion rootProject.compileSdkVersion
+    compileSdk rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
     defaultConfig {
-        minSdkVersion rootProject.minSdkVersion
-        targetSdkVersion rootProject.compileSdkVersion
+        minSdk rootProject.minSdkVersion
+        targetSdk rootProject.compileSdkVersion
         versionName version
         multiDexEnabled true
-        project.archivesBaseName = "realm-kotlin-extensions"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -80,6 +78,10 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
     }
+}
+
+base {
+    archivesName = "realm-kotlin-extensions"
 }
 
 dependencies {
@@ -176,4 +178,3 @@ artifacts {
 publishToMavenLocal.dependsOn assemble
 
 io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)
-

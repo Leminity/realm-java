@@ -4,7 +4,7 @@ buildscript {
     ext.kotlin_version = properties.get('KOTLIN')
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -27,13 +27,10 @@ properties.load(new FileInputStream("${projectDir}/../dependencies.list"))
 
 def coreVersion = properties.getProperty('REALM_CORE')
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
-
 repositories {
     mavenLocal()
     google()
-    jcenter()
+    mavenCentral()
 }
 
 configurations {
@@ -76,7 +73,6 @@ task generateVersionClass(type: Copy) {
 compileKotlin.dependsOn generateVersionClass
 
 apply from: "${rootDir}/../mavencentral-publications.gradle"
-apply from: "${rootDir}/../mavencentral-publish.gradle"
 
 publishing {
     publications {
@@ -105,4 +101,8 @@ compileKotlin {
         jvmTarget = JavaVersion.VERSION_11
         freeCompilerArgs = ["-Xinline-classes", "-Xjvm-default=all-compatibility"]
     }
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
 }
