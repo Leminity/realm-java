@@ -16,9 +16,10 @@
 
 package io.realm.transformer.ext
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.AndroidComponentsExtension
 import org.gradle.api.Project
-import java.io.File
 
 /**
  * Attempts to determine the best possible unique AppId for this project.
@@ -36,54 +37,28 @@ fun Project.getAppId(): String {
  * Returns the `targetSdk` property for this project if it is available.
  */
 fun Project.getTargetSdk(): String {
-    return getAndroidExtension(this).defaultConfig.targetSdkVersion?.apiString ?: "unknown"
+    return extensions.findByType(ApplicationExtension::class.java)
+        ?.defaultConfig
+        ?.targetSdk
+        ?.toString()
+        ?: "unknown"
 }
 
 /**
  * Returns the `minSdk` property for this project if it is available.
  */
 fun Project.getMinSdk(): String {
-    return getAndroidExtension(this).defaultConfig.minSdkVersion?.apiString ?: "unknown"
+    return (extensions.findByType(ApplicationExtension::class.java)?.defaultConfig?.minSdk
+        ?: extensions.findByType(LibraryExtension::class.java)?.defaultConfig?.minSdk)
+        ?.toString()
+        ?: "unknown"
 }
 
 /**
  * Returns the version of the Android Gradle Plugin that is used.
  */
 fun Project.getAgpVersion(): String {
-    // This API is only available from AGP 7.0.0. And it is a bit unclear exactly which part of
-    // this is actually stable. Also, there appear to be problems with depending on AGP 7.* on
-    // the compile classpath (it cannot load BaseExtension).
-    //
-    // So for now, this code assumes that we are compiling against AGP 4.1 and uses reflection
-    // to try to grap the AGP version.
-    //
-    // This is done with a best-effort, but we just
-    // accept finding the version isn't possible if anything goes wrong.
-    return try {
-        val extension = this.extensions.getByName("androidComponents") as Object
-        val method = extension.`class`.getMethod("getPluginVersion")
-        val version = method.invoke(extension)
-        if (version != null) {
-            return version.toString()
-        } else {
-            return "unknown"
-        }
-    } catch (e: Exception) {
-        "unknown"
-    }
-}
-
-/**
- * Returns the `bootClasspath` for this project
- */
-fun Project.getBootClasspath(): List<File> {
-    return getAndroidExtension(this).bootClasspath
-}
-
-private fun getAndroidExtension(project: Project): BaseExtension {
-    // This will always be present, otherwise the android build would not be able to
-    // trigger the transformer code in the first place.
-    return project.extensions.getByName("android") as BaseExtension
+    return extensions.getByType(AndroidComponentsExtension::class.java).pluginVersion.toString()
 }
 
 fun Project.areIncrementalBuildsDisabled() =
