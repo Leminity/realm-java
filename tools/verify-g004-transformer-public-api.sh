@@ -143,14 +143,20 @@ run_fixture() {
   rm -rf "$fixture"
 }
 
+select_primary_transformer_jar() {
+  local libraries_dir=$1 transformer_version=$2 primary_jar
+  primary_jar="$libraries_dir/realm-transformer-$transformer_version.jar"
+  [[ -f "$primary_jar" ]] || fail "primary transformer jar was not produced: $primary_jar"
+  printf '%s\n' "$primary_jar"
+}
+
 run_matrix() {
   (
     cd "$root/realm-transformer"
     ./gradlew --no-daemon --console=plain jar
   )
-  transformer_jar="$(find "$root/realm-transformer/build/libs" -maxdepth 1 -name 'realm-transformer-*.jar' | head -1)"
-  [[ -n "$transformer_jar" ]] || fail 'realm-transformer jar was not produced'
   transformer_version="$(tr -d '[:space:]' < "$root/version.txt")"
+  transformer_jar="$(select_primary_transformer_jar "$root/realm-transformer/build/libs" "$transformer_version")"
   sdk_dir="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
   if [[ -z "$sdk_dir" && -d "$HOME/Android/Sdk" ]]; then
     sdk_dir="$HOME/Android/Sdk"
@@ -163,13 +169,19 @@ run_matrix() {
   done
 }
 
-case "${1:-}" in
-  '') ;;
-  --run) mode='run' ;;
-  *) fail 'usage: tools/verify-g004-transformer-public-api.sh [--run]' ;;
-esac
+main() {
+  case "${1:-}" in
+    '') ;;
+    --run) mode='run' ;;
+    *) fail 'usage: tools/verify-g004-transformer-public-api.sh [--run]' ;;
+  esac
 
-verify_static
-if [[ "$mode" == run ]]; then
-  run_matrix
+  verify_static
+  if [[ "$mode" == run ]]; then
+    run_matrix
+  fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
 fi

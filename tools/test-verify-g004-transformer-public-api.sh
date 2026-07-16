@@ -24,4 +24,24 @@ if ROOT_OVERRIDE="$temp_dir" "$verifier" >/dev/null 2>&1; then
   exit 1
 fi
 
+# Classified publication artifacts must not displace the exact primary JAR.
+source "$verifier"
+jar_dir="$temp_dir/transformer-jars"
+version='test-version'
+mkdir -p "$jar_dir"
+touch "$jar_dir/realm-transformer-$version-javadoc.jar"
+touch "$jar_dir/realm-transformer-$version-sources.jar"
+touch "$jar_dir/realm-transformer-$version.jar"
+selected_jar="$(select_primary_transformer_jar "$jar_dir" "$version")"
+[[ "$selected_jar" == "$jar_dir/realm-transformer-$version.jar" ]] || {
+  echo "G004 verifier selected a classified transformer JAR: $selected_jar" >&2
+  exit 1
+}
+
+rm "$jar_dir/realm-transformer-$version.jar"
+if (select_primary_transformer_jar "$jar_dir" "$version" >/dev/null 2>&1); then
+  echo 'G004 verifier accepted a missing primary transformer JAR' >&2
+  exit 1
+fi
+
 printf 'G004 transformer verifier regression tests: PASS\n'
