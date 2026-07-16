@@ -16,7 +16,6 @@
 
 package io.realm.transformer
 
-import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.UnitTest
 import io.realm.analytics.RealmAnalytics
@@ -85,7 +84,6 @@ data class ProjectMetaData(
 fun registerRealmTransformerTask(project: Project) {
     val androidComponents =
         project.extensions.getByType(AndroidComponentsExtension::class.java)
-    val sdkComponents = project.extensions.getByType(SdkComponents::class.java)
     androidComponents.onVariants { variant ->
         variant.components
             .filterNot {
@@ -104,7 +102,7 @@ fun registerRealmTransformerTask(project: Project) {
                     ) { task ->
                         task.apply {
                             referencedInputs.setFrom(variant.compileClasspath)
-                            bootClasspath.setFrom(sdkComponents.bootClasspath)
+                            bootClasspath.setFrom(androidComponents.sdkComponents.bootClasspath)
                             offline.set(project.gradle.startParameter.isOffline)
                             targetType.set(project.targetType())
                             usesKotlin.set(project.usesKotlin())

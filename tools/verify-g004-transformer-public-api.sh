@@ -42,10 +42,8 @@ verify_static() {
   reject_text 'getAndroidExtension' "$project_ext"
   reject_text 'getBootClasspath' "$project_ext"
 
-  require_text 'import com.android.build.api.dsl.SdkComponents' "$transformer"
-  require_text 'project.extensions.getByType(SdkComponents::class.java)' "$transformer"
   require_text 'referencedInputs.setFrom(variant.compileClasspath)' "$transformer"
-  require_text 'bootClasspath.setFrom(sdkComponents.bootClasspath)' "$transformer"
+  require_text 'bootClasspath.setFrom(androidComponents.sdkComponents.bootClasspath)' "$transformer"
   require_text 'ScopedArtifacts.Scope.PROJECT' "$transformer"
   require_text 'FileSystems.newFileSystem(output.get().asFile.toPath(), emptyMap<String, Any>())' "$transformer"
   reject_text 'com.android.build.gradle.internal' "$transformer"
