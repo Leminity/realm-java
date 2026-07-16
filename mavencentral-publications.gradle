@@ -63,7 +63,7 @@ def normalizePublishedPomDependencies(artifactId) {
     ]
     return {
         def dependenciesNodes = asNode().children().findAll { node ->
-            node instanceof Node && node.name().toString() == 'dependencies'
+            node.name().toString() == 'dependencies'
         }
         if (dependenciesNodes.isEmpty()) {
             return
@@ -72,7 +72,7 @@ def normalizePublishedPomDependencies(artifactId) {
         def suppressed = suppressions.get(artifactId, [])
         def renamed = renames.get(artifactId, [:])
         dependenciesNode.children().findAll { node ->
-            node instanceof Node && node.name().toString() == 'dependency'
+            node.name().toString() == 'dependency'
         }.each { dependency ->
             def groupId = dependency.children().find { node -> node.name().toString() == 'groupId' }
             def artifactId = dependency.children().find { node -> node.name().toString() == 'artifactId' }
