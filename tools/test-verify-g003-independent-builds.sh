@@ -62,12 +62,12 @@ GRADLEW
 done
 
 declare -A poms=(
-  [realm-annotations/build/publications/realmPublication/pom-default.xml]=realm-annotations
-  [realm-transformer/build/publications/realmPublication/pom-default.xml]=realm-transformer
-  [realm/realm-annotations-processor/build/publications/realmPublication/pom-default.xml]=realm-annotations-processor
+  [realm-annotations/build/publications/realm/pom-default.xml]=realm-annotations
+  [realm-transformer/build/publications/realm/pom-default.xml]=realm-transformer
+  [realm/realm-annotations-processor/build/publications/realm/pom-default.xml]=realm-annotations-processor
   [realm/realm-library/build/publications/basePublication/pom-default.xml]=realm-android-library
-  [realm/kotlin-extensions/build/publications/realmPublication/pom-default.xml]=realm-android-kotlin-extensions
-  [gradle-plugin/build/publications/realmPublication/pom-default.xml]=realm-gradle-plugin
+  [realm/kotlin-extensions/build/publications/realm/pom-default.xml]=realm-android-kotlin-extensions
+  [gradle-plugin/build/publications/realm/pom-default.xml]=realm-gradle-plugin
 )
 for pom in "${!poms[@]}"; do
   mkdir -p "$(dirname "$matrix_root/$pom")"
@@ -82,6 +82,10 @@ grep -Fqx "G003 independent-build matrix: PASS (evidence: $matrix_evidence)" "$t
 grep -Fq ':realm-library:generatePomFileForBasePublication :kotlin-extensions:generatePomFileForRealmPublication' "$temp_dir/matrix-commands.log"
 if grep -Fq ':realm-library:generatePomFileForRealmPublication' "$temp_dir/matrix-commands.log"; then
   printf 'stale realm-library RealmPublication task was requested\n' >&2
+  exit 1
+fi
+if grep -Fq 'build/publications/realmPublication/pom-default.xml' "$verifier"; then
+  printf 'stale realmPublication POM container is allowlisted\n' >&2
   exit 1
 fi
 

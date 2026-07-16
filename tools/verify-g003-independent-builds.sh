@@ -232,12 +232,12 @@ run_matrix() {
 verify_public_metadata_allowlist() {
   local pom artifact_id
   local -a poms=(
-    realm-annotations/build/publications/realmPublication/pom-default.xml
-    realm-transformer/build/publications/realmPublication/pom-default.xml
-    realm/realm-annotations-processor/build/publications/realmPublication/pom-default.xml
+    realm-annotations/build/publications/realm/pom-default.xml
+    realm-transformer/build/publications/realm/pom-default.xml
+    realm/realm-annotations-processor/build/publications/realm/pom-default.xml
     realm/realm-library/build/publications/basePublication/pom-default.xml
-    realm/kotlin-extensions/build/publications/realmPublication/pom-default.xml
-    gradle-plugin/build/publications/realmPublication/pom-default.xml
+    realm/kotlin-extensions/build/publications/realm/pom-default.xml
+    gradle-plugin/build/publications/realm/pom-default.xml
   )
   local -a expected=(
     realm-android-kotlin-extensions
