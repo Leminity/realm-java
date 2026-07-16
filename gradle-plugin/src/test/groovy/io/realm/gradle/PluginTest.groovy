@@ -267,6 +267,7 @@ class PluginTest {
             ''' + syncBlock + '''
 
             tasks.register('verifyRealmPluginContract') {
+                dependsOn 'assembleDebug', 'assembleRelease'
                 doLast {
                     def coordinate = { dependency ->
                         dependency.group + ':' + dependency.name + ':' + dependency.version
