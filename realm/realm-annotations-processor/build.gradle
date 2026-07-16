@@ -1,8 +1,10 @@
 apply plugin: 'kotlin'
 apply plugin: 'maven-publish'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../../dependencies.list"))
@@ -20,7 +22,6 @@ dependencies {
 
 // for Ant filter
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.internal.jvm.Jvm
 
 task generateVersionClass(type: Copy) {
     from 'src/main/templates/Version.java'
@@ -39,13 +40,12 @@ sourceSets {
 }
 
 compileKotlin.dependsOn generateVersionClass
-compileTestJava.dependsOn ':realm-library:assembleBaseRelease'
 
 apply from: "${rootDir}/../mavencentral-publications.gradle"
 
 publishing {
     publications {
-        basePublication(MavenPublication) {
+        realm(MavenPublication) {
             groupId 'io.realm'
             artifactId = 'realm-annotations-processor'
             from components.java

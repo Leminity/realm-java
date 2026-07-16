@@ -1,0 +1,36 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred configuring project ':realm-library'.
+> Failed to notify project evaluation listener.
+   > SDK location not found. Define a valid SDK location with an ANDROID_HOME environment variable or by setting the sdk.dir path in your project's local properties file at '/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/local.properties'.
+   > Could not create task ':realm-library:baseDebugRealmAccessorsTransformer'.
+      > class com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated_Decorated cannot be cast to class com.android.build.gradle.BaseExtension (com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated_Decorated and com.android.build.gradle.BaseExtension are in unnamed module of loader org.gradle.internal.classloader.VisitableURLClassLoader$InstrumentingVisitableURLClassLoader @7cafd1b4)
+   > Could not get unknown property 'libraryVariants' for object of type com.android.build.gradle.internal.dsl.LibraryExtensionImpl$AgpDecorated.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 8s

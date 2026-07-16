@@ -88,13 +88,15 @@ publishing {
     }
 }
 
-signing {
-    required { signBuild }
-    def keyId = rootProject.ext["signing.keyId"]
-    def ringFile = rootProject.ext["signing.secretKeyRingFile"]
-    def password = rootProject.ext["signing.password"]
-    useInMemoryPgpKeys(keyId, ringFile, password)
-    sign publishing.publications
+if (rootProject.ext["signBuild"].toString().toBoolean()) {
+    signing {
+        required { true }
+        def keyId = rootProject.ext["signing.keyId"]
+        def ringFile = rootProject.ext["signing.secretKeyRingFile"]
+        def password = rootProject.ext["signing.password"]
+        useInMemoryPgpKeys(keyId, ringFile, password)
+        sign publishing.publications
+    }
 }
 
 // Export methods so they are available in other gradle files
@@ -103,4 +105,3 @@ ext {
     createPomDependencies = this.&createPomDependencies
     populatePom = this.&populatePom
 }
-

@@ -14,6 +14,7 @@ def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../../dependencies.list"))
 
 android {
+    namespace 'io.realm.kotlin'
     compileSdk rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
     defaultConfig {
@@ -75,9 +76,6 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-    }
 }
 
 base {
@@ -118,7 +116,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 task sourcesJar(type: Jar) {
     from android.sourceSets.objectServer.java.srcDirs
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 tasks.dokkaHtml.configure {
@@ -126,7 +124,7 @@ tasks.dokkaHtml.configure {
 }
 
 task javadocJar(type: Jar, dependsOn: dokkaHtml) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from "$buildDir/dokka"
 }
 
@@ -134,7 +132,7 @@ apply from: "${rootDir}/../mavencentral-publications.gradle"
 
 publishing {
     publications {
-        basePublication(MavenPublication) {
+        realm(MavenPublication) {
             groupId 'io.realm'
             artifactId 'realm-android-kotlin-extensions'
             version project.version

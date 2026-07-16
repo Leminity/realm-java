@@ -76,7 +76,7 @@ apply from: "${rootDir}/../mavencentral-publications.gradle"
 
 publishing {
     publications {
-        realmPublication(MavenPublication) {
+        realm(MavenPublication) {
             groupId 'io.realm'
             artifactId = 'realm-transformer'
             from components.java
@@ -94,6 +94,10 @@ java {
     withJavadocJar()
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+tasks.named('sourcesJar') {
+    dependsOn generateVersionClass
 }
 
 compileKotlin {
