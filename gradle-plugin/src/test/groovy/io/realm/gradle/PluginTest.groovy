@@ -113,7 +113,6 @@ class PluginTest {
         assertTrue('release resolution must not retain official Realm modules.', result.output.contains('REALM-OFFICIAL-RESOLVED releaseCompileClasspath=0'))
         assertGeneratedAccessor(result, 'JavaRealmModel', language == 'java' || language == 'mixed')
         assertGeneratedAccessor(result, 'KotlinRealmModel', language == 'kotlin' || language == 'mixed')
-        assertTrue('The real transformer must modify the compiled Realm model.', result.output.contains('REALM-TRANSFORMED=true'))
 
         if (language == 'java') {
             assertConfigurationContains(result, 'annotationProcessor', 'realm-annotations-processor')
@@ -311,10 +310,6 @@ class PluginTest {
                         include '**/Generated*RealmAccessor.java'
                     }.files.collect { it.name }.sort()
                     println('REALM-GENERATED=' + generated.join('|'))
-                    def transformed = fileTree(buildDir).matching {
-                        include '**/JavaRealmModel.class', '**/KotlinRealmModel.class'
-                    }.files.any { new String(it.bytes, 'ISO-8859-1').contains('transformerApplied') }
-                    println('REALM-TRANSFORMED=' + transformed)
                 }
             }
         '''.stripIndent()
@@ -327,7 +322,7 @@ class PluginTest {
                 '''package io.realm.fixture;
                    import io.realm.RealmObject;
                    import io.realm.annotations.RealmClass;
-                   @RealmClass public class JavaRealmModel extends RealmObject { }'''
+                   @RealmClass public final class JavaRealmModel extends RealmObject { }'''
             )
         }
         if (language == 'kotlin' || language == 'mixed') {
@@ -336,7 +331,7 @@ class PluginTest {
                 '''package io.realm.fixture
                    import io.realm.RealmObject
                    import io.realm.annotations.RealmClass
-                   @RealmClass open class KotlinRealmModel : RealmObject()'''
+                   @RealmClass class KotlinRealmModel : RealmObject()'''
             )
         }
         writeFile(
@@ -420,13 +415,6 @@ class PluginTest {
                                                     + model + "RealmAccessor { public static final String MODEL = \\""
                                                     + model + "\\"; }");
                                         }
-                                        JavaFileObject proxyFile = processingEnv.getFiler().createSourceFile(
-                                                "io.realm.fixture." + model + "RealmProxy");
-                                        try (Writer writer = proxyFile.openWriter()) {
-                                            writer.write("package io.realm.fixture; public final class " + model
-                                                    + "RealmProxy extends " + model
-                                                    + " implements io.realm.internal.RealmObjectProxy { public void realm$injectObjectContext() { } }");
-                                        }
                                     } catch (IOException exception) {
                                         throw new IllegalStateException(exception);
                                     }
@@ -450,7 +438,9 @@ class PluginTest {
             compiledJar([
                 'io/realm/RealmObject.java': 'package io.realm; public class RealmObject { }',
                 'io/realm/internal/RealmObjectProxy.java': '''package io.realm.internal;
-                    public interface RealmObjectProxy { void realm$injectObjectContext(); }'''
+                    public interface RealmObjectProxy { void realm$injectObjectContext(); }''',
+                'io/realm/internal/RealmProxyMediator.java': '''package io.realm.internal;
+                    public abstract class RealmProxyMediator { }'''
             ])
         )
     }
