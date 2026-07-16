@@ -52,38 +52,34 @@ def createPomDependencies(configurationNames) {
 // pinned official POM oracle (the validator enforces the complete graph).
 def normalizePublishedPomDependencies(artifactId) {
     def suppressions = [
-            'realm-gradle-plugin': [['com.android.tools.build', 'gradle-kotlin']],
-            'realm-android-library': [['org.jetbrains.kotlin', 'kotlin-stdlib']],
-            'realm-android-kotlin-extensions': [['org.jetbrains.kotlin', 'kotlin-stdlib']]
+            'realm-gradle-plugin': ['com.android.tools.build:gradle-kotlin'],
+            'realm-android-library': ['org.jetbrains.kotlin:kotlin-stdlib'],
+            'realm-android-kotlin-extensions': ['org.jetbrains.kotlin:kotlin-stdlib']
     ]
     def renames = [
             'realm-gradle-plugin': [
-                    ['org.jetbrains.kotlin', 'kotlin-stdlib']: 'kotlin-stdlib-jdk8'
+                    'org.jetbrains.kotlin:kotlin-stdlib': 'kotlin-stdlib-jdk8'
             ]
     ]
     return {
-        def dependenciesNodes = asNode().children().findAll { node ->
-            node.name().toString() == 'dependencies'
-        }
+        def dependenciesNodes = asNode().get('dependencies')
         if (dependenciesNodes.isEmpty()) {
             return
         }
         def dependenciesNode = dependenciesNodes[0]
-        def suppressed = suppressions.get(artifactId, [])
-        def renamed = renames.get(artifactId, [:])
-        dependenciesNode.children().findAll { node ->
-            node.name().toString() == 'dependency'
-        }.each { dependency ->
-            def groupId = dependency.children().find { node -> node.name().toString() == 'groupId' }
-            def artifactId = dependency.children().find { node -> node.name().toString() == 'artifactId' }
-            def key = [groupId.text(), artifactId.text()]
+        def suppressed = suppressions[artifactId] ?: []
+        def renamed = renames[artifactId] ?: [:]
+        dependenciesNode.get('dependency').each { dependency ->
+            def groupId = dependency.get('groupId')[0]
+            def artifactIdNode = dependency.get('artifactId')[0]
+            def key = groupId.text() + ':' + artifactIdNode.text()
             if (suppressed.contains(key)) {
                 dependenciesNode.remove(dependency)
                 return
             }
             def replacement = renamed.get(key)
             if (replacement != null) {
-                artifactId.setValue(replacement)
+                artifactIdNode.setValue(replacement)
             }
         }
     }
