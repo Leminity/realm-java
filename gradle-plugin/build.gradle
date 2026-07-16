@@ -16,6 +16,7 @@ buildscript {
 }
 
 apply plugin: 'kotlin'
+apply plugin: 'groovy'
 apply plugin: 'java-gradle-plugin'
 apply plugin: 'maven-publish'
 
@@ -68,6 +69,10 @@ dependencies {
     testImplementation gradleTestKit()
     testImplementation 'junit:junit:4.12'
     testImplementation "com.android.tools.build:gradle:${props.get("GRADLE_BUILD_TOOLS")}"
+}
+
+test {
+    systemProperty 'realmPluginClasspath', sourceSets.main.runtimeClasspath.asPath
 }
 
 task generateVersionClass(type: Copy) {
