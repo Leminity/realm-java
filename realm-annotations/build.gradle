@@ -23,7 +23,7 @@ apply from: "${rootDir}/../mavencentral-publications.gradle"
 
 publishing {
     publications {
-        realmPublication(MavenPublication) {
+        realm(MavenPublication) {
             groupId 'io.realm'
             artifactId = 'realm-annotations'
             from components.java

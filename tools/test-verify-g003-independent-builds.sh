@@ -13,6 +13,7 @@ bash -n "$verifier"
 
 cat > "$temp_dir/allowed.log" <<'LOG'
 > Task :realm-annotations:generatePomFileForRealmPublication
+ObjectServer source remains outside the supported release graph.
 BUILD SUCCESSFUL
 LOG
 "$verifier" --check-log "$temp_dir/allowed.log"
@@ -20,7 +21,7 @@ LOG
 for forbidden in \
   'https://static.realm.io/downloads/core.zip' \
   's3://realm-ci-artifacts/maven/releases/' \
-  'publishToSonatype' \
+  '> Task :realm:publishToSonatype' \
   '> Task :examples:assembleDebug' \
   '> Task :realm-library:compileBaseObjectServerDebugSources' \
   '> Task :realm-library:syncIntegrationTest'; do

@@ -1,0 +1,77 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :realm-annotations:compileJava UP-TO-DATE
+> Task :realm-annotations:processResources NO-SOURCE
+> Task :realm-annotations:classes UP-TO-DATE
+> Task :realm-annotations:jar UP-TO-DATE
+> Task :realm-annotations:javadoc UP-TO-DATE
+> Task :realm-annotations:javadocJar UP-TO-DATE
+> Task :realm-annotations:sourcesJar UP-TO-DATE
+> Task :realm-annotations:generateMetadataFileForRealmPublicationPublication
+> Task :realm-annotations:generatePomFileForRealmPublicationPublication
+> Task :realm-annotations:publishRealmPublicationPublicationToMavenLocal
+> Task :realm-annotations:publishToMavenLocal
+> Task :installAnnotations
+> Task :realm-transformer:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-transformer:generateVersionClass
+> Task :realm-transformer:compileKotlin UP-TO-DATE
+> Task :realm-transformer:compileJava
+> Task :realm-transformer:processResources NO-SOURCE
+> Task :realm-transformer:classes
+> Task :realm-transformer:jar UP-TO-DATE
+
+> Task :realm-transformer:javadoc
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/gradle/RealmPluginExtension.java:24: warning: no comment
+public class RealmPluginExtension {
+       ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/gradle/RealmPluginExtension.java:38: warning: no comment
+    public boolean isKotlinExtensionsEnabled() {
+                   ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/gradle/RealmPluginExtension.java:29: warning: no comment
+    public boolean isSyncEnabled() {
+                   ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/gradle/RealmPluginExtension.java:42: warning: no comment
+    public void setKotlinExtensionsEnabled(boolean kotlinExtensionsEnabled) {
+                ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/gradle/RealmPluginExtension.java:33: warning: no comment
+    public void setSyncEnabled(boolean syncEnabled) {
+                ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/transformer/Utils.java:42: warning: no description for @throws
+     * @throws NoSuchAlgorithmException
+       ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/transformer/Utils.java:26: warning: no comment
+public class Utils {
+       ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/src/main/java/io/realm/transformer/Utils.java:63: warning: no comment
+    public static boolean isSyncEnabled(Project project) {
+                          ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/build/generated-src/main/java/io/realm/transformer/Version.java:3: warning: no comment
+public class Version {
+       ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/build/generated-src/main/java/io/realm/transformer/Version.java:5: warning: no comment
+    public static final String SYNC_VERSION = "13.26.0";
+                               ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-transformer/build/generated-src/main/java/io/realm/transformer/Version.java:4: warning: no comment
+    public static final String VERSION = "10.19.0";
+                               ^
+11 warnings
+
+> Task :realm-transformer:javadocJar
+> Task :realm-transformer:sourcesJar
+> Task :realm-transformer:generateMetadataFileForRealmPublicationPublication
+> Task :realm-transformer:generatePomFileForRealmPublicationPublication
+> Task :realm-transformer:publishRealmPublicationPublicationToMavenLocal
+> Task :realm-transformer:publishToMavenLocal
+> Task :installTransformer
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 26s
+2 actionable tasks: 2 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html

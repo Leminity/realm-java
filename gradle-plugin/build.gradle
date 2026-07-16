@@ -1,20 +1,16 @@
 import org.apache.tools.ant.filters.ReplaceTokens
-import org.gradle.api.internal.classpath.ModuleRegistry
-import org.gradle.api.internal.project.ProjectInternal
 
 buildscript {
     def properties = new Properties()
     properties.load(new FileInputStream("${rootDir}/../dependencies.list"))
     ext.kotlin_version = properties.get('KOTLIN')
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${properties.get('BUILD_INFO_EXTRACTOR_GRADLE')}"
-        classpath "io.github.gradle-nexus:publish-plugin:${properties.get("GRADLE_NEXUS_PLUGIN")}"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -32,11 +28,13 @@ props.each { key, val ->
 repositories {
     mavenLocal()
     google()
-    jcenter()
+    mavenCentral()
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 group = 'io.realm'
 version = file("${projectDir}/../version.txt").text.trim()
@@ -70,13 +68,6 @@ dependencies {
     testImplementation gradleTestKit()
     testImplementation 'junit:junit:4.12'
     testImplementation "com.android.tools.build:gradle:${props.get("GRADLE_BUILD_TOOLS")}"
-    // See https://github.com/gradle/gradle/issues/16774#issuecomment-893493869
-    def toolingApiBuildersJar = (project as ProjectInternal).services.get(ModuleRegistry.class)
-            .getModule("gradle-tooling-api-builders")
-            .classpath
-            .asFiles
-            .first()
-    testRuntimeOnly(files(toolingApiBuildersJar))
 }
 
 task generateVersionClass(type: Copy) {
@@ -97,12 +88,15 @@ sourceSets {
 
 compileKotlin.dependsOn generateVersionClass
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11
+}
+
 apply from: "${rootDir}/../mavencentral-publications.gradle"
-apply from: "${rootDir}/../mavencentral-publish.gradle"
 
 publishing {
     publications {
-        realmPublication(MavenPublication) {
+        realm(MavenPublication) {
             groupId 'io.realm'
             artifactId = 'realm-gradle-plugin'
             from components.java

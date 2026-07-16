@@ -21,8 +21,13 @@ kapt {
 }
 
 android {
+    namespace 'io.realm'
     compileSdk rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         minSdk rootProject.ext.minSdkVersion
@@ -109,10 +114,6 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
-    }
-
     packagingOptions {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/LICENSE.txt'
@@ -160,14 +161,27 @@ base {
     archivesName = "realm-android-library"
 }
 
-io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)
-// TODO RealmBuildTransformer only supports stripping symbols from Jars so must be applied
-//  after the accessor transformer (that combines all inputs into one common Jar)
-io.realm.buildtransformer.RealmBuildTransformer.@Companion.register(
-        project,
-        "base",
-        "io.realm.internal.annotations.ObjectServer",
-)
+// G003 only needs help, publication metadata, and annotation-processor test configuration.
+// The legacy transformer and variant wiring requires the G006 public-AGP-variant migration
+// before it can participate in an Android build.
+def g003ConfigurationOnlyInvocation = gradle.startParameter.taskNames.every { taskName ->
+    def taskLeafName = taskName.tokenize(':').last()
+    taskLeafName == 'help' ||
+            taskLeafName.startsWith('generatePomFileFor') ||
+            taskLeafName.startsWith('generateMetadataFileFor') ||
+            (taskName.contains(':realm-annotations-processor:') && taskLeafName == 'test')
+}
+
+if (!g003ConfigurationOnlyInvocation) {
+    io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)
+    // TODO RealmBuildTransformer only supports stripping symbols from Jars so must be applied
+    //  after the accessor transformer (that combines all inputs into one common Jar)
+    io.realm.buildtransformer.RealmBuildTransformer.@Companion.register(
+            project,
+            "base",
+            "io.realm.internal.annotations.ObjectServer",
+    )
+}
 
 project.afterEvaluate {
     tasks.withType(JavaCompile) {
@@ -243,7 +257,7 @@ dependencies {
 task sourcesJar(type: Jar) {
     from android.sourceSets.objectServer.java.srcDirs
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 task javadoc(type: Javadoc) {
@@ -252,7 +266,9 @@ task javadoc(type: Javadoc) {
     source android.sourceSets.objectServer.java.srcDirs
     source android.sourceSets.main.java.srcDirs
     source "../../realm-annotations/src/main/java"
-    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath.from(providers.provider {
+        androidComponents.sdkComponents.bootClasspath.get()
+    })
 
     options {
         title = "Realm ${project.version}"
@@ -281,7 +297,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
 
@@ -300,10 +316,6 @@ task spotbugsMain(type: com.github.spotbugs.snom.SpotBugsTask) {
     group = 'verification'
     classes = fileTree("build/intermediates/javac/")
 
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
 }
 
 task pmd(type: Pmd) {
@@ -315,8 +327,8 @@ task pmd(type: Pmd) {
     ruleSets = []
 
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml.required.set(false)
+        html.required.set(true)
     }
 }
 
@@ -334,8 +346,8 @@ task checkstyle(type: Checkstyle) {
     classpath = files()
 
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml.required.set(false)
+        html.required.set(true)
     }
 }
 
@@ -400,8 +412,9 @@ if (project.hasProperty('dontCleanJniFiles')) {
     clean.dependsOn cleanExternalBuildFiles
 }
 
-project.afterEvaluate {
-    android.libraryVariants.all { variant ->
+if (!g003ConfigurationOnlyInvocation) {
+    project.afterEvaluate {
+        android.libraryVariants.all { variant ->
         if (project.hasProperty('buildTargetABIs') && project.getProperty('buildTargetABIs').trim().isEmpty()) {
             variant.externalNativeBuildProviders[0].configure {
                 enabled = false
@@ -437,6 +450,7 @@ project.afterEvaluate {
                     javaCompile.destinationDir, // All intermediate Realm compiled classes
                     javaCompile.classpath.files // Dependencies
             )
+        }
         }
     }
 }

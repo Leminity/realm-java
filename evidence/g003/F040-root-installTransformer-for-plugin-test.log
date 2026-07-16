@@ -1,0 +1,187 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :realm-annotations:compileJava
+> Task :realm-annotations:processResources NO-SOURCE
+> Task :realm-annotations:classes
+> Task :realm-annotations:jar
+
+> Task :realm-annotations:javadoc
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/Ignore.java:26: warning: no comment
+public @interface Ignore {
+        ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/LinkingObjects.java:108: warning: no @return
+    String value() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:42: warning: no @return
+    String value() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:51: warning: no @return
+    String name() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:80: warning: no @return
+    boolean embedded() default false;
+            ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:89: warning: no @return
+    RealmNamingPolicy fieldNamingPolicy() default RealmNamingPolicy.NO_POLICY;
+                      ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:76: warning: no @return
+    boolean library() default false;
+            ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:86: warning: no @return
+    boolean allClasses() default false;
+            ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:95: warning: no @return
+    Class<?>[] classes() default {};
+               ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:109: warning: no @return
+    RealmNamingPolicy classNamingPolicy() default RealmNamingPolicy.NO_POLICY;
+                      ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:120: warning: no @return
+    RealmNamingPolicy fieldNamingPolicy() default RealmNamingPolicy.NO_POLICY;
+                      ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmField.java:40: warning: no @return
+    String value() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmField.java:48: warning: no @return
+    String name() default "";
+           ^
+13 warnings
+
+> Task :realm-annotations:javadocJar
+> Task :realm-annotations:sourcesJar
+> Task :realm-annotations:generateMetadataFileForRealmPublicationPublication
+> Task :realm-annotations:generatePomFileForRealmPublicationPublication
+> Task :realm-annotations:signRealmPublicationPublication FAILED
+> Task :installAnnotations FAILED
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':realm-annotations:signRealmPublicationPublication' (registered in script '../mavencentral-publications.gradle').
+> Error while evaluating property 'signatory.keyId' of task ':realm-annotations:signRealmPublicationPublication'.
+   > Cannot find key with id 'BD9104E9' in key data
+
+* Try:
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':realm-annotations:signRealmPublicationPublication' (registered in script '../mavencentral-publications.gradle').
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:38)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
+	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+Caused by: org.gradle.api.internal.tasks.properties.PropertyEvaluationException: Error while evaluating property 'signatory.keyId' of task ':realm-annotations:signRealmPublicationPublication'.
+	at org.gradle.api.internal.tasks.properties.InputParameterUtils.prepareInputParameterValue(InputParameterUtils.java:31)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.lambda$visitMutableInputs$1(TaskExecution.java:338)
+	at org.gradle.internal.execution.impl.DefaultInputFingerprinter$InputCollectingVisitor.visitInputProperty(DefaultInputFingerprinter.java:120)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.visitMutableInputs(TaskExecution.java:336)
+	at org.gradle.internal.execution.impl.DefaultInputFingerprinter.fingerprintInputProperties(DefaultInputFingerprinter.java:77)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.captureExecutionStateWithOutputs(CaptureMutableStateBeforeExecutionStep.java:124)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.lambda$captureExecutionState$0(CaptureMutableStateBeforeExecutionStep.java:94)
+	at org.gradle.internal.execution.steps.BuildOperationStep$1.call(BuildOperationStep.java:38)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.internal.execution.steps.BuildOperationStep.operation(BuildOperationStep.java:35)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.captureExecutionState(CaptureMutableStateBeforeExecutionStep.java:92)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.executeMutable(CaptureMutableStateBeforeExecutionStep.java:73)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:65)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeWithNonEmptySources(SkipEmptyMutableWorkStep.java:210)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:85)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:53)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:77)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:43)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$executeMutable$0(AssignMutableWorkspaceStep.java:34)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:305)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:30)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:21)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:56)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	... 23 more
+Caused by: org.gradle.api.InvalidUserDataException: Cannot find key with id 'BD9104E9' in key data
+	at org.gradle.plugins.signing.signatory.internal.pgp.PgpSignatoryUtil.parseSecretKey(PgpSignatoryUtil.java:178)
+	at org.gradle.plugins.signing.signatory.internal.pgp.PgpSignatoryService.lambda$readSecretKeyFromArmoredString$2(PgpSignatoryService.java:54)
+	at org.gradle.internal.lazy.LockingLazy.get(LockingLazy.java:49)
+	at org.gradle.plugins.signing.signatory.internal.pgp.PgpSignatoryService$ParsedPgpKey.getSecretKey(PgpSignatoryService.java:126)
+	at org.gradle.api.internal.provider.ValueSupplier$Present.transform(ValueSupplier.java:520)
+	at org.gradle.api.internal.provider.TransformBackedProvider.mapValue(TransformBackedProvider.java:91)
+	at org.gradle.api.internal.provider.TransformBackedProvider.calculateOwnValue(TransformBackedProvider.java:82)
+	at org.gradle.api.internal.provider.AbstractMinimalProvider.calculateOwnPresentValue(AbstractMinimalProvider.java:80)
+	at org.gradle.api.internal.provider.AbstractMinimalProvider.get(AbstractMinimalProvider.java:100)
+	at org.gradle.plugins.signing.signatory.pgp.PgpSignatory.getKeyId(PgpSignatory.java:94)
+	at org.gradle.internal.reflect.annotations.impl.DefaultPropertyAnnotationMetadata.getPropertyValue(DefaultPropertyAnnotationMetadata.java:53)
+	at org.gradle.internal.properties.annotations.DefaultTypeMetadataStore$DefaultPropertyMetadata.getPropertyValue(DefaultTypeMetadataStore.java:377)
+	at org.gradle.internal.properties.bean.DefaultPropertyWalker$1.lambda$visitLeaf$0(DefaultPropertyWalker.java:92)
+	at org.gradle.internal.deprecation.DeprecationLogger.whileDisabled(DeprecationLogger.java:249)
+	at org.gradle.internal.properties.bean.DefaultPropertyWalker$CachedPropertyValue.lambda$new$0(DefaultPropertyWalker.java:117)
+	at com.google.common.base.Suppliers$NonSerializableMemoizingSupplier.get(Suppliers.java:198)
+	at org.gradle.internal.properties.bean.DefaultPropertyWalker$CachedPropertyValue.call(DefaultPropertyWalker.java:164)
+	at org.gradle.internal.UncheckedException.uncheckedCall(UncheckedException.java:103)
+	at org.gradle.util.internal.DeferredUtil.unpackNestableDeferred(DeferredUtil.java:83)
+	at org.gradle.util.internal.DeferredUtil.unpack(DeferredUtil.java:57)
+	at org.gradle.util.internal.DeferredUtil.unpackOrNull(DeferredUtil.java:49)
+	at org.gradle.api.internal.tasks.properties.InputParameterUtils.prepareInputParameterValue(InputParameterUtils.java:37)
+	at org.gradle.api.internal.tasks.properties.InputParameterUtils.prepareInputParameterValue(InputParameterUtils.java:29)
+	... 76 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 16s
+1 actionable task: 1 executed

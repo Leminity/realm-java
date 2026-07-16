@@ -34,11 +34,14 @@ is_baseline_allowed_path() {
     evidence/toolchain/android17-wsl2/*|\
     evidence/toolchain/task-12-api37-runtime-audit/*|\
     evidence/audit/g002-toolchain-final.md|\
+    evidence/audit/g003-independent-build-recovery.md|\
     evidence/audit/task-9-preflight.md|\
     compatibility-fixtures/official-10.19.0-generator/*|\
     tools/capture-baseline.py|tools/verify-baseline.sh|\
     tools/verify-release-tag.sh|tools/test-verify-release-tag.sh|\
     tools/bootstrap-wsl-android.sh|tools/verify-toolchain.sh|\
+    tools/verify-g003-independent-builds.sh|\
+    tools/test-verify-g003-independent-builds.sh|\
     tools/test-verify-baseline.sh|\
     examples/gradle/wrapper/gradle-wrapper.properties|\
     gradle-plugin/gradle/wrapper/gradle-wrapper.properties|\

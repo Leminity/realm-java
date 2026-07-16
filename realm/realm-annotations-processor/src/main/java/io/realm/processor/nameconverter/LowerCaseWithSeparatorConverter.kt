@@ -22,6 +22,7 @@ class LowerCaseWithSeparatorConverter(private val separator: Char) : NameConvert
 
     private val tokenizer = WordTokenizer()
 
+    @Suppress("DEPRECATION_ERROR")
     override fun convert(name: String): String {
         val words = tokenizer.split(name)
         val output = StringBuilder()
