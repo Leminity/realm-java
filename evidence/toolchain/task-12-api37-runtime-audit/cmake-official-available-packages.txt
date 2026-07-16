@@ -1,0 +1,17 @@
+cmake;3.10.2.4988404
+cmake;3.18.1
+cmake;3.22.1
+cmake;3.30.3
+cmake;3.30.4
+cmake;3.30.5
+cmake;3.31.0
+cmake;3.31.1
+cmake;3.31.4
+cmake;3.31.5
+cmake;3.31.6
+cmake;3.6.4111459
+cmake;4.0.2
+cmake;4.0.3
+cmake;4.1.0
+cmake;4.1.1
+cmake;4.1.2

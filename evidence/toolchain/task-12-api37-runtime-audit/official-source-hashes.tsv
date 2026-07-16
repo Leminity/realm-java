@@ -1,0 +1,7 @@
+file_or_endpoint	sha256_or_published_checksum	note
+https://dl.google.com/android/repository/repository2-1.xml	ec8d62391cee24521b2ec8964135e5b3b4dea92ae34ccc7c94cd9bf6cee94a85	Fetched 2026-07-16; Google repository metadata.
+https://developer.android.com/studio	3dd1e1714671ffe17e5231e0cdbcbabec2cb83c8af5dcb56c1b0f1f60db393f8	Fetched 2026-07-16; source of command-line-tools table.
+https://services.gradle.org/distributions/gradle-9.6.1-bin.zip.sha256	9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14	Official 64-hex SHA-256 file content.
+https://services.gradle.org/distributions/gradle-9.6.1-bin.zip	9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14	Downloaded and locally SHA-256 verified; 140682664 bytes.
+https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip	48833c34b761c10cb20bcd16582129395d121b27	Google page labels this as SHA-256 but value has 40 hex chars; local SHA-1 matches it exactly.
+https://dl.google.com/android/repository/commandlinetools-linux-14742923_latest.zip	04453066b540409d975c676d781da1477479dde3761310f1a7eb92a1dfb15af7	Downloaded and locally SHA-256 calculated; 172789259 bytes. Google does not publish this 64-hex value on its current table.

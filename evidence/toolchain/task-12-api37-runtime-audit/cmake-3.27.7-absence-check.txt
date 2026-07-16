@@ -1,0 +1,3 @@
+sdkmanager list command: sdkmanager --list --verbose --channel=0
+sdkmanager exact cmake;3.27.7: ABSENT
+repository2-1.xml exact cmake;3.27.7: ABSENT
