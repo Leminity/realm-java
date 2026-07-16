@@ -459,7 +459,7 @@ class PluginTest {
                 'AndroidManifest.xml',
                 '<manifest package="io.realm.fixture.stub" />'.getBytes('UTF-8')
             )
-            writeZipEntry(output, 'classes.jar', emptyJar())
+            writeZipEntry(output, 'classes.jar', classesJar)
             writeZipEntry(output, 'R.txt', new byte[0])
         } finally {
             output.close()
