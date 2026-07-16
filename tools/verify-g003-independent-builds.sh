@@ -217,7 +217,7 @@ run_matrix() {
   run_gradle build-transformer-test-metadata library-build-transformer test generatePomFileForRealmPublication publishToMavenLocal
   run_gradle realm-help realm help
   run_gradle realm-processor-metadata realm :realm-annotations-processor:test :realm-annotations-processor:generatePomFileForRealmPublication
-  run_gradle realm-base-metadata realm :realm-library:generatePomFileForRealmPublication :kotlin-extensions:generatePomFileForRealmPublication
+  run_gradle realm-base-metadata realm :realm-library:generatePomFileForBasePublication :kotlin-extensions:generatePomFileForRealmPublication
   run_gradle gradle-plugin-help gradle-plugin help
   run_gradle gradle-plugin-test-metadata gradle-plugin test generatePomFileForRealmPublication
 
@@ -235,7 +235,7 @@ verify_public_metadata_allowlist() {
     realm-annotations/build/publications/realmPublication/pom-default.xml
     realm-transformer/build/publications/realmPublication/pom-default.xml
     realm/realm-annotations-processor/build/publications/realmPublication/pom-default.xml
-    realm/realm-library/build/publications/realmPublication/pom-default.xml
+    realm/realm-library/build/publications/basePublication/pom-default.xml
     realm/kotlin-extensions/build/publications/realmPublication/pom-default.xml
     gradle-plugin/build/publications/realmPublication/pom-default.xml
   )

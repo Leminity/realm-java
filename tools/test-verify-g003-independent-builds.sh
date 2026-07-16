@@ -52,6 +52,9 @@ for wrapper in \
   cat > "$matrix_root/$wrapper" <<'GRADLEW'
 #!/usr/bin/env bash
 set -euo pipefail
+if [[ -n "${G003_TEST_COMMAND_TRACE:-}" ]]; then
+  printf '%s\n' "$*" >> "$G003_TEST_COMMAND_TRACE"
+fi
 printf '> Task :synthetic:%s\n' "${1:-help}"
 printf 'BUILD SUCCESSFUL\n'
 GRADLEW
@@ -62,7 +65,7 @@ declare -A poms=(
   [realm-annotations/build/publications/realmPublication/pom-default.xml]=realm-annotations
   [realm-transformer/build/publications/realmPublication/pom-default.xml]=realm-transformer
   [realm/realm-annotations-processor/build/publications/realmPublication/pom-default.xml]=realm-annotations-processor
-  [realm/realm-library/build/publications/realmPublication/pom-default.xml]=realm-android-library
+  [realm/realm-library/build/publications/basePublication/pom-default.xml]=realm-android-library
   [realm/kotlin-extensions/build/publications/realmPublication/pom-default.xml]=realm-android-kotlin-extensions
   [gradle-plugin/build/publications/realmPublication/pom-default.xml]=realm-gradle-plugin
 )
@@ -71,9 +74,15 @@ for pom in "${!poms[@]}"; do
   printf '<project><artifactId>%s</artifactId></project>\n' "${poms[$pom]}" > "$matrix_root/$pom"
 done
 
-"$matrix_root/tools/verify-g003-independent-builds.sh" \
+G003_TEST_COMMAND_TRACE="$temp_dir/matrix-commands.log" \
+  "$matrix_root/tools/verify-g003-independent-builds.sh" \
   --run --evidence-dir "$matrix_evidence" > "$temp_dir/matrix.log"
 grep -Fqx "G003 independent-build matrix: PASS (evidence: $matrix_evidence)" "$temp_dir/matrix.log"
 [[ "$(find "$matrix_evidence" -maxdepth 1 -name '*.log' -type f | wc -l)" -eq 12 ]]
+grep -Fq ':realm-library:generatePomFileForBasePublication :kotlin-extensions:generatePomFileForRealmPublication' "$temp_dir/matrix-commands.log"
+if grep -Fq ':realm-library:generatePomFileForRealmPublication' "$temp_dir/matrix-commands.log"; then
+  printf 'stale realm-library RealmPublication task was requested\n' >&2
+  exit 1
+fi
 
 printf 'G003 independent-build verifier regression tests: PASS\n'
