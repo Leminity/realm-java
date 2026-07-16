@@ -9,6 +9,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from xml.etree import ElementTree
 
 
 MODULE_PATH = Path(__file__).with_name("g008-publication.py")
@@ -19,24 +20,35 @@ G008 = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(G008)
 
 
-def pom(artifact: str, dependencies: set[tuple[str, str]]) -> str:
-    dependency_xml = "".join(
-        "<dependency><groupId>io.github.leminity.realm</groupId>"
-        f"<artifactId>{dependency}</artifactId><version>{version}</version>"
-        "</dependency>"
-        for dependency, version in sorted(dependencies)
-    )
-    return f"""<project>
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>{G008.GROUP}</groupId>
-  <artifactId>{artifact}</artifactId>
-  <version>{G008.VERSION}</version>
-  <name>{artifact}</name><description>G008 test artifact</description>
-  <url>https://github.com/Leminity/realm-java</url>
-  <licenses><license><name>Apache Software License, Version 2.0</name></license></licenses>
-  <developers><developer><name>Leminity</name></developer></developers>
-  <dependencies>{dependency_xml}</dependencies>
-</project>"""
+def tag_name(node: ElementTree.Element) -> str:
+    return node.tag.rsplit("}", 1)[-1]
+
+
+def direct_child(node: ElementTree.Element, name: str) -> ElementTree.Element | None:
+    return next((child for child in node if tag_name(child) == name), None)
+
+
+def staged_pom_from_official(artifact: str) -> ElementTree.Element:
+    """Build a metadata-valid fork POM from the pinned full-edge oracle."""
+    oracle = G008.OFFICIAL_POM_DIRECTORY / f"{artifact}-{G008.OFFICIAL_POM_VERSION}.pom"
+    root = ElementTree.parse(oracle).getroot()
+    for node in root.iter():
+        if tag_name(node) == "groupId" and (node.text or "").strip() == "io.realm":
+            node.text = G008.GROUP
+        elif tag_name(node) == "version" and (node.text or "").strip() == G008.OFFICIAL_POM_VERSION:
+            node.text = G008.VERSION
+        elif tag_name(node) == "url" and (node.text or "").strip() == "https://docs.mongodb.com/realm":
+            node.text = "https://github.com/Leminity/realm-java"
+        elif tag_name(node) == "name" and (node.text or "").strip() == "Realm":
+            node.text = "Leminity"
+    dependencies = direct_child(root, "dependencies")
+    if artifact == "realm-gradle-plugin" and dependencies is not None:
+        for dependency in list(dependencies):
+            group = direct_child(dependency, "groupId")
+            name = direct_child(dependency, "artifactId")
+            if (group.text, name.text) == ("com.neenbedankt.gradle.plugins", "android-apt"):
+                dependencies.remove(dependency)
+    return root
 
 
 def populate_repository(repository: Path) -> None:
@@ -50,8 +62,12 @@ def populate_repository(repository: Path) -> None:
                     for abi in sorted(G008.ANDROID_ABIS):
                         archive.writestr(f"jni/{abi}/librealm-jni.so", abi)
             else:
-                content = pom(artifact, G008.FORK_EDGES[artifact]) if name.endswith(".pom") else name
-                path.write_text(content, encoding="utf-8")
+                if name.endswith(".pom"):
+                    ElementTree.ElementTree(staged_pom_from_official(artifact)).write(
+                        path, encoding="utf-8", xml_declaration=True
+                    )
+                else:
+                    path.write_text(name, encoding="utf-8")
     G008.write_checksums(repository)
 
 
@@ -151,7 +167,7 @@ class G008PublicationTests(unittest.TestCase):
 
         validator_source = MODULE_PATH.read_text(encoding="utf-8")
         self.assertIn('REPOSITORY_ROOT / "version.txt"', validator_source)
-        self.assertNotIn('VERSION = "', validator_source)
+        self.assertNotRegex(validator_source, r'(?m)^VERSION = ["\']')
 
         consumer_source = (REPOSITORY_ROOT / "tools/g008-clean-consumer.sh").read_text(
             encoding="utf-8"
@@ -170,6 +186,47 @@ class G008PublicationTests(unittest.TestCase):
         self.assertIn("project.providers.exec", build_script)
         self.assertIn("runG008Command([", build_script)
         self.assertNotIn("doLast {\n        exec {", build_script)
+
+    def test_external_pom_edges_match_the_pinned_official_oracle(self) -> None:
+        for artifact in G008.ARTIFACTS:
+            staged = Path(self.tempdir.name) / f"{artifact}.pom"
+            ElementTree.ElementTree(staged_pom_from_official(artifact)).write(
+                staged, encoding="utf-8", xml_declaration=True
+            )
+            G008.validate_external_pom_edge_parity(staged, artifact)
+
+        source = Path(self.tempdir.name) / "realm-gradle-plugin.pom"
+        ElementTree.ElementTree(staged_pom_from_official("realm-gradle-plugin")).write(
+            source, encoding="utf-8", xml_declaration=True
+        )
+        modified = Path(self.tempdir.name) / "realm-gradle-plugin.pom"
+        root = ElementTree.parse(source).getroot()
+        dependencies = direct_child(root, "dependencies")
+        assert dependencies is not None
+        injected = ElementTree.SubElement(dependencies, "dependency")
+        ElementTree.SubElement(injected, "groupId").text = "com.android.tools.build"
+        ElementTree.SubElement(injected, "artifactId").text = "gradle-kotlin"
+        ElementTree.SubElement(injected, "version").text = "9.1.1"
+        ElementTree.SubElement(injected, "scope").text = "runtime"
+        ElementTree.ElementTree(root).write(modified, encoding="utf-8", xml_declaration=True)
+        with self.assertRaisesRegex(G008.ValidationError, "external POM edges differ"):
+            G008.validate_external_pom_edge_parity(modified, "realm-gradle-plugin")
+
+        base = Path(self.tempdir.name) / "realm-android-library.pom"
+        root = staged_pom_from_official("realm-android-library")
+        dependencies = direct_child(root, "dependencies")
+        assert dependencies is not None
+        duplicate_bson = [
+            dependency
+            for dependency in dependencies
+            if (direct_child(dependency, "groupId").text, direct_child(dependency, "artifactId").text)
+            == ("org.mongodb", "bson")
+        ]
+        self.assertEqual(2, len(duplicate_bson))
+        dependencies.remove(duplicate_bson[-1])
+        ElementTree.ElementTree(root).write(base, encoding="utf-8", xml_declaration=True)
+        with self.assertRaisesRegex(G008.ValidationError, "external POM edges differ"):
+            G008.validate_external_pom_edge_parity(base, "realm-android-library")
 
 
 if __name__ == "__main__":

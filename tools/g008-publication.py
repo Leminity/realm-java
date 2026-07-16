@@ -9,6 +9,7 @@ manifest, and optionally creates a byte-stable Central-format zip bundle.
 from __future__ import annotations
 
 import argparse
+from collections import Counter
 import hashlib
 import json
 import os
@@ -34,6 +35,13 @@ ARTIFACTS = {
     "realm-android-kotlin-extensions": "aar",
 }
 ANDROID_ABIS = frozenset(("armeabi-v7a", "arm64-v8a", "x86_64"))
+OFFICIAL_POM_DIRECTORY = REPOSITORY_ROOT / "evidence" / "oracle" / "official-10.19.0" / "poms"
+OFFICIAL_POM_VERSION = "10.19.0"
+ALLOWED_EXTERNAL_POM_REMOVALS = {
+    "realm-gradle-plugin": {
+        ("com.neenbedankt.gradle.plugins", "android-apt", "runtime", ()),
+    },
+}
 FORK_EDGES = {
     "realm-gradle-plugin": {("realm-transformer", VERSION)},
     "realm-transformer": {("realm-annotations", VERSION)},
@@ -163,6 +171,51 @@ def validate_fork_edges(artifact: str, dependencies: list[dict[str, object]]) ->
     if actual != expected:
         raise ValidationError(
             f"{artifact}: fork POM edges differ; expected {sorted(expected)}, got {sorted(actual)}"
+        )
+
+
+def normalized_pom_edges(dependencies: list[dict[str, object]]) -> Counter[tuple[str, str, str, tuple[tuple[str, str], ...]]]:
+    """Return the direct dependency edge multiset normalized to the official fork.
+
+    Dependency versions intentionally remain outside this structural comparison:
+    the AGP 9 build may need a newer implementation version while retaining the
+    official group, artifact, scope, exclusion, and multiplicity graph for consumers.
+    """
+    return Counter(
+        (
+            "io.realm" if str(dependency["groupId"]) == GROUP else str(dependency["groupId"]),
+            str(dependency["artifactId"]),
+            str(dependency["scope"]),
+            tuple(dependency["exclusions"]),
+        )
+        for dependency in dependencies
+    )
+
+
+def validate_external_pom_edge_parity(pom: Path, artifact: str) -> None:
+    """Require each staged POM's full direct-edge multiset to match Realm 10.19.0.
+
+    The old ``android-apt`` runtime helper is the only explicitly permitted
+    removal because AGP 9 replaces that obsolete plugin internally. Fork group
+    and release-version rewrites are normalized here and verified separately by
+    ``validate_fork_edges``. Duplicate official direct dependencies are part of
+    the pinned consumer metadata and must remain duplicates.
+    """
+    oracle = OFFICIAL_POM_DIRECTORY / f"{artifact}-{OFFICIAL_POM_VERSION}.pom"
+    if not oracle.is_file():
+        raise ValidationError(f"missing pinned official POM oracle {oracle}")
+    expected = normalized_pom_edges(parse_pom(oracle))
+    for edge in ALLOWED_EXTERNAL_POM_REMOVALS.get(artifact, set()):
+        expected[edge] -= 1
+        if expected[edge] <= 0:
+            expected.pop(edge, None)
+    actual = normalized_pom_edges(parse_pom(pom))
+    if actual != expected:
+        removed = sorted((expected - actual).elements())
+        added = sorted((actual - expected).elements())
+        raise ValidationError(
+            f"{artifact}: external POM edges differ from official 10.19.0; "
+            f"removed={removed}, added={added}"
         )
 
 
@@ -324,6 +377,7 @@ def validate_repository(repository: Path, require_signatures: bool, plugin_sourc
         validate_pom_metadata(pom, artifact)
         dependencies = parse_pom(pom)
         validate_fork_edges(artifact, dependencies)
+        validate_external_pom_edge_parity(pom, artifact)
         graph[artifact] = dependencies
         artifact_inventory[artifact] = sorted(names)
 
