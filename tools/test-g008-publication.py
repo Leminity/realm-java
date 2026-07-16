@@ -92,6 +92,20 @@ class G008PublicationTests(unittest.TestCase):
         with self.assertRaisesRegex(G008.ValidationError, "unexpected classifiers"):
             G008.validate_repository(self.repository, False, None)
 
+    def test_checksum_writer_removes_gradle_signature_checksum_recursion(self) -> None:
+        directory = G008.coordinate_directory(self.repository, "realm-transformer")
+        recursive = [
+            directory / f"realm-transformer-{G008.VERSION}.jar.asc.md5",
+            directory / f"realm-transformer-{G008.VERSION}.jar.asc.sha1",
+            directory / f"realm-transformer-{G008.VERSION}.jar.md5.sha256",
+        ]
+        for path in recursive:
+            path.write_text("bad", encoding="utf-8")
+        G008.write_checksums(self.repository)
+        for path in recursive:
+            self.assertFalse(path.exists())
+        G008.validate_repository(self.repository, False, None)
+
     def test_module_metadata_and_secret_payload_are_rejected(self) -> None:
         directory = G008.coordinate_directory(self.repository, "realm-gradle-plugin")
         (directory / f"realm-gradle-plugin-{G008.VERSION}.module").write_text("{}", encoding="utf-8")

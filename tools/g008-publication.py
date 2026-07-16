@@ -205,7 +205,20 @@ def write_checksums(repository: Path) -> None:
         metadata.unlink()
     for artifact, extension in ARTIFACTS.items():
         directory = coordinate_directory(repository, artifact)
-        for name in expected_deployables(artifact, extension):
+        deployables = expected_deployables(artifact, extension)
+        # Gradle's file publisher can emit checksums for detached signatures
+        # and even checksum sidecars. Central inputs checksum the four actual
+        # deployables only, so prune every pre-existing checksum that does not
+        # immediately belong to one of those files before rebuilding them.
+        for sidecar in directory.iterdir():
+            if not sidecar.is_file():
+                continue
+            for algorithm in CHECKSUMS:
+                suffix = f".{algorithm}"
+                if sidecar.name.endswith(suffix) and sidecar.name[: -len(suffix)] not in deployables:
+                    sidecar.unlink()
+                    break
+        for name in deployables:
             source = directory / name
             if not source.is_file():
                 raise ValidationError(f"cannot checksum missing deployable {source}")
