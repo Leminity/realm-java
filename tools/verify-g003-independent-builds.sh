@@ -62,6 +62,7 @@ mode='static'
 release_task=''
 evidence_dir=''
 check_log=''
+matrix_temp_dir=''
 
 usage() {
   cat <<'USAGE'
@@ -86,6 +87,15 @@ fail() {
   exit 1
 }
 
+cleanup_matrix() {
+  if [[ -n "$matrix_temp_dir" ]]; then
+    rm -rf "$matrix_temp_dir"
+    matrix_temp_dir=''
+  fi
+}
+
+trap cleanup_matrix EXIT
+
 require_line() {
   local expected=$1 file=$2
   grep -Fqx "$expected" "$file" || fail "expected '$expected' in $file"
@@ -100,13 +110,14 @@ check_log_for_forbidden_activity() {
     fi
   done
   task_lines="$(mktemp)"
-  trap 'rm -f "$task_lines"' RETURN
   grep -E '^> Task ' "$log" > "$task_lines" || true
   for pattern in "${FORBIDDEN_TASK_PATTERN[@]}"; do
     if grep -Ein -- "$pattern" "$task_lines" >/dev/null; then
+      rm -f "$task_lines"
       fail "unsupported task graph activity ($pattern) in $log"
     fi
   done
+  rm -f "$task_lines"
 }
 
 verify_java() {
@@ -188,13 +199,11 @@ run_gradle() {
 }
 
 run_matrix() {
-  local temp_dir
-  temp_dir="$(mktemp -d)"
-  trap 'rm -rf "$temp_dir"' EXIT
+  matrix_temp_dir="$(mktemp -d)"
   evidence_dir="${evidence_dir:-$root/build/g003-independent-builds}"
-  staged_maven_repo="$temp_dir/maven-repository"
+  staged_maven_repo="$matrix_temp_dir/maven-repository"
   mkdir -p "$evidence_dir" "$staged_maven_repo"
-  export GRADLE_USER_HOME="$temp_dir/gradle-user-home"
+  export GRADLE_USER_HOME="$matrix_temp_dir/gradle-user-home"
 
   # The ordering is the G003 release-critical contract.  Only the first three
   # prerequisite builds publish to the temporary local repository; the Realm
@@ -217,6 +226,7 @@ run_matrix() {
   verify_public_metadata_allowlist
 
   printf 'G003 independent-build matrix: PASS (evidence: %s)\n' "$evidence_dir"
+  cleanup_matrix
 }
 
 verify_public_metadata_allowlist() {
