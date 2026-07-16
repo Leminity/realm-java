@@ -30,12 +30,23 @@ for allowed in \
   fi
 done
 
+for allowed in "${APPROVED_G003_PATHS[@]}"; do
+  if ! is_baseline_allowed_path "$allowed"; then
+    printf 'approved G003 path was rejected: %s\n' "$allowed" >&2
+    exit 1
+  fi
+done
+
 for disallowed in \
+  'build.gradle.kts' \
+  'evidence/g003/F056-unlinked.log' \
   'realm/src/main/java/io/realm/Realm.java' \
   'realm/realm-library/src/main/cpp/realm/unsafe.cpp' \
+  'realm-transformer/src/main/kotlin/io/realm/transformer/Unapproved.kt' \
   'compatibility-fixtures/unapproved/app/src/main/java/Injected.java' \
   'evidence/toolchain/unapproved/README.md' \
   'evidence/audit/g003-unapproved.md' \
+  'tools/verify-g004-unapproved.sh' \
   'tools/unapproved-helper.sh' \
   'unexpected-root-file.md'; do
   if is_baseline_allowed_path "$disallowed"; then
@@ -64,16 +75,42 @@ for invalid_pin in \
   fi
 done
 
-python3 - "$temp_dir/current.json" "$temp_dir/non-wrapper-mismatch.json" <<'PY'
+python3 - "$temp_dir/current.json" "$temp_dir/detached-worktree.json" "$temp_dir/toolchain-mismatch.json" "$temp_dir/dependencies-mismatch.json" "$temp_dir/non-wrapper-mismatch.json" <<'PY'
 import json
 import sys
 
 with open(sys.argv[1], encoding="utf-8") as source:
     capture = json.load(source)
-capture["source"]["commit"] = "0000000000000000000000000000000000000000"
+capture["source"]["work_branch"] = "detached-team-worktree"
 with open(sys.argv[2], "w", encoding="utf-8") as target:
     json.dump(capture, target, sort_keys=True)
+
+capture["toolchain_pins"]["KOTLIN"] = "0.0.0"
+with open(sys.argv[3], "w", encoding="utf-8") as target:
+    json.dump(capture, target, sort_keys=True)
+
+capture["toolchain_pins"]["KOTLIN"] = "2.2.10"
+capture["source_integrity"]["dependencies_list_sha256"] = "0" * 64
+with open(sys.argv[4], "w", encoding="utf-8") as target:
+    json.dump(capture, target, sort_keys=True)
+
+capture["source_integrity"]["dependencies_list_sha256"] = "1ab17f0b75665a98d38d73dc81eba601d438b1be2aa6d3f3ece994e43664394b"
+capture["source"]["commit"] = "0000000000000000000000000000000000000000"
+with open(sys.argv[5], "w", encoding="utf-8") as target:
+    json.dump(capture, target, sort_keys=True)
 PY
+if ! verify_baseline_capture evidence/provenance/baseline.json "$temp_dir/detached-worktree.json"; then
+  echo 'detached worktree provenance capture was rejected' >&2
+  exit 1
+fi
+if verify_baseline_capture evidence/provenance/baseline.json "$temp_dir/toolchain-mismatch.json"; then
+  echo 'unapproved G003 toolchain pin was accepted' >&2
+  exit 1
+fi
+if verify_baseline_capture evidence/provenance/baseline.json "$temp_dir/dependencies-mismatch.json"; then
+  echo 'unapproved G003 dependencies digest was accepted' >&2
+  exit 1
+fi
 if verify_baseline_capture evidence/provenance/baseline.json "$temp_dir/non-wrapper-mismatch.json"; then
   echo 'non-wrapper baseline mismatch was accepted' >&2
   exit 1
