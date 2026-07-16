@@ -382,21 +382,30 @@ task g008PublishLocal {
     dependsOn g008PublishGradlePlugin
 }
 
+def runG008Command = { List<String> arguments ->
+    // Gradle 9 no longer exposes exec() on a task action. ProviderFactory.exec
+    // is the public, lazy command-execution API and retains the task's process
+    // environment for ephemeral signing-key and local-staging verification.
+    project.providers.exec { spec ->
+        spec.commandLine(*arguments)
+    }.result.get().assertNormalExitValue()
+}
+
 task g008VerifyLocalStaging {
     group = 'Verification'
     description = 'Validate the unsigned exact-six local staging tree, POM graph, checksums, and isolated consumer'
     dependsOn g008PublishLocal
     doLast {
-        exec {
-            commandLine 'python3', 'tools/g008-publication.py',
-                    '--repository', g008StagingRepository.absolutePath,
-                    '--write-checksums', '--manifest', g008Manifest.absolutePath,
-                    '--plugin-source', 'gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt'
-        }
-        exec {
-            commandLine 'bash', 'tools/g008-clean-consumer.sh',
-                    '--repository', g008StagingRepository.absolutePath
-        }
+        runG008Command([
+                'python3', 'tools/g008-publication.py',
+                '--repository', g008StagingRepository.absolutePath,
+                '--write-checksums', '--manifest', g008Manifest.absolutePath,
+                '--plugin-source', 'gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt'
+        ])
+        runG008Command([
+                'bash', 'tools/g008-clean-consumer.sh',
+                '--repository', g008StagingRepository.absolutePath
+        ])
     }
 }
 
@@ -405,12 +414,12 @@ task g008Bundle {
     description = 'Create a signed deterministic Maven Central-format G008 bundle from local staging'
     dependsOn g008VerifyLocalStaging
     doLast {
-        exec {
-            commandLine 'python3', 'tools/g008-publication.py',
-                    '--repository', g008StagingRepository.absolutePath,
-                    '--require-signatures', '--manifest', g008Manifest.absolutePath,
-                    '--bundle', g008BundleFile.absolutePath,
-                    '--plugin-source', 'gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt'
-        }
+        runG008Command([
+                'python3', 'tools/g008-publication.py',
+                '--repository', g008StagingRepository.absolutePath,
+                '--require-signatures', '--manifest', g008Manifest.absolutePath,
+                '--bundle', g008BundleFile.absolutePath,
+                '--plugin-source', 'gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt'
+        ])
     }
 }

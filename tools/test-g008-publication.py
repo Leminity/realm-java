@@ -151,6 +151,12 @@ class G008PublicationTests(unittest.TestCase):
         self.assertIn("releaseVersion()", plugin_test_source)
         self.assertNotIn(G008.VERSION, plugin_test_source)
 
+    def test_g008_gradle_tasks_use_the_gradle9_execution_api(self) -> None:
+        build_script = (REPOSITORY_ROOT / "build.gradle").read_text(encoding="utf-8")
+        self.assertIn("project.providers.exec", build_script)
+        self.assertIn("runG008Command([", build_script)
+        self.assertNotIn("doLast {\n        exec {", build_script)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
