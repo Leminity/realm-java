@@ -55,9 +55,7 @@ open class Realm : Plugin<Project> {
         )
 
         project.afterEvaluate {
-            val isKotlinProject = project.extensions
-                .getByType(CommonExtension::class.java)
-                .enableKotlin
+            val isKotlinProject = usesKotlinSources(project)
             extension.isKotlinExtensionsEnabled = isKotlinProject
 
             if (extension.isSyncEnabled) {
@@ -104,6 +102,23 @@ open class Realm : Plugin<Project> {
         }
         project.dependencies.add("annotationProcessor", forkCoordinate("realm-annotations-processor"))
         project.dependencies.add("androidTestAnnotationProcessor", forkCoordinate("realm-annotations-processor"))
+    }
+
+    private fun usesKotlinSources(project: Project): Boolean {
+        val android = project.extensions.getByType(CommonExtension::class.java)
+        if (!android.enableKotlin) {
+            return false
+        }
+
+        // AGP 9 enables its built-in Kotlin support by default. Keep Java-only projects on the
+        // annotationProcessor path by selecting KAPT only when a public Android source set has Kotlin code.
+        return android.sourceSets.any { sourceSet ->
+            (sourceSet.java.directories + sourceSet.kotlin.directories).any { directory ->
+                project.file(directory).walkTopDown().any { source ->
+                    source.isFile && source.extension == "kt"
+                }
+            }
+        }
     }
 
     companion object {
