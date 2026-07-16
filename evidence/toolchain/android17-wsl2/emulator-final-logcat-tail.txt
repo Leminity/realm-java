@@ -1,0 +1,163 @@
+--------- beginning of system
+07-16 12:41:42.880   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.appwindowlayout.AppWindowLayoutSettingsService
+07-16 12:41:42.880   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.appwindowlayout.AppWindowLayoutSettingsService took to complete: 0ms
+07-16 12:41:42.881   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.grammaticalinflection.GrammaticalInflectionService
+07-16 12:41:42.881   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.grammaticalinflection.GrammaticalInflectionService took to complete: 0ms
+07-16 12:41:42.881   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.apphibernation.AppHibernationService
+07-16 12:41:42.881   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.apphibernation.AppHibernationService took to complete: 0ms
+07-16 12:41:42.881   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.locksettings.LockSettingsService$Lifecycle
+07-16 12:41:43.198   668   668 W SystemServiceManager: Service com.android.server.locksettings.LockSettingsService$Lifecycle took 317 ms in onBootPhase
+07-16 12:41:43.199   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.locksettings.LockSettingsService$Lifecycle took to complete: 318ms
+07-16 12:41:43.199   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.testharness.TestHarnessModeService
+07-16 12:41:43.199   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.testharness.TestHarnessModeService took to complete: 0ms
+07-16 12:41:43.199   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.DeviceIdleController
+07-16 12:41:43.199   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.DeviceIdleController took to complete: 0ms
+07-16 12:41:43.199   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle
+07-16 12:41:43.201   668   668 I DevicePolicyManager: Started device policies migration to the device policy engine.
+--------- beginning of main
+07-16 12:41:43.287   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:getconf PAGE_SIZE'
+07-16 12:41:43.294   668   696 W system_server: Long monitor contention with owner InputReader (943) at android.hardware.input.KeyboardLayoutSelectionResult com.android.server.input.KeyboardLayoutManager.getKeyboardLayoutForInputDeviceInternal(com.android.server.input.KeyboardLayoutManager$KeyboardIdentifier, com.android.server.input.KeyboardLayoutManager$ImeInfo)(KeyboardLayoutManager.java:676) waiters=0 in android.hardware.input.KeyboardLayoutSelectionResult com.android.server.input.KeyboardLayoutManager.getKeyboardLayoutForInputDeviceInternal(com.android.server.input.KeyboardLayoutManager$KeyboardIdentifier, com.android.server.input.KeyboardLayoutManager$ImeInfo) for 416ms
+07-16 12:41:43.428   668   716 E AppFGSTracker$NotificationListener: No completion listener supplied for this service!
+07-16 12:41:43.564   668   696 W PermissionService: getPermissionFlags: Unknown user -1
+07-16 12:41:43.565   668   696 W PermissionService: getPermissionFlags: Unknown user -1
+07-16 12:41:43.676   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:43.734   668   668 I DevicePolicyManager: Migrating security logging policy to policy engine
+07-16 12:41:43.735   668   668 I DevicePolicyManager: Security logs not enabled, exiting
+07-16 12:41:43.735   668   668 I DevicePolicyManager: Marking security logging policy migration complete
+07-16 12:41:43.773   668   668 I DevicePolicyManager: Migrating password complexity to policy engine
+07-16 12:41:43.774   668   943 I InputReader: Reconfiguring input devices, changes=KEY_REMAPPING
+07-16 12:41:43.777   668   696 W BLASTSyncEngine: Sync group 1 timeout
+07-16 12:41:43.778   668   696 W BLASTSyncEngine: Sync group 1 timed-out because not ready. If you see this, please file a bug.
+07-16 12:41:43.778   668   696 E Transition: #1 readiness timeout. state=1
+07-16 12:41:43.778   668   696 E Transition:    met conditions: []
+07-16 12:41:43.779   668   696 E Transition:    unmet conditions: [{Legacy: used=false deferDepth=0 group={}}]
+07-16 12:41:43.780   668   696 V WindowManager: Playing [FALLBACK] animation for #1 @0
+07-16 12:41:43.808   668   693 V WindowManager: Sent Transition (#1) createdAt=07-16 12:41:41.087 via request=TransitionRequestInfo { type = CHANGE, triggerTask = null, pipChange = null, remoteTransitionInfo = null, displayChanges = null, requestedLocation = null, userChange = null, windowingLayerChange = null, fullscreenRequestChange = null, flags = 0, debugId = 1 }
+07-16 12:41:43.808   668   693 V WindowManager:     startWCT=WindowContainerTransaction { changes= {} hops= [] flags= 0 errorCallbackToken=null taskFragmentOrganizer=null }
+07-16 12:41:43.808   668   693 V WindowManager:     info={id=1 t=CHANGE f=0x0 trk=0 r=[] c=[]}
+07-16 12:41:43.836   668   696 V WindowManager: Transition animation [FALLBACK] finished #1 @0
+07-16 12:41:43.842   668   668 I DevicePolicyManager: Migrating ResetPasswordWithToken to policy engine
+07-16 12:41:43.855   668   693 V WindowManager: Finish Transition (#1): created at 07-16 12:41:41.087 collect-started=8.969ms request-sent=9.136ms started=124.553ms ready=-683994.084ms sent=2691.969ms finished=2763.978ms
+07-16 12:41:43.900   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:43.922   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:43.938   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:43.941   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:43.944   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:44.007   668   681 W system_server: Suspending all threads took: 13.023ms
+07-16 12:41:44.043  1316  1316 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdNativeBacktrace
+07-16 12:41:44.062   334   334 I tombstoned: received crash request for pid 454
+07-16 12:41:44.062   334   334 I tombstoned: found intercept fd 512 for pid 454 and type kDebuggerdNativeBacktrace
+07-16 12:41:44.066   668   695 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+07-16 12:41:44.071  1316  1316 I crash_dump64: performing dump of process 454 (target tid = 454)
+07-16 12:41:44.110   668   668 I DevicePolicyEngine: Backup created at /data/system/device_policy_backups/device_policy_state.36.2.supervision-support.xml
+07-16 12:41:44.230   334   334 W tombstoned: skipping tombstone file creation due to intercept
+07-16 12:41:44.231   668   699 I system_server: libdebuggerd_client: done dumping process 454
+--------- beginning of kernel
+07-16 12:41:44.285     0     0 I init    : Untracked process (pid: 1316 name: (crash_dump64) ppid: 1 pgrp: 1313 state: Z) exited with status 0
+07-16 12:41:44.285     0     0 I init    : Untracked process (pid: 1316 name: (crash_dump64) ppid: 1 pgrp: 1313 state: Z) did not have an associated service entry and will not be reaped
+07-16 12:41:44.286     0     0 I init    : Untracked process (pid: 1319 name: (android.hardwar) ppid: 1 pgrp: 1319 state: Z) exited with status 0
+07-16 12:41:44.286     0     0 I init    : Untracked process (pid: 1319 name: (android.hardwar) ppid: 1 pgrp: 1319 state: Z) did not have an associated service entry and will not be reaped
+07-16 12:41:44.430   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:getprop ro.product.model'
+07-16 12:41:44.647   668   699 I ActivityManager: Collecting stacks for native pid 264
+07-16 12:41:44.648   668   699 E android.os.Debug: Failed to get binder state info for pid: 264 status: -2: Success
+07-16 12:41:44.671   668   668 I DevicePolicyManager: Marking ResetPasswordWithToken migration complete
+07-16 12:41:44.689   668   699 I system_server: libdebuggerd_client: started dumping process 264
+07-16 12:41:44.711   668   668 I DevicePolicyManager: Migrating suspended packages to policy engine
+07-16 12:41:44.713   668   668 W DevicePolicyEngine: Backup already exist: /data/system/device_policy_backups/device_policy_state.36.2.supervision-support.xml
+07-16 12:41:44.720   668   668 I DevicePolicyManager: Marking suspended packages migration complete
+07-16 12:41:44.727   668   681 I system_server: Background young concurrent mark compact GC freed 19MB AllocSpace bytes, 6(192KB) LOS objects, 44% free, 19MB/36MB, paused 71.373ms,503.891ms total 3.282s
+07-16 12:41:44.738   334   334 I tombstoned: registered intercept for pid 264 and type kDebuggerdNativeBacktrace
+07-16 12:41:44.779   668   668 I DevicePolicyManager: Migrating set keyguard disabled features to policy engine
+07-16 12:41:44.781   264   264 I libc    : Requested dump for pid 264 (servicemanager)
+07-16 12:41:44.787   668   668 W DevicePolicyEngine: Backup already exist: /data/system/device_policy_backups/device_policy_state.36.2.supervision-support.xml
+07-16 12:41:44.788   668   668 I DevicePolicyManager: Marking set keyguard disabled features migration complete
+07-16 12:41:44.824   668   668 I DevicePolicyManager: Backup made: 36.2.supervision-support
+07-16 12:41:44.825   668   668 I DevicePolicyManager: Migrating Memory Tagging to policy engine
+07-16 12:41:44.832   668   668 I DevicePolicyEngine: Backup created at /data/system/device_policy_backups/device_policy_state.36.3.memory-tagging.xml
+07-16 12:41:44.839   668   668 I DevicePolicyManager: Marking Memory Tagging migration complete
+07-16 12:41:44.871   668   668 I DevicePolicyManager: Backup made: 36.3.memory-tagging
+07-16 12:41:44.872   668   668 I DevicePolicyManager: Migrating PERMISSION_GRANT policy to device policy engine.
+07-16 12:41:44.892   668   668 I DevicePolicyEngine: Backup created at /data/system/device_policy_backups/device_policy_state.37.1.permission-support.xml
+07-16 12:41:44.903   668   668 I DevicePolicyManager: Marking Permission Grant State migration complete
+07-16 12:41:44.974   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:getprop ro.build.fingerprint'
+07-16 12:41:45.005   668   668 I DevicePolicyManager: Backup made: 37.1.permission-support
+07-16 12:41:45.005   668   668 I DevicePolicyManager: Migrating application restrictions to policy engine
+07-16 12:41:45.028   668   668 I DevicePolicyEngine: Backup created at /data/system/device_policy_backups/device_policy_state.37.2.application-restrictions.xml
+07-16 12:41:45.060   668   668 I DevicePolicyManager: Marking set application restrictions migration complete
+07-16 12:41:45.103   668   668 I DevicePolicyManager: Backup made: 37.2.application-restrictions
+07-16 12:41:45.104   668   668 I DevicePolicyManager: Migrating Cross Profile Widget Provider to policy engine
+07-16 12:41:45.112   668   668 I DevicePolicyEngine: Backup created at /data/system/device_policy_backups/device_policy_state.37.3.cross-profile-widget-provider.xml
+07-16 12:41:45.127   668   668 I DevicePolicyManager: Marking Cross Profile Widget Provider migration complete
+07-16 12:41:45.171   668   668 I DevicePolicyManager: Backup made: 37.3.cross-profile-widget-provider
+07-16 12:41:45.173   668   668 W SystemServiceManager: Service com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle took 1974 ms in onBootPhase
+07-16 12:41:45.187   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.devicepolicy.DevicePolicyManagerService$Lifecycle took to complete: 1984ms
+07-16 12:41:45.188   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.voiceinteraction.VoiceInteractionManagerService
+07-16 12:41:45.248   668   668 W SystemServiceManager: Service com.android.server.voiceinteraction.VoiceInteractionManagerService took 60 ms in onBootPhase
+07-16 12:41:45.249   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.voiceinteraction.VoiceInteractionManagerService took to complete: 60ms
+07-16 12:41:45.255   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.musicrecognition.MusicRecognitionManagerService
+07-16 12:41:45.255   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.musicrecognition.MusicRecognitionManagerService took to complete: 0ms
+07-16 12:41:45.255   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.contentcapture.ContentCaptureManagerService
+07-16 12:41:45.255   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.contentcapture.ContentCaptureManagerService took to complete: 0ms
+07-16 12:41:45.255   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.systemcaptions.SystemCaptionsManagerService
+07-16 12:41:45.255   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.systemcaptions.SystemCaptionsManagerService took to complete: 0ms
+07-16 12:41:45.255   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.texttospeech.TextToSpeechManagerService
+07-16 12:41:45.256   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.texttospeech.TextToSpeechManagerService took to complete: 0ms
+07-16 12:41:45.256   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.wearable.WearableSensingManagerService
+07-16 12:41:45.256   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.wearable.WearableSensingManagerService took to complete: 0ms
+07-16 12:41:45.256   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService
+07-16 12:41:45.256   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService took to complete: 0ms
+07-16 12:41:45.256   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.contentsafety.ContentSafetyManagerService
+07-16 12:41:45.256   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.contentsafety.ContentSafetyManagerService took to complete: 0ms
+07-16 12:41:45.256   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.ambientcontext.AmbientContextManagerService
+07-16 12:41:45.256   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.ambientcontext.AmbientContextManagerService took to complete: 0ms
+07-16 12:41:45.256   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.speech.SpeechRecognitionManagerService
+07-16 12:41:45.256   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.speech.SpeechRecognitionManagerService took to complete: 0ms
+07-16 12:41:45.257   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.appprediction.AppPredictionManagerService
+07-16 12:41:45.257   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.appprediction.AppPredictionManagerService took to complete: 0ms
+07-16 12:41:45.257   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.contentsuggestions.ContentSuggestionsManagerService
+07-16 12:41:45.257   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.contentsuggestions.ContentSuggestionsManagerService took to complete: 0ms
+07-16 12:41:45.257   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.searchui.SearchUiManagerService
+07-16 12:41:45.257   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.searchui.SearchUiManagerService took to complete: 0ms
+07-16 12:41:45.257   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.smartspace.SmartspaceManagerService
+07-16 12:41:45.257   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.smartspace.SmartspaceManagerService took to complete: 0ms
+07-16 12:41:45.257   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.graphics.fonts.FontManagerService$Lifecycle
+07-16 12:41:45.302   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.graphics.fonts.FontManagerService$Lifecycle took to complete: 0ms
+07-16 12:41:45.303   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.textservices.TextServicesManagerService$Lifecycle
+07-16 12:41:45.303   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.textservices.TextServicesManagerService$Lifecycle took to complete: 0ms
+07-16 12:41:45.303   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.textclassifier.TextClassificationManagerService$Lifecycle
+07-16 12:41:45.303   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.textclassifier.TextClassificationManagerService$Lifecycle took to complete: 0ms
+07-16 12:41:45.303   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.NetworkScoreService$Lifecycle
+07-16 12:41:45.303   668   668 V SystemServerTiming: OnBootPhase_550_com.android.server.NetworkScoreService$Lifecycle took to complete: 0ms
+07-16 12:41:45.303   668   668 D SystemServerTiming: OnBootPhase_550_com.android.server.NetworkStatsServiceInitializer
+07-16 12:41:45.429  1327  1327 I crash_dump64: obtaining output fd from tombstoned, type: kDebuggerdNativeBacktrace
+07-16 12:41:45.455   334   334 I tombstoned: received crash request for pid 264
+07-16 12:41:45.455   334   334 I tombstoned: found intercept fd 512 for pid 264 and type kDebuggerdNativeBacktrace
+07-16 12:41:45.459  1327  1327 I crash_dump64: performing dump of process 264 (target tid = 264)
+07-16 12:41:45.638   334   334 W tombstoned: skipping tombstone file creation due to intercept
+07-16 12:41:45.643   668   699 I system_server: libdebuggerd_client: done dumping process 264
+07-16 12:41:45.675     0     0 I init    : Untracked process (pid: 1327 name: (crash_dump64) ppid: 1 pgrp: 1324 state: Z) exited with status 0
+07-16 12:41:45.675     0     0 I init    : Untracked process (pid: 1327 name: (crash_dump64) ppid: 1 pgrp: 1324 state: Z) did not have an associated service entry and will not be reaped
+07-16 12:41:45.677     0     0 I init    : Untracked process (pid: 1329 name: (servicemanager) ppid: 1 pgrp: 1329 state: Z) exited with status 0
+07-16 12:41:45.677     0     0 I init    : Untracked process (pid: 1329 name: (servicemanager) ppid: 1 pgrp: 1329 state: Z) did not have an associated service entry and will not be reaped
+07-16 12:41:45.684   668   699 I ActivityManager: Collecting stacks for native pid 524
+07-16 12:41:45.743   668   957 I StorageManagerService: Filesystem configuration feature is disabled
+07-16 12:41:45.751   668   668 I NetworkStats: Starting import : attempts 0/1
+07-16 12:41:45.760   668   668 I NetworkStats: Importing platform collection for prefix dev
+07-16 12:41:45.709   668   699 I system_server: libdebuggerd_client: started dumping process 524
+07-16 12:41:45.772   334   334 I tombstoned: registered intercept for pid 524 and type kDebuggerdNativeBacktrace
+07-16 12:41:45.776   524   524 I libc    : Requested dump for pid 524 (cameraserver)
+07-16 12:41:45.794   668   668 I NetworkStats: Successfully read platform collection spanning from +292278994-08-17T07:12:55.807Z to -292275055-05-16T16:47:04.192Z
+07-16 12:41:45.795   668   668 I NetworkStats: Importing platform collection for prefix xt
+07-16 12:41:45.795   668   668 I NetworkStats: Successfully read platform collection spanning from +292278994-08-17T07:12:55.807Z to -292275055-05-16T16:47:04.192Z
+07-16 12:41:45.797   668   668 I NetworkStats: Importing platform collection for prefix uid
+07-16 12:41:45.805   668   668 I NetworkStats: Successfully read platform collection spanning from +292278994-08-17T07:12:55.807Z to -292275055-05-16T16:47:04.192Z
+07-16 12:41:45.810   668   668 I NetworkStats: Importing platform collection for prefix uid_tag
+07-16 12:41:45.811   668   668 I NetworkStats: Successfully read platform collection spanning from +292278994-08-17T07:12:55.807Z to -292275055-05-16T16:47:04.192Z
+07-16 12:41:45.812   668   668 I NetworkStats: Rewriting data with imported collections with cutoff -292275055-05-16T16:47:04.192Z
+07-16 12:41:45.823   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '160''
+07-16 12:41:45.879   668   668 I NetworkStats: Successfully imported platform collections
+07-16 12:41:45.964   668   668 W BestClock: java.time.DateTimeException: No network time available
+07-16 12:41:46.064   424   462 I netd    : tetherGetStats() -> {[]} <38.92ms>
+07-16 12:41:46.212   668   668 I TetheringManager: registerTetheringEventCallback caller:android
+07-16 12:41:46.300   424   462 I netd    : registerUnsolicitedEventListener(interface:0x7515c6c35ff0) <0.13ms>
+07-16 12:41:46.583     0     0 I logd    : logdr: UID=2000 GID=2000 PID=1332 n tail=160 logMask=99 pid=0 start=0ns deadline=0ns

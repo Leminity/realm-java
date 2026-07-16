@@ -1,0 +1,2 @@
+    PID    PPID    PGID     SID STAT     ELAPSED CMD
+ 262226    1343  262226  262226 Ssl        02:37 /home/leminity/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-x86_64-headless -avd realm-api37-ps16k -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -accel off -memory 2048 -cores 2

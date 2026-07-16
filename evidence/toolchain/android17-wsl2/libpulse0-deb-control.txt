@@ -1,0 +1,3 @@
+Package: libpulse0
+Version: 1:16.1+dfsg1-2ubuntu10.1
+Architecture: amd64

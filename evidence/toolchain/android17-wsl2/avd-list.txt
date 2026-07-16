@@ -1,0 +1,12 @@
+Available Android Virtual Devices:
+    Name: realm-api37-ps16k
+  Device: pixel_6 (Google)
+    Path: /home/leminity/.android/avd/realm-api37-ps16k.avd
+  Target: Google APIs (Google Inc.)
+          Based on: Android API 37.0 Tag/ABI: google_apis/x86_64
+  Sdcard: 512 MB
+
+The following Android Virtual Devices could not be loaded:
+    Name: wake2work_api36
+    Path: /home/leminity/.android/avd/wake2work_api36.avd
+   Error: Missing system image for Google APIs x86_64 wake2work api36.

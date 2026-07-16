@@ -1,0 +1,130 @@
+INFO         | Android emulator version 36.6.11.0 (build_id 15507667) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+INFO         | Found systemPath /home/leminity/Android/Sdk/system-images/android-37.0/google_apis_ps16k/x86_64/
+INFO         | Saving last run QEMU version for the AVD to 2
+INFO         | Guest usage of host flag 'VulkanVirtualQueue' will be ignored.
+INFO         | Increasing RAM size to 4096MB
+INFO         | Guest GLES Driver: Auto (ext controls)
+INFO         | emuglConfig_init: vulkan_mode_selected:swiftshader gles_mode_selected:swiftshader
+INFO         | Checking system compatibility:
+INFO         |   Checking: hasSufficientDiskSpace
+INFO         |      Ok: Disk space requirements to run avd: `realm-api37-ps16k` are met
+INFO         |   Checking: hasSufficientHwGpu
+INFO         |      Ok: Hardware GPU compatibility checks are not required
+INFO         |   Checking: hasSufficientSystem
+INFO         |      Ok: System requirements to run avd: `realm-api37-ps16k` are met
+WARNING      | Feature QuickbootFileBacked is disabled due to stability issues, if you really want that, the environment variable ANDROID_EMU_FORCE_QUICKBOOT_FILE_BACKED need to set to 1
+ProbeKVM: This user doesn't have permissions to use KVM (/dev/kvm).
+The KVM line in /etc/group is: [kvm:x:993:]
+
+If the current user has KVM permissions,
+the KVM line in /etc/group should end with ":" followed by your username.
+
+If we see LINE_NOT_FOUND, the kvm group may need to be created along with permissions:
+    sudo groupadd -r kvm
+    # Then ensure /lib/udev/rules.d/50-udev-default.rules contains something like:
+    # KERNEL=="kvm", GROUP="kvm", MODE="0660"
+    # and then run:
+    sudo gpasswd -a $USER kvm
+
+If we see kvm:... but no username at the end, running the following command may allow KVM access:
+    sudo gpasswd -a $USER kvm
+
+You may need to log out and back in for changes to take effect.
+
+WARNING      | x86_64 emulation may not work without hardware acceleration!
+INFO         | Storing crashdata in: /tmp/android-leminity/emu-crash-36.6.11.db, detection is enabled for process: 258600
+INFO         | Initializing gfxstream backend
+INFO         | startOpenglesRendererImpl: gpu info
+INFO         |
+INFO         | Vulkan 1.4 is not supported for the guest and won't be enabled
+INFO         | initIcdPaths: ICD set to 'swiftshader', using Swiftshader ICD
+INFO         | Setting ICD filenames for the loader = /home/leminity/Android/Sdk/emulator/lib64/vulkan/vk_swiftshader_icd.json
+INFO         | SharedLibrary::open for [/home/leminity/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so]
+INFO         | SharedLibrary::open for [/home/leminity/Android/Sdk/emulator/qemu/linux-x86_64/lib64/vulkan/libvulkan.so.1]
+INFO         | SharedLibrary::open for [/home/leminity/Android/Sdk/emulator/lib64/vulkan/libvulkan.so]
+INFO         | Added library: /home/leminity/Android/Sdk/emulator/lib64/vulkan/libvulkan.so
+INFO         | Selecting Vulkan device: SwiftShader Device (Subzero), Version: 1.3.0
+INFO         | Using Vulkan externalMemoryMode: OpaqueFd for VkEmulation
+INFO         | SharedLibrary::open for [libX11]
+WARNING      | Could not open libX11.so, try libX11.so.6
+INFO         | SharedLibrary::open for [libX11.so.6]
+INFO         | SharedLibrary::open for [libX11-xcb]
+WARNING      | Could not open libX11-xcb.so, try libX11-xcb.so.1
+INFO         | SharedLibrary::open for [libX11-xcb.so.1]
+INFO         | Initializing VkEmulation features:
+INFO         |     glInteropSupported: false
+INFO         |     useDeferredCommands: true
+INFO         |     createResourceWithRequirements: true
+INFO         |     useVulkanComposition: false
+INFO         |     useVulkanNativeSwapchain: false
+INFO         |     enable guestRenderDoc: false
+INFO         |     ASTC LDR emulation mode: Gpu
+INFO         |     enable ETC2 emulation: true
+INFO         |     enable Ycbcr emulation: false
+INFO         |     guestVulkanOnly: false
+INFO         |     useDedicatedAllocations: false
+INFO         |     guestVulkanMaxApiVersion: 1.3.0
+INFO         |     enableProtectedMemoryEmulation: false
+INFO         | Graphics Adapter Vendor Google (Google Inc.)
+INFO         | Graphics Adapter Android Emulator OpenGL ES Translator (Google SwiftShader)
+INFO         | Graphics API Version OpenGL ES 3.0 (OpenGL ES 3.0 SwiftShader 4.0.0.1)
+INFO         | Graphics API Extensions GL_OES_EGL_sync GL_OES_EGL_image GL_OES_EGL_image_external GL_OES_depth24 GL_OES_depth32 GL_OES_element_index_uint GL_OES_texture_float GL_OES_texture_float_linear GL_OES_compressed_paletted_texture GL_OES_compressed_ETC1_RGB8_texture GL_OES_depth_texture GL_OES_texture_half_float GL_OES_texture_half_float_linear GL_OES_packed_depth_stencil GL_OES_vertex_half_float GL_OES_standard_derivatives GL_OES_texture_npot GL_OES_rgb8_rgba8 GL_EXT_color_buffer_float GL_EXT_color_buffer_half_float GL_EXT_texture_format_BGRA8888 GL_APPLE_texture_format_BGRA8888
+INFO         | Graphics Device Extensions N/A
+INFO         | Disabling sparse binding feature support
+INFO         | Sending adb public key [QAAAAMlXQT6HjSmnzfCz/jS2NV/X8UkfTdWzpL9X++O+GznXmlHp/jzlANbr7xdv2WI/abVN+AqXshJl6MQ1FVzJTz7vg7ZuNP9iwNdaFmHZ3e3f9EvO+T2HF66EqcxuEfc6iXxdNoYy2SV9y81x35M6dfHLC4B+dXXKfIrVox1mxYuHMMEvB0CbWAGQR8SJraWJpo1i9+X8zl104Q0tlStRXr6Vlz50iUE8XTO+qO0D2UpjUtPnTTvien9TBvloxPje8GXqlA38lTidVEHfvsl1wd/hPMH+G8hogMEiozw79lrZe4URWcwOBie9rniQLaCa4ySGDqRQZR7P67iDoPSraqd5qRbMJ2AzYDaU+EDcWDil9HFkf0c1NcQI9Ofa6cyq8+EcYBLc8JJXlo3cjYOY7bwOGb2fwNmGQO7H/PyCWyjtwI/QwkvFCCetwXfcUVvr7BGK23nZW9rM+v6ZIDoHe31yS88/b7Q3l7nL1dNFfKPHihRhneXQXp5B40y0pih+XAQ3X/+/NkCvYZQEuH5ahpJfWzy/ILP5qO6ds4dcz2PB3352EQUQB0QfTyNuJe3P2g9TsOR9xu7b8BF17MFXCg5oUse0rFjyY5x6TTkMF3HLBBiXUYS/dYSYC/5D80PjcOm25HRhiV5rG1Jg2YEj7DnWM8qs0gwiPvXOgCkLdQ+LEpnyFwEAAQA= leminity@unknown]
+INFO         | Userspace boot properties:
+INFO         |   androidboot.boot_devices=pci0000:00/0000:00:03.0 pci0000:00/0000:00:06.0
+INFO         |   androidboot.dalvik.vm.heapsize=576m
+INFO         |   androidboot.debug.hwui.renderer=skiagl
+INFO         |   androidboot.debug.sf.nobootanimation=1
+INFO         |   androidboot.hardware=ranchu
+INFO         |   androidboot.hardware.gltransport=pipe
+INFO         |   androidboot.hardware.vulkan=ranchu
+INFO         |   androidboot.logcat=*:V
+INFO         |   androidboot.opengles.version=196608
+INFO         |   androidboot.qemu=1
+INFO         |   androidboot.qemu.adb.pubkey=QAAAAMlXQT6HjSmnzfCz/jS2NV/X8UkfTdWzpL9X++O+GznXmlHp/jzlANbr7xdv2WI/abVN+AqXshJl6MQ1FVzJTz7vg7ZuNP9iwNdaFmHZ3e3f9EvO+T2HF66EqcxuEfc6iXxdNoYy2SV9y81x35M6dfHLC4B+dXXKfIrVox1mxYuHMMEvB0CbWAGQR8SJraWJpo1i9+X8zl104Q0tlStRXr6Vlz50iUE8XTO+qO0D2UpjUtPnTTvien9TBvloxPje8GXqlA38lTidVEHfvsl1wd/hPMH+G8hogMEiozw79lrZe4URWcwOBie9rniQLaCa4ySGDqRQZR7P67iDoPSraqd5qRbMJ2AzYDaU+EDcWDil9HFkf0c1NcQI9Ofa6cyq8+EcYBLc8JJXlo3cjYOY7bwOGb2fwNmGQO7H/PyCWyjtwI/QwkvFCCetwXfcUVvr7BGK23nZW9rM+v6ZIDoHe31yS88/b7Q3l7nL1dNFfKPHihRhneXQXp5B40y0pih+XAQ3X/+/NkCvYZQEuH5ahpJfWzy/ILP5qO6ds4dcz2PB3352EQUQB0QfTyNuJe3P2g9TsOR9xu7b8BF17MFXCg5oUse0rFjyY5x6TTkMF3HLBBiXUYS/dYSYC/5D80PjcOm25HRhiV5rG1Jg2YEj7DnWM8qs0gwiPvXOgCkLdQ+LEpnyFwEAAQA= leminity@unknown
+INFO         |   androidboot.qemu.avd_name=realm-api37-ps16k
+INFO         |   androidboot.qemu.camera_hq_edge_processing=0
+INFO         |   androidboot.qemu.camera_protocol_ver=1
+INFO         |   androidboot.qemu.cpuvulkan.version=4210688
+INFO         |   androidboot.qemu.gltransport.drawFlushInterval=800
+INFO         |   androidboot.qemu.gltransport.name=pipe
+INFO         |   androidboot.qemu.hwcodec.avcdec=2
+INFO         |   androidboot.qemu.hwcodec.hevcdec=2
+INFO         |   androidboot.qemu.hwcodec.vpxdec=2
+INFO         |   androidboot.qemu.settings.system.screen_off_timeout=2147483647
+INFO         |   androidboot.qemu.skin=1080x2400
+INFO         |   androidboot.qemu.virtiowifi=1
+INFO         |   androidboot.qemu.vsync=60
+INFO         |   androidboot.serialno=EMULATOR36X6X11X0
+INFO         |   androidboot.vbmeta.digest=e13589856fd6b440846e53072a238ec39e36831cb6b340dee2090b0912bd1f9e
+INFO         |   androidboot.vbmeta.hash_alg=sha256
+INFO         |   androidboot.vbmeta.size=6848
+INFO         |   androidboot.veritymode=enforcing
+TCG doesn't support requested feature: CPUID.01H:ECX.avx [bit 28]
+TCG doesn't support requested feature: CPUID.01H:ECX.f16c [bit 29]
+TCG doesn't support requested feature: CPUID.01H:ECX.avx [bit 28]
+TCG doesn't support requested feature: CPUID.01H:ECX.f16c [bit 29]
+TCG doesn't support requested feature: CPUID.01H:ECX.avx [bit 28]
+TCG doesn't support requested feature: CPUID.01H:ECX.f16c [bit 29]
+TCG doesn't support requested feature: CPUID.01H:ECX.avx [bit 28]
+TCG doesn't support requested feature: CPUID.01H:ECX.f16c [bit 29]
+WARNING: cannnot unmap ptr 0x7b87c34e0000 as it is in the protected range from 0x7b87c34e0000 to 0x7b88c36e0000
+WARNING: cannnot unmap ptr 0x7b88c3601000 as it is in the protected range from 0x7b87c34e0000 to 0x7b88c36e0000
+pc_memory_init: above 4g size: 40000000
+INFO         | Monitoring duration of emulator setup.
+WARNING      | The emulator now requires a signed jwt token for gRPC access! Use the -grpc flag if you really want an open unprotected grpc port
+INFO         | Using security allow list from: /home/leminity/Android/Sdk/emulator/lib/emulator_access.json
+INFO         | The active JSON Web Key Sets can be found here: /run/user/1000/avd/running/258600/jwks/404b6302-c4c8-4dff-973f-e4af926c1b39/active.jwk
+INFO         | Scanning /run/user/1000/avd/running/258600/jwks/404b6302-c4c8-4dff-973f-e4af926c1b39 for jwk keys.
+INFO         | Started GRPC server at 127.0.0.1:8554, security: Local, auth: +token
+INFO         | Advertising in: /run/user/1000/avd/running/pid_258600.ini
+INFO         | Activated packet streamer for bluetooth emulation
+INFO         | Successfully initialized netsim WiFi
+INFO         | Activated packet streamer for uwb emulation
+INFO         | Setting display: 0 configuration to: 1080x2400, dpi: 420x420
+INFO         | setDisplayActiveConfig: id:0, 1080x2400
+INFO         | emulatorSetupEnvironment: Environment scene is not required
+USER_INFO    | Emulator is performing a full startup. This may take upto two minutes, or more.

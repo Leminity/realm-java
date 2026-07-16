@@ -1,0 +1,8 @@
+libpulse0:
+  Installed: (none)
+  Candidate: 1:16.1+dfsg1-2ubuntu10.1
+  Version table:
+     1:16.1+dfsg1-2ubuntu10.1 500
+        500 http://archive.ubuntu.com/ubuntu noble-updates/main amd64 Packages
+     1:16.1+dfsg1-2ubuntu10 500
+        500 http://archive.ubuntu.com/ubuntu noble/main amd64 Packages

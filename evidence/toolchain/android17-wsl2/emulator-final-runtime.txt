@@ -1,0 +1,9 @@
+timestamp=2026-07-16T03:41:41Z
+device
+sdk=37
+boot=
+dev_boot=
+page_size=16384
+model=sdk_gphone16k_x86_64
+build_fingerprint=google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys
+ 262226    1343 Ssl      694 /home/leminity/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-x86_64-headless -avd realm-api37-ps16k -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -accel off -memory 2048 -cores 2
