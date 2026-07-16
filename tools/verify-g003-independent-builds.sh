@@ -153,6 +153,10 @@ verify_static() {
     fail "expected compileSdk $EXPECTED_COMPILE_TARGET_SDK in realm/build.gradle"
   grep -Eq "minSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_MIN_SDK" realm/build.gradle || \
     fail "expected minSdk $EXPECTED_MIN_SDK in realm/build.gradle"
+  grep -REq --include='*.gradle' \
+      "targetSdk(Version)?[[:space:]]+rootProject(\.ext)?\.compileSdkVersion|targetSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_COMPILE_TARGET_SDK" \
+      realm/realm-library realm/kotlin-extensions || \
+    fail "expected targetSdk $EXPECTED_COMPILE_TARGET_SDK for supported Android modules"
 
   if grep -REn --include='*.gradle' --include='*.kt' --include='*.java' \
       'org\.gradle\.internal\.' gradle-plugin/build.gradle gradle-plugin/src/main >/dev/null; then
