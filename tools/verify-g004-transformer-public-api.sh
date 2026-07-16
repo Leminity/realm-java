@@ -50,7 +50,7 @@ verify_static() {
   reject_text 'AndroidArtifacts' "$transformer"
 
   # The callback is registered for all production variants; fixture runs below
-  # validate the app/library × Java/Kotlin × debug/release matrix and cache reuse.
+  # execute each app/library × Java/Kotlin × debug/release transform and cache reuse.
   require_text 'androidComponents.onVariants { variant ->' "$transformer"
   printf 'G004 transformer public-API static verification: PASS\n'
 }
@@ -58,6 +58,7 @@ verify_static() {
 write_fixture() {
   local fixture=$1 kind=$2 language=$3
   mkdir -p "$fixture/app/src/main/$language/fixture"
+  printf 'sdk.dir=%s\n' "$sdk_dir" > "$fixture/local.properties"
   cat > "$fixture/settings.gradle" <<'EOF'
 pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
 dependencyResolutionManagement {
@@ -73,6 +74,8 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:$EXPECTED_AGP'
         classpath files('$transformer_jar')
+        classpath 'org.javassist:javassist:3.25.0-GA'
+        classpath 'io.realm:realm-annotations:$transformer_version'
     }
 }
 EOF
@@ -87,13 +90,17 @@ android {
     }
 }
 
+dependencies {
+    implementation 'io.realm:realm-android-library:$transformer_version'
+}
+
 io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)
 EOF
   if [[ "$kind" == application ]]; then
     sed -i "/minSdk $EXPECTED_MIN_SDK/a\\        applicationId 'fixture.$kind.$language'\\n        targetSdk $EXPECTED_TARGET_SDK\\n        versionCode 1\\n        versionName '1.0'" "$fixture/app/build.gradle"
   fi
-  cat > "$fixture/app/src/main/AndroidManifest.xml" <<EOF
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="fixture.$kind.$language" />
+  cat > "$fixture/app/src/main/AndroidManifest.xml" <<'EOF'
+<manifest />
 EOF
   if [[ "$language" == java ]]; then
     cat > "$fixture/app/src/main/java/fixture/Fixture.java" <<'EOF'
@@ -118,15 +125,17 @@ run_fixture() {
   (
     cd "$fixture"
     "$root/realm-transformer/gradlew" --no-daemon --console=plain \
-      :app:tasks --all --configuration-cache
+      :app:debugRealmAccessorsTransformer :app:releaseRealmAccessorsTransformer \
+      --configuration-cache
   ) >"$first" 2>&1 || { cat "$first" >&2; fail "$kind/$language first configuration failed"; }
-  grep -Fq 'debugRealmAccessorsTransformer' "$first" || fail "$kind/$language missing debug transformer task"
-  grep -Fq 'releaseRealmAccessorsTransformer' "$first" || fail "$kind/$language missing release transformer task"
+  grep -Fq '> Task :app:debugRealmAccessorsTransformer' "$first" || fail "$kind/$language did not execute debug transformer task"
+  grep -Fq '> Task :app:releaseRealmAccessorsTransformer' "$first" || fail "$kind/$language did not execute release transformer task"
 
   (
     cd "$fixture"
     "$root/realm-transformer/gradlew" --no-daemon --console=plain \
-      :app:tasks --all --configuration-cache
+      :app:debugRealmAccessorsTransformer :app:releaseRealmAccessorsTransformer \
+      --configuration-cache
   ) >"$second" 2>&1 || { cat "$second" >&2; fail "$kind/$language cache reuse failed"; }
   grep -Fq 'Reusing configuration cache.' "$second" ||
     fail "$kind/$language did not reuse its configuration cache"
@@ -141,6 +150,12 @@ run_matrix() {
   )
   transformer_jar="$(find "$root/realm-transformer/build/libs" -maxdepth 1 -name 'realm-transformer-*.jar' | head -1)"
   [[ -n "$transformer_jar" ]] || fail 'realm-transformer jar was not produced'
+  transformer_version="$(tr -d '[:space:]' < "$root/version.txt")"
+  sdk_dir="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+  if [[ -z "$sdk_dir" && -d "$HOME/Android/Sdk" ]]; then
+    sdk_dir="$HOME/Android/Sdk"
+  fi
+  [[ -d "$sdk_dir/platforms" ]] || fail 'set ANDROID_HOME or ANDROID_SDK_ROOT to an Android SDK'
   for kind in application library; do
     for language in java kotlin; do
       run_fixture "$kind" "$language"
