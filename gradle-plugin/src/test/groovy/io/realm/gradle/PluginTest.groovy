@@ -90,6 +90,9 @@ class PluginTest {
             ':app:assembleDebug',
             ':app:assembleRelease',
             ':app:verifyRealmPluginContract',
+            ':app:dependencies',
+            '--configuration',
+            'api',
             '--offline'
         ).build()
 
@@ -107,6 +110,8 @@ class PluginTest {
         assertConfigurationContains(result, 'releaseCompileClasspath', 'realm-annotations')
         assertConfigurationContains(result, 'releaseCompileClasspath', 'realm-android-library')
         assertTrue('The plugin must remove owned official Realm dependencies.', result.output.contains('REALM-OFFICIAL-COUNT api=0'))
+        assertTrue('debug resolution must not retain official Realm modules.', result.output.contains('REALM-OFFICIAL-RESOLVED debugCompileClasspath=0'))
+        assertTrue('release resolution must not retain official Realm modules.', result.output.contains('REALM-OFFICIAL-RESOLVED releaseCompileClasspath=0'))
         assertGeneratedAccessor(result, 'JavaRealmModel', language == 'java' || language == 'mixed')
         assertGeneratedAccessor(result, 'KotlinRealmModel', language == 'kotlin' || language == 'mixed')
 
@@ -289,6 +294,9 @@ class PluginTest {
                             .collect { it.moduleVersion.group + ':' + it.moduleVersion.name + ':' + it.moduleVersion.version }
                             .sort()
                         println('REALM-RESOLVED ' + name + '=' + components.join('|'))
+                        def officialComponents = configuration.incoming.resolutionResult.allComponents
+                            .findAll { it.moduleVersion != null && it.moduleVersion.group == 'io.realm' }
+                        println('REALM-OFFICIAL-RESOLVED ' + name + '=' + officialComponents.size())
                     }
 
                     println('REALM-LEGACY-KAPT=' + pluginManager.hasPlugin('com.android.legacy-kapt'))
@@ -539,7 +547,10 @@ class PluginTest {
     private void assertConfigurationContains(BuildResult result, String configuration, String artifact) {
         assertTrue(
             'Expected ' + configuration + ' to include the forked ' + artifact + ' coordinate.\\n' + result.output,
-            result.output.contains('io.github.leminity.realm:' + artifact + ':' + FORK_VERSION)
+            result.output.readLines().any { line ->
+                line.startsWith('REALM-DEPS ' + configuration + '=')
+                    && line.contains(FORK_GROUP + ':' + artifact + ':' + FORK_VERSION)
+            }
         )
     }
 
