@@ -153,7 +153,7 @@ open class Realm : Plugin<Project> {
                 project.configurations.getByName(dependencyConfigurationName).dependencies.iterator()
             while (iterator.hasNext()) {
                 val item = iterator.next()
-                if (item.group == FORK_GROUP) {
+                if (item.group == FORK_GROUP || item.group == "io.realm") {
                     if (item.name.startsWith("realm-android-library")) {
                         iterator.remove()
                     }
