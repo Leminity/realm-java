@@ -64,7 +64,6 @@ class PluginTest {
                 mavenLocal()
                 mavenCentral()
                 google()
-                jcenter()
             }
             dependencies {
                 classpath "com.android.tools.build:gradle:${projectDependencies.get("GRADLE_BUILD_TOOLS")}"
@@ -100,7 +99,6 @@ class PluginTest {
             repositories {
                 mavenLocal()
                 mavenCentral()
-                jcenter()
             }
             dependencies {
                 classpath "com.android.tools.build:gradle:${projectDependencies.get("GRADLE_BUILD_TOOLS")}"
