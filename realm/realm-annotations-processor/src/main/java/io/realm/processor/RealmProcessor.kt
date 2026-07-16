@@ -155,19 +155,11 @@ class RealmProcessor : AbstractProcessor() {
     private val realmModelSetsToValidate = HashSet<RealmFieldElement>()
 
     private var hasProcessedModules = false
-    private var round = -1
-
     override fun getSupportedSourceVersion(): SourceVersion {
         return SourceVersion.latestSupported()
     }
 
     override fun process(annotations: Set<TypeElement>, roundEnv: RoundEnvironment): Boolean {
-        round++
-
-        if (round == 0) {
-            RealmVersionChecker.getInstance(processingEnv).executeRealmVersionUpdate()
-        }
-
         if (roundEnv.errorRaised()) {
             return ABORT
         }

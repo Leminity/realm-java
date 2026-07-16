@@ -52,6 +52,12 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "11"
 }
 
+test {
+    // Gradle 9's ProjectBuilder defines synthetic legacy types during these
+    // focused task-property tests and requires this JDK 17 module access.
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
+}
+
 def commonPom = {
     licenses {
         license {

@@ -1,3 +1,3 @@
 [submodule "realm/realm-library/src/main/cpp/realm-core"]
 	path = realm/realm-library/src/main/cpp/realm-core
-	url = https://github.com/realm/realm-core.git
+	url = https://github.com/Leminity/realm-core.git

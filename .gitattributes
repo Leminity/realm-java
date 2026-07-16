@@ -1,0 +1,4 @@
+/realm/realm-library/src/main/cpp/generated-jni-headers/*.h text eol=lf
+/realm/realm-library/src/main/cpp/generated-jni-headers/*.md text eol=lf
+/realm/realm-library/src/main/cpp/generated-jni-headers/SHA256SUMS text eol=lf
+/realm/realm-library/src/main/cpp/generated-jni-headers/SOURCE_NATIVE_DECLARATIONS.txt text eol=lf

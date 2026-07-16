@@ -34,9 +34,10 @@ import org.objectweb.asm.ClassWriter
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.io.BufferedOutputStream
-import java.io.FileInputStream
+import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import java.nio.file.Files
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
@@ -57,7 +58,8 @@ val logger: Logger = LoggerFactory.getLogger("realm-build-logger")
  */
 class RealmBuildTransformer(
     private val annotationQualifiedName: Property<String>,
-    private val input: ListProperty<RegularFile>,
+    private val inputJars: ListProperty<RegularFile>,
+    private val inputDirectories: ListProperty<Directory>,
     private val output: RegularFileProperty,
 ) {
 
@@ -69,11 +71,6 @@ class RealmBuildTransformer(
         // back to the final output location in the end.
         // See https://developer.android.com/reference/tools/gradle-api/7.4/com/android/build/api/variant/ScopedArtifactsOperation#toTransform(com.android.build.api.artifact.ScopedArtifact,kotlin.Function1,kotlin.Function1,kotlin.Function1)
         // for further information.
-        val temporaryOutput = output.get().asFile.absolutePath + ".tmp"
-        val outputProvider = JarOutputStream(
-            BufferedOutputStream(FileOutputStream(temporaryOutput))
-        )
-
         val timer = Stopwatch()
         timer.start("Build Transform time")
 
@@ -84,55 +81,76 @@ class RealmBuildTransformer(
         val annotationDescriptor = createDescriptor(annotationQualifiedName.get())
         val metadataCollector =
             io.realm.buildtransformer.asm.visitors.AnnotationVisitor(annotationDescriptor)
-        forEachJarEntry { jarEntry, inputStream ->
-            if (jarEntry.name.endsWith(".class")) {
-                inputStream.use {
-                    val classReader = ClassReader(it)
+        val entryNames = mutableSetOf<String>()
+        forEachInputEntry { name, inputStream ->
+            inputStream.use { stream ->
+                require(entryNames.add(name)) { "Duplicate transformed entry: $name" }
+                if (name.endsWith(".class")) {
+                    val classReader = ClassReader(stream)
                     classReader.accept(metadataCollector, 0)
                 }
             }
         }
         // 2. Strip annotated symbols
-        forEachJarEntry { jarEntry, inputStream ->
-            val bytes = inputStream.use { inputStream ->
-                if (jarEntry.name.endsWith(".class")) {
-                    val writer =
-                        ClassWriter(0) // We don't modify methods so no reason to re-calculate method frames
-                    val classRemover = AnnotatedCodeStripVisitor(
-                        annotationDescriptor,
-                        metadataCollector.annotatedClasses,
-                        metadataCollector.annotatedMethods,
-                        metadataCollector.annotatedFields,
-                        writer
-                    )
-                    ClassReader(inputStream).accept(classRemover, 0)
-                    if (classRemover.deleteClass) ByteArray(0) else writer.toByteArray()
-                } else {
-                    inputStream.readBytes()
+        val outputFile = output.get().asFile
+        val temporaryOutput = File("${outputFile.absolutePath}.tmp")
+        outputFile.parentFile?.mkdirs()
+        temporaryOutput.delete()
+        try {
+            JarOutputStream(BufferedOutputStream(FileOutputStream(temporaryOutput))).use { outputProvider ->
+                forEachInputEntry { name, inputStream ->
+                    val bytes = inputStream.use { stream ->
+                        if (name.endsWith(".class")) {
+                            val writer =
+                                ClassWriter(0) // We don't modify methods so no reason to re-calculate method frames
+                            val classRemover = AnnotatedCodeStripVisitor(
+                                annotationDescriptor,
+                                metadataCollector.annotatedClasses,
+                                metadataCollector.annotatedMethods,
+                                metadataCollector.annotatedFields,
+                                writer
+                            )
+                            ClassReader(stream).accept(classRemover, 0)
+                            if (classRemover.deleteClass) ByteArray(0) else writer.toByteArray()
+                        } else {
+                            stream.readBytes()
+                        }
+                    }
+                    if (bytes.isNotEmpty()) {
+                        outputProvider.putNextEntry(JarEntry(name).apply { time = 0L })
+                        outputProvider.write(bytes)
+                        outputProvider.closeEntry()
+                    }
                 }
             }
-            if (bytes.isNotEmpty()) {
-                outputProvider.putNextEntry(JarEntry(jarEntry.name))
-                outputProvider.write(bytes)
-                outputProvider.closeEntry()
-            }
-        }
-        outputProvider.close()
-        // Write the temporary output to the final output location. See comment about
-        // temporaryOutput for the details
-        FileInputStream(temporaryOutput).channel.use { input ->
-            FileOutputStream(this.output.asFile.get().absoluteFile).channel.use { output ->
-                output.transferFrom(input, 0, input.size())
-            }
+            temporaryOutput.copyTo(outputFile, overwrite = true)
+        } finally {
+            temporaryOutput.delete()
         }
         timer.stop()
     }
 
-    private fun forEachJarEntry(block: (jarEntry: JarEntry, inputStream: InputStream) -> Unit) {
-        val jarFiles: List<JarFile> = input.get().map { JarFile(it.asFile) }
-        jarFiles.forEach { jarFile ->
-            jarFile.entries().toList().map {
-                block(it, jarFile.getInputStream(it))
+    private fun forEachInputEntry(block: (name: String, inputStream: InputStream) -> Unit) {
+        inputJars.get().sortedBy { it.asFile.absolutePath }.forEach { regularFile ->
+            JarFile(regularFile.asFile).use { jarFile ->
+                jarFile.entries().toList()
+                    .filterNot { it.isDirectory }
+                    .sortedBy { it.name }
+                    .forEach { entry -> block(entry.name, jarFile.getInputStream(entry)) }
+            }
+        }
+        inputDirectories.get().sortedBy { it.asFile.absolutePath }.forEach { directory ->
+            val root = directory.asFile.toPath()
+            val paths = Files.walk(root)
+            try {
+                paths.filter { Files.isRegularFile(it) }
+                    .sorted()
+                    .forEach { path ->
+                        val name = root.relativize(path).toString().replace(File.separatorChar, '/')
+                        block(name, Files.newInputStream(path))
+                    }
+            } finally {
+                paths.close()
             }
         }
     }
@@ -180,7 +198,7 @@ abstract class ModifyClassesTask: DefaultTask() {
 
     @TaskAction
     fun taskAction() {
-        RealmBuildTransformer(annotationQualifiedName, allJars, output)
+        RealmBuildTransformer(annotationQualifiedName, allJars, allDirectories, output)
             .transform()
     }
 }

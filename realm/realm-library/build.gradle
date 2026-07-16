@@ -1,4 +1,111 @@
 import java.security.MessageDigest
+import com.android.build.api.artifact.SingleArtifact
+import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.Delete
+import org.gradle.api.tasks.Sync
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.compile.JavaCompile
+
+/** Verifies that the build-only JNI headers exactly match the committed snapshot. */
+abstract class VerifyJniHeaders extends DefaultTask {
+    @InputDirectory
+    abstract DirectoryProperty getSnapshotDirectory()
+
+    @InputFile
+    abstract RegularFileProperty getManifestFile()
+
+    @InputDirectory
+    abstract DirectoryProperty getStagedDirectory()
+
+    @InputDirectory
+    abstract DirectoryProperty getValidationDirectory()
+
+    // This public AGP artifact Provider carries the complete Java/native producer chain.
+    @InputFile
+    abstract RegularFileProperty getInputAar()
+
+    @OutputFile
+    abstract RegularFileProperty getOutputAar()
+
+    @OutputFile
+    abstract RegularFileProperty getReportFile()
+
+    @TaskAction
+    void verifyHeaders() {
+        Map<String, String> expected = parseManifest(manifestFile.get().asFile)
+        verifyDirectory('snapshot', snapshotDirectory.get().asFile, expected)
+        verifyDirectory('staged', stagedDirectory.get().asFile, expected)
+        verifyDirectory('validation', validationDirectory.get().asFile, expected)
+
+        File report = reportFile.get().asFile
+        report.parentFile.mkdirs()
+        File inputArtifact = inputAar.get().asFile
+        File outputArtifact = outputAar.get().asFile
+        outputArtifact.parentFile.mkdirs()
+        inputArtifact.withInputStream { input ->
+            outputArtifact.withOutputStream { output ->
+                input.transferTo(output)
+            }
+        }
+        report.text = 'JNI header parity verified\n' +
+            "headers=${expected.size()}\n" +
+            "snapshot=${snapshotDirectory.get().asFile}\n" +
+            "staged=${stagedDirectory.get().asFile}\n" +
+            "validation=${validationDirectory.get().asFile}\n" +
+            "inputAar=${inputArtifact}\n" +
+            "inputAarSha256=${sha256(inputArtifact)}\n" +
+            "outputAar=${outputArtifact}\n" +
+            "outputAarSha256=${sha256(outputArtifact)}\n"
+    }
+
+    private static Map<String, String> parseManifest(File manifest) {
+        Map<String, String> entries = new TreeMap<>()
+        manifest.eachLine { line ->
+            if (!line.trim()) {
+                return
+            }
+            def match = line =~ /^([0-9a-f]{64})  (.+\.h)$/
+            if (!match.matches()) {
+                throw new GradleException("Invalid JNI header manifest entry: ${line}")
+            }
+            if (entries.put(match.group(2), match.group(1)) != null) {
+                throw new GradleException("Duplicate JNI header manifest entry: ${match.group(2)}")
+            }
+        }
+        if (entries.size() != 30) {
+            throw new GradleException("JNI header manifest must contain exactly 30 entries, found ${entries.size()}: ${manifest}")
+        }
+        entries
+    }
+
+    private static void verifyDirectory(String label, File directory, Map<String, String> expected) {
+        Map<String, String> actual = new TreeMap<>()
+        directory.listFiles()?.findAll { it.isFile() && it.name.endsWith('.h') }?.each { header ->
+            actual.put(header.name, sha256(header))
+        }
+        if (actual != expected) {
+            throw new GradleException("JNI header ${label} inventory or bytes differ from the committed snapshot. Expected ${expected.keySet()}, got ${actual.keySet()}")
+        }
+    }
+
+    private static String sha256(File file) {
+        MessageDigest digest = MessageDigest.getInstance('SHA-256')
+        file.withInputStream { input ->
+            byte[] buffer = new byte[8192]
+            int read
+            while ((read = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        digest.digest().collect { String.format('%02x', it & 0xff) }.join()
+    }
+}
 
 apply plugin: 'com.android.library'
 apply plugin: 'com.android.legacy-kapt'
@@ -31,7 +138,7 @@ android {
 
     defaultConfig {
         minSdk rootProject.ext.minSdkVersion
-        targetSdk rootProject.ext.compileSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionName version
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
@@ -67,11 +174,11 @@ android {
         }
     }
 
-    ndkVersion = project.findProperty('ndkVersion')
+    ndkVersion = rootProject.ext.ndkVersion
 
     externalNativeBuild {
         cmake {
-            version = properties.getProperty('CMAKE')
+            version = rootProject.ext.cmakeVersion
             path 'src/main/cpp/CMakeLists.txt'
         }
     }
@@ -95,16 +202,17 @@ android {
 
     sourceSets {
         testObjectServer {
-            java.srcDirs += ['src/testObjectServer/kotlin']
+            kotlin.srcDirs += ['src/testObjectServer/kotlin']
         }
         androidTest {
-            java.srcDirs += ['src/androidTest/kotlin', 'src/testUtils/java', 'src/testUtils/kotlin']
+            kotlin.srcDirs += ['src/androidTest/kotlin', 'src/testUtils/kotlin']
+            java.srcDirs += ['src/testUtils/java']
         }
         androidTestObjectServer {
-            java.srcDirs += [ 'src/syncIntegrationTest/kotlin',
-                              'src/androidTestObjectServer/kotlin',
-                              'src/syncTestUtils/java',
-                              'src/syncTestUtils/kotlin' ]
+            kotlin.srcDirs += [ 'src/syncIntegrationTest/kotlin',
+                                'src/androidTestObjectServer/kotlin',
+                                'src/syncTestUtils/kotlin' ]
+            java.srcDirs += ['src/syncTestUtils/java']
             assets.srcDirs += ['src/syncIntegrationTest/assets/']
         }
     }
@@ -114,20 +222,20 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
 
-    packagingOptions {
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/LICENSE.txt'
+    packaging {
+        resources {
+            excludes += ['META-INF/NOTICE.txt', 'META-INF/LICENSE.txt']
+        }
         // We did strip with cmake for release build.
         // Please, Gradle, you are not that smart! Pleas DO NOT strip debug symbols for debug build!
-        doNotStrip "*/*/*.so"
-
-        // Use compressed shared libraries to support 16 KB ELF alignment
         jniLibs {
+            keepDebugSymbols += ['*/*/*.so']
+            // Use compressed shared libraries to support 16 KB ELF alignment.
             useLegacyPackaging = true
         }
     }
 
-    lintOptions {
+    lint {
         abortOnError false
     }
 
@@ -157,50 +265,85 @@ android {
     }
 }
 
-base {
-    archivesName = "realm-android-library"
-}
+// Stage 5 supports only the local-DB base release. Keep ObjectServer sources in
+// the tree, but prevent their variants from entering this build's task graph.
+def baseReleaseAar = objects.fileProperty()
 
-// G003 only needs help, publication metadata, and annotation-processor test configuration.
-// The legacy transformer and variant wiring requires the G006 public-AGP-variant migration
-// before it can participate in an Android build.
-def g003ConfigurationOnlyInvocation = gradle.startParameter.taskNames.every { taskName ->
-    def taskLeafName = taskName.tokenize(':').last()
-    taskLeafName == 'help' ||
-            taskLeafName.startsWith('generatePomFileFor') ||
-            taskLeafName.startsWith('generateMetadataFileFor') ||
-            (taskName.contains(':realm-annotations-processor:') && taskLeafName == 'test')
-}
-
-if (!g003ConfigurationOnlyInvocation) {
-    io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)
-    // TODO RealmBuildTransformer only supports stripping symbols from Jars so must be applied
-    //  after the accessor transformer (that combines all inputs into one common Jar)
-    io.realm.buildtransformer.RealmBuildTransformer.@Companion.register(
-            project,
-            "base",
-            "io.realm.internal.annotations.ObjectServer",
-    )
-}
-
-project.afterEvaluate {
-    tasks.withType(JavaCompile) {
-        options.compilerArgs << '-Werror'
+androidComponents {
+    beforeVariants(selector().withFlavor('api', 'objectServer')) { variantBuilder ->
+        variantBuilder.enable = false
     }
+    onVariants(selector().withFlavor('api', 'base').withBuildType('release')) { variant ->
+        baseReleaseAar.set(variant.artifacts.get(SingleArtifact.AAR.INSTANCE))
+        def snapshotHeaders = layout.projectDirectory.dir('src/main/cpp/generated-jni-headers')
+        def stagedHeaders = layout.buildDirectory.dir("intermediates/javac/${variant.name}/jni_include")
+        def validationHeaders = layout.buildDirectory.dir("generated/jni-headers/${variant.name}/validation")
+        def headerManifest = layout.projectDirectory.file('src/main/cpp/generated-jni-headers/SHA256SUMS')
 
-    android.productFlavors.all { flavor ->
-        tasks.all { task ->
-            if (task.name == "publish${flavor.name.capitalize()}PublicationPublicationToMavenLocal") {
-                task.dependsOn "assemble${flavor.name.capitalize()}"
+        def stageBaseReleaseJniHeaderSnapshot = tasks.register('stageBaseReleaseJniHeaderSnapshot', Sync) {
+            from(snapshotHeaders) {
+                include '*.h'
             }
+            into(stagedHeaders)
+            includeEmptyDirs = false
+        }
+        variant.lifecycleTasks.registerPreBuild(stageBaseReleaseJniHeaderSnapshot)
+
+        def cleanBaseReleaseJniHeaderValidation = tasks.register('cleanBaseReleaseJniHeaderValidation', Delete) {
+            delete(validationHeaders)
+        }
+
+        def verifyBaseReleaseJniHeaders = tasks.register('verifyBaseReleaseJniHeaders', VerifyJniHeaders) {
+            snapshotDirectory.set(snapshotHeaders)
+            manifestFile.set(headerManifest)
+            stagedDirectory.set(stagedHeaders)
+            validationDirectory.set(validationHeaders)
+            outputAar.convention(layout.buildDirectory.file("intermediates/jni-headers/${variant.name}/verified/realm-library.aar"))
+            reportFile.set(layout.buildDirectory.file("reports/jni-headers/${variant.name}-parity.txt"))
+            outputs.upToDateWhen { false }
+            outputs.cacheIf { false }
+        }
+
+        // Transforming the public AAR artifact makes its producers prerequisites and
+        // makes this verifier the AAR consumed by assemble and publication lifecycles.
+        variant.artifacts.use(verifyBaseReleaseJniHeaders)
+            .wiredWithFiles(
+                { task -> task.inputAar },
+                { task -> task.outputAar }
+            )
+            .toTransform(SingleArtifact.AAR.INSTANCE)
+
+        variant.configureJavaCompileTask { javaCompile ->
+            javaCompile.dependsOn(cleanBaseReleaseJniHeaderValidation)
+            javaCompile.options.incremental = false
+            javaCompile.options.headerOutputDirectory.set(validationHeaders)
         }
     }
 }
 
-// enable @ParametersAreNonnullByDefault annotation. See https://blog.jetbrains.com/kotlin/2017/09/kotlin-1-1-50-is-out/
-tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
-    kotlinOptions {
-        freeCompilerArgs = ["-Xjsr305=strict"]
+// Public Android Components/ScopedArtifacts transformer: remove ObjectServer API
+// from the only supported local-DB artifact. The legacy consumer transformer stays removed.
+io.realm.buildtransformer.RealmBuildTransformer.@Companion.register(
+        project,
+        'base',
+        'io.realm.internal.annotations.ObjectServer',
+)
+
+base {
+    archivesName = "realm-android-library"
+}
+
+// The stale transformer on the buildscript classpath cannot consume AGP 9's
+// public DSL. It is consumer-plugin behavior, not library assembly behavior;
+// assembleBaseRelease therefore uses only Android Components wiring.
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add('-Werror')
+}
+
+// AGP 9 built-in Kotlin replaces kotlin-android task configuration.
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add('-Xjsr305=strict')
     }
 }
 
@@ -255,16 +398,15 @@ dependencies {
 }
 
 task sourcesJar(type: Jar) {
-    from android.sourceSets.objectServer.java.srcDirs
     from android.sourceSets.main.java.srcDirs
+    from android.sourceSets.main.kotlin.srcDirs
     archiveClassifier.set('sources')
 }
 
 task javadoc(type: Javadoc) {
     failOnError false
-    dependsOn("compileObjectServerReleaseJavaWithJavac")
-    source android.sourceSets.objectServer.java.srcDirs
     source android.sourceSets.main.java.srcDirs
+    source android.sourceSets.main.kotlin.srcDirs
     source "../../realm-annotations/src/main/java"
     classpath.from(providers.provider {
         androidComponents.sdkComponents.bootClasspath.get()
@@ -359,7 +501,7 @@ publishing {
             groupId 'io.realm'
             artifactId 'realm-android-library'
             version project.version
-            artifact file("${rootDir}/realm-library/build/outputs/aar/realm-android-library-base-release.aar")
+            artifact(baseReleaseAar)
             artifact sourcesJar
             artifact javadocJar
             populatePom(
@@ -369,21 +511,6 @@ publishing {
                     createPomDependencies(["baseImplementation", "implementation", "baseApi", "api"])
             )
         }
-
-        objectServerPublication(MavenPublication) {
-            groupId 'io.realm'
-            artifactId 'realm-android-library-object-server'
-            version project.version
-            artifact file("${rootDir}/realm-library/build/outputs/aar/realm-android-library-objectServer-release.aar")
-            artifact sourcesJar
-            artifact javadocJar
-            populatePom(
-                    it,
-                    'realm-android-library-object-server',
-                    'Realm is a mobile database: Build better apps, faster.',
-                    createPomDependencies(["objectServerImplementation", "implementation", "objectServerApi", "api"])
-            )
-        }
     }
 }
 
@@ -391,8 +518,6 @@ artifacts {
     archives javadocJar
     archives sourcesJar
 }
-
-publishToMavenLocal.dependsOn assemble
 
 if (project.hasProperty('dontCleanJniFiles')) {
     project.afterEvaluate {
@@ -410,49 +535,6 @@ if (project.hasProperty('dontCleanJniFiles')) {
         delete project.file('src/main/jniLibs')
     }
     clean.dependsOn cleanExternalBuildFiles
-}
-
-if (!g003ConfigurationOnlyInvocation) {
-    project.afterEvaluate {
-        android.libraryVariants.all { variant ->
-        if (project.hasProperty('buildTargetABIs') && project.getProperty('buildTargetABIs').trim().isEmpty()) {
-            variant.externalNativeBuildProviders[0].configure {
-                enabled = false
-            }
-        }
-
-        // all Java files must be compiled before native build
-        // See https://github.com/android/ndk-samples/issues/284
-        variant.externalNativeBuildProviders[0].configure { externalNativeBuildTask ->
-            externalNativeBuildTask.taskDependencies.getDependencies(externalNativeBuildTask)
-                .findAll { it.name.startsWith("buildCMake") }
-                .forEach { externalNativeBuildDependency ->
-                    externalNativeBuildDependency.dependsOn "compile${variant.name.capitalize()}JavaWithJavac"
-                }
-        }
-        // as of android gradle plugin 3.0.0-alpha5, generateJsonModel* triggers native build. Java files must be compiled before them.
-        android.buildTypes.all { buildType ->
-            tasks["generateJsonModel${variant.name.capitalize()}"].dependsOn "compile${variant.flavorName.capitalize()}${buildType.name.capitalize()}JavaWithJavac"
-        }
-
-        // Java compiler to generate JNI headers.
-        def generatedJNIHeadersPath = "$buildDir/intermediates/javac/${variant.name}/jni_include"
-        tasks["compile${variant.name.capitalize()}JavaWithJavac"].with {
-            options.compilerArgs += ["-h", file(generatedJNIHeadersPath)]
-            // Add generated headers into the build cache.
-            outputs.dir(generatedJNIHeadersPath)
-        }
-
-        // Set javaDoc task's classpath with the project compiled classes and its dependencies
-        if(variant.name == "objectServerRelease") {
-            def javaCompile = variant.javaCompileProvider.get()
-            javadoc.classpath += files(
-                    javaCompile.destinationDir, // All intermediate Realm compiled classes
-                    javaCompile.classpath.files // Dependencies
-            )
-        }
-        }
-    }
 }
 
 static def getValueFromPropertiesFile(File propFile, String key) {
