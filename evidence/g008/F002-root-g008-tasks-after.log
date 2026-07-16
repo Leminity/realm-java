@@ -1,0 +1,103 @@
+
+> Task :tasks
+
+------------------------------------------------------------
+Tasks runnable from root project 'realm-java'
+------------------------------------------------------------
+
+Artifact tasks
+--------------
+distributionJniUnstrippedPackage - Generate native libs package with debug symbols
+
+Build tasks
+-----------
+assemble - Build the supported Realm libraries and Gradle plugin
+assembleAnnotations - Assemble the Realm annotations
+assembleBenchmarks - Assemble benchmark tests for the library 
+assembleExamples - Assemble the Realm examples
+assembleGradlePlugin - Assemble the Realm Gradle plugin
+assembleRealm - Assemble the Realm project
+assembleTransformer - Assemble the Realm transformer
+assembleUnitTests - Assemble Android unit tests of the Realm project
+monkeyExamples - Run the monkey tests on the Realm examples
+
+Build Setup tasks
+-----------------
+init - Initializes a new Gradle build.
+updateDaemonJvm - Generates or updates the Gradle Daemon JVM criteria.
+wrapper - Generates Gradle wrapper files.
+
+Clean tasks
+-----------
+clean - Perform all the other clean tasks
+cleanExamples - Clean the Realm examples
+cleanGradlePlugin - Clean the Realm Gradle plugin project
+cleanLocalMavenRepos - Remove any Realm artifacts from the local Maven repositories
+cleanRealm - Clean the Realm project
+manualClean - Clean build files without using clean tasks defined in sub projects
+
+Docs tasks
+----------
+javadoc - Generate the Javadoc Jar for the Realm project
+sourcesJar - Generate the sources Jar for the Realm project
+
+Help tasks
+----------
+artifactTransforms - Displays the Artifact Transforms that can be executed in root project 'realm-java'.
+buildEnvironment - Displays all buildscript dependencies declared in root project 'realm-java'.
+dependencies - Displays all dependencies declared in root project 'realm-java'.
+dependencyInsight - Displays the insight into a specific dependency in root project 'realm-java'.
+help - Displays a help message.
+javaToolchains - Displays the detected java toolchains.
+outgoingVariants - Displays the outgoing variants of root project 'realm-java'.
+projects - Displays the sub-projects of root project 'realm-java'.
+properties - Displays the properties of root project 'realm-java'.
+resolvableConfigurations - Displays the configurations that can be resolved in root project 'realm-java'.
+tasks - Displays the tasks runnable from root project 'realm-java'.
+
+Install tasks
+-------------
+installAnnotations - Install the jar realm-annotations into mavenLocal()
+installBuildTransformer - Install the jar realm-library-build-transformer into mavenLocal()
+installGradlePlugin - Install the Realm Gradle plugin into mavenLocal()
+installRealm - Install the artifacts of Realm libraries into mavenLocal()
+installRealmJava - Install the Realm library and Gradle plugin into mavenLocal()
+installTransformer - Install the jar realm-transformer into mavenLocal()
+
+Publishing tasks
+----------------
+cleanG008LocalStaging - Remove only G008 local staging and fork coordinates before a fresh publication run
+g008Bundle - Create a signed deterministic Maven Central-format G008 bundle from local staging
+g008PublishAnnotations - Publish realm-annotations to the G008 local staging repository
+g008PublishGradlePlugin - Publish realm-gradle-plugin to the G008 local staging repository
+g008PublishLocal - Publish exactly the six public G008 artifacts to a local Maven-layout repository
+g008PublishRealm - Publish the base library, processor, and Kotlin extensions to G008 local staging
+g008PublishTransformer - Publish realm-transformer to the G008 local staging repository
+
+Test tasks
+----------
+check - Run the JVM tests and checks in the supported Realm project
+checkExamples - Run the JVM tests and checks the examples
+checkRealm - Run the JVM tests and checks Realm project
+connectedBenchmarks - Run all the benchmark tests for the library 
+connectedUnitTests - Run the Android unit tests of the Realm project
+
+Verification tasks
+------------------
+g008VerifyLocalStaging - Validate the unsigned exact-six local staging tree, POM graph, checksums, and isolated consumer
+
+Other tasks
+-----------
+prepareKotlinBuildScriptModel
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1s
+1 actionable task: 1 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html

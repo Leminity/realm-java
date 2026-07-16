@@ -1,21 +1,19 @@
-// Find property in either System environment or Gradle properties.
-// If set in both places, Gradle properties win.
+// Shared G008 publication configuration. This file deliberately contains no
+// Central credentials or remote repository endpoints: staging is always a
+// caller-selected local Maven-layout directory.
 def getPropertyValue(String propertyName) {
     return project.findProperty(propertyName) ?: System.getenv(propertyName) ?: ""
 }
 
-// Default values
 def rootExt = rootProject.ext
-rootExt["signing.keyId"] = 'BD9104E9'
-rootExt["sonatypeStagingProfileId"] = '78c19333e4450f'
+rootExt["realmPublicationGroup"] = "io.github.leminity.realm"
+rootExt["realmPublicationVersion"] = "10.19.0-agp9.1"
+rootExt["g008StagingRepository"] = getPropertyValue("g008StagingRepository")
+rootExt["g008SigningKey"] = getPropertyValue("g008SigningKey")
+rootExt["g008SigningPassword"] = getPropertyValue("g008SigningPassword")
 
-// Set properties either from a global properties file or environment parameters
-rootExt["signBuild"] = getPropertyValue('signBuild')
-rootExt["signing.password"] = getPropertyValue('signPassword')
-// Apparently Gradle treats properties define through a gradle.properties file differently
-// than those defined through the commandline using `-P`. This is a problem with new
-// line characters as found in an ascii-armoured PGP file. To ensure work around this, all newlines
-// have been replaced with `#` and thus needs to be reverted here.
-rootExt["signing.secretKeyRingFile"] = getPropertyValue('signSecretRingFile').replaceAll('#','\n')
-rootExt["ossrhUsername"] = getPropertyValue('ossrhUsername')
-rootExt["ossrhPassword"] = getPropertyValue('ossrhPassword')
+def expectedPublicationVersion = rootExt["realmPublicationVersion"]
+if (project.version != "unspecified" && project.version.toString() != expectedPublicationVersion) {
+    throw new GradleException("G008 publication version must be " +
+            "${expectedPublicationVersion}, found ${project.version}")
+}

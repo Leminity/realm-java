@@ -8,15 +8,12 @@ buildscript {
             url "https://plugins.gradle.org/m2/"
         }
     }
-    dependencies {
-        classpath "io.github.gradle-nexus:publish-plugin:${properties.get("GRADLE_NEXUS_PLUGIN")}"
-    }
 }
 
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-group = 'io.realm'
+group = 'io.github.leminity.realm'
 version = file("${projectDir}/../version.txt").text.trim()
 
 apply from: "${rootDir}/../mavencentral-publications.gradle"
@@ -24,7 +21,7 @@ apply from: "${rootDir}/../mavencentral-publications.gradle"
 publishing {
     publications {
         realm(MavenPublication) {
-            groupId 'io.realm'
+            groupId 'io.github.leminity.realm'
             artifactId = 'realm-annotations'
             from components.java
             populatePom(

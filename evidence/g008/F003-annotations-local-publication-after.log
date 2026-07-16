@@ -1,0 +1,68 @@
+> Task :cleanG008LocalStaging UP-TO-DATE
+> Task :realm-annotations:compileJava FROM-CACHE
+> Task :realm-annotations:processResources NO-SOURCE
+> Task :realm-annotations:classes UP-TO-DATE
+> Task :realm-annotations:jar
+
+> Task :realm-annotations:javadoc
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/Ignore.java:26: warning: no comment
+public @interface Ignore {
+        ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/LinkingObjects.java:108: warning: no @return
+    String value() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:42: warning: no @return
+    String value() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:51: warning: no @return
+    String name() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:80: warning: no @return
+    boolean embedded() default false;
+            ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmClass.java:89: warning: no @return
+    RealmNamingPolicy fieldNamingPolicy() default RealmNamingPolicy.NO_POLICY;
+                      ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:76: warning: no @return
+    boolean library() default false;
+            ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:86: warning: no @return
+    boolean allClasses() default false;
+            ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:95: warning: no @return
+    Class<?>[] classes() default {};
+               ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:109: warning: no @return
+    RealmNamingPolicy classNamingPolicy() default RealmNamingPolicy.NO_POLICY;
+                      ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmModule.java:120: warning: no @return
+    RealmNamingPolicy fieldNamingPolicy() default RealmNamingPolicy.NO_POLICY;
+                      ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmField.java:40: warning: no @return
+    String value() default "";
+           ^
+/mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/realm-annotations/src/main/java/io/realm/annotations/RealmField.java:48: warning: no @return
+    String name() default "";
+           ^
+13 warnings
+
+> Task :realm-annotations:javadocJar
+> Task :realm-annotations:sourcesJar
+> Task :realm-annotations:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm-annotations:generatePomFileForRealmPublication
+> Task :realm-annotations:publishRealmPublicationToG008LocalStagingRepository
+> Task :realm-annotations:publish
+> Task :g008PublishAnnotations
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g008-six-artifact-pub-6fc3cb75/worktrees/worker-1/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 10s
+2 actionable tasks: 1 executed, 1 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+exit=0

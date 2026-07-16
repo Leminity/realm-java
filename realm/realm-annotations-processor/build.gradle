@@ -26,10 +26,10 @@ configurations {
 
 dependencies {
     implementation "com.squareup:javawriter:2.5.1"
-    implementation "io.realm:realm-annotations:${version}"
+    implementation "io.github.leminity.realm:realm-annotations:${version}"
     implementation "org.mongodb:bson:${properties.getProperty('BSON_DEPENDENCY')}"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    realmLibraryTestAar "io.realm:realm-android-library:${version}@aar"
+    realmLibraryTestAar "io.github.leminity.realm:realm-android-library:${version}@aar"
     testImplementation group:'junit', name:'junit', version:'4.13.1'
     testImplementation group:'com.google.testing.compile', name:'compile-testing', version:'0.21.0'
     testImplementation files(androidApi37Jar)
@@ -78,7 +78,7 @@ apply from: "${rootDir}/../mavencentral-publications.gradle"
 publishing {
     publications {
         realm(MavenPublication) {
-            groupId 'io.realm'
+            groupId 'io.github.leminity.realm'
             artifactId = 'realm-annotations-processor'
             from components.java
             populatePom(

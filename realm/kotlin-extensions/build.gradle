@@ -151,7 +151,7 @@ apply from: "${rootDir}/../mavencentral-publications.gradle"
 publishing {
     publications {
         realm(MavenPublication) {
-            groupId 'io.realm'
+            groupId 'io.github.leminity.realm'
             artifactId 'realm-android-kotlin-extensions'
             version project.version
             artifact(baseReleaseAar)

@@ -12,21 +12,6 @@ buildscript {
 
 def currentVersion = file("${projectDir}/version.txt").text.trim()
 
-// Find property in either System environment or Gradle properties.
-// If set in both places, Gradle properties win.
-def getPropertyValueOrThrow(String propertyName) {
-    def value = System.getenv(propertyName)
-    if (project.hasProperty(propertyName)) {
-        value = project.getProperty(propertyName)
-    }
-    if (value == null || value.trim().isEmpty()) {
-        throw new GradleException("Could not find '$propertyName'. " +
-                "Most be provided as either environment variable or " +
-                "a Gradle property.")
-    }
-    return value
-}
-
 // Shared configuration that copies relevant properties from the root level and parse them on to
 // child projects.
 def copyProperties = {
@@ -231,34 +216,6 @@ task javadoc(type:GradleBuild) {
     configure copyProperties
 }
 
-task uploadJavadoc {
-    group = 'Release'
-    description = 'Upload Java and Kotlin docs to S3'
-    dependsOn javadoc
-
-    doLast {
-        def awsAccessKey = getPropertyValueOrThrow("SDK_DOCS_AWS_ACCESS_KEY")
-        def awsSecretKey = getPropertyValueOrThrow("SDK_DOCS_AWS_SECRET_KEY")
-
-        // Upload two copies, to 'latest' and a versioned folder for posterity.
-        // Symlinks would have been safer and faster, but this is not supported by S3.
-        [ "${currentVersion}", "latest"].forEach { version ->
-            exec {
-                commandLine 's3cmd', 'put', '--recursive', '--acl-public', "--access_key=${awsAccessKey}", "--secret_key=${awsSecretKey}", 'realm/realm-library/build/docs/javadoc/', "s3://realm-sdks/realm-sdks/java/${version}/"
-            }
-            // The stylesheet is being uploaded with the wrong Content-Type header, which causes the stylesheet to not be applied in some browsers.
-            // So we need to modify the stylesheet after it has been uploaded.
-            exec {
-                commandLine 's3cmd', 'modify', "--access_key=${awsAccessKey}", "--secret_key=${awsSecretKey}", "--debug", '--add-header=Content-Type: text/css', "s3://realm-sdks/realm-sdks/java/${version}/stylesheet.css"
-            }
-            // Upload Kotlin extension docs to a subdirectory of the Javadoc. This should not conflict with the Javadoc folder layout.
-            exec {
-                commandLine 's3cmd', 'put', '--recursive', '--acl-public', "--access_key=${awsAccessKey}", "--secret_key=${awsSecretKey}", 'realm/kotlin-extensions/build/dokka/', "s3://realm-sdks/realm-sdks/java/${version}/kotlin-extensions/"
-            }
-        }
-    }
-}
-
 task sourcesJar(type:GradleBuild) {
     description = 'Generate the sources Jar for the Realm project'
     group = 'Docs'
@@ -354,82 +311,106 @@ task manualClean {
     }
 }
 
-task uploadDistributionPackage {
-    group = 'Release'
-    description = 'Upload the distribution package to S3'
-    dependsOn distributionJniUnstrippedPackage
-    def s3AccessKey = "${ -> getPropertyValueOrThrow('REALM_S3_ACCESS_KEY')}"
-    def s3SecretKey = "${ -> getPropertyValueOrThrow('REALM_S3_SECRET_KEY')}"
+// G008 creates a complete, local Maven-layout staging repository. It never
+// contacts a publication service; a protected release workflow is responsible
+// for any later Central Portal upload of the verified bundle.
+def g008StagingRepository = file(project.findProperty('g008StagingRepository') ?: "$buildDir/g008-local-staging")
+def g008Manifest = file("$buildDir/g008-publication-manifest.json")
+def g008BundleFile = file("$buildDir/g008-maven-central-bundle.zip")
+
+def configureG008NestedBuild = {
+    startParameter.projectProperties = new LinkedHashMap(gradle.startParameter.projectProperties)
+    startParameter.projectProperties.put('g008StagingRepository', g008StagingRepository.absolutePath)
+}
+
+task cleanG008LocalStaging(type: Delete) {
+    group = 'Publishing'
+    description = 'Remove only the caller-selected G008 local staging directory before a fresh publication run'
+    delete g008StagingRepository
+}
+
+task g008PublishAnnotations(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Publish realm-annotations to the G008 local staging repository'
+    dependsOn cleanG008LocalStaging
+    dir = file('realm-annotations')
+    tasks = ['publishRealmPublicationToG008LocalStagingRepository']
+    configure copyProperties
+    configure configureG008NestedBuild
+}
+
+task g008PublishTransformer(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Publish realm-transformer to the G008 local staging repository'
+    dependsOn g008PublishAnnotations
+    dir = file('realm-transformer')
+    tasks = ['publishRealmPublicationToG008LocalStagingRepository']
+    configure copyProperties
+    configure configureG008NestedBuild
+}
+
+task g008PublishRealm(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Publish the base library, processor, and Kotlin extensions to G008 local staging'
+    dependsOn g008PublishTransformer
+    dependsOn installBuildTransformer
+    dir = file('realm')
+    tasks = [
+            ':realm-annotations-processor:publishRealmPublicationToG008LocalStagingRepository',
+            ':realm-library:publishBasePublicationPublicationToG008LocalStagingRepository',
+            ':kotlin-extensions:publishRealmPublicationToG008LocalStagingRepository'
+    ]
+    configure copyProperties
+    configure configureG008NestedBuild
+}
+
+task g008PublishGradlePlugin(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Publish realm-gradle-plugin to the G008 local staging repository'
+    dependsOn g008PublishRealm
+    dir = file('gradle-plugin')
+    // java-gradle-plugin also creates marker publications. The fork contract
+    // releases only the explicit realm-gradle-plugin coordinate.
+    tasks = ['publishRealmPublicationToG008LocalStagingRepository']
+    configure copyProperties
+    configure configureG008NestedBuild
+}
+
+task g008PublishLocal {
+    group = 'Publishing'
+    description = 'Publish exactly the six public G008 artifacts to a local Maven-layout repository'
+    dependsOn g008PublishGradlePlugin
+}
+
+task g008VerifyLocalStaging {
+    group = 'Verification'
+    description = 'Validate the unsigned exact-six local staging tree, POM graph, checksums, and isolated consumer'
+    dependsOn g008PublishLocal
     doLast {
-
-        // Check that zip file exists. Creating the zip file will silently fail if no files exists, so check here.
-        def zipFile = file("${buildDir}/outputs/distribution/realm-java-jni-libs-unstripped-${currentVersion}.zip")
-        if (!zipFile.exists()) {
-            throw new GradleException("Could not locate unstripped binary zip file in: ${zipFile.getPath()}")
-        }
-
         exec {
-            commandLine 's3cmd', "--access_key=${s3AccessKey}", "--secret_key=${s3SecretKey}", 'put', zipFile.getAbsolutePath(), 's3://static.realm.io/downloads/java/'
+            commandLine 'python3', 'tools/g008-publication.py',
+                    '--repository', g008StagingRepository.absolutePath,
+                    '--write-checksums', '--manifest', g008Manifest.absolutePath,
+                    '--plugin-source', 'gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt'
+        }
+        exec {
+            commandLine 'bash', 'tools/g008-clean-consumer.sh',
+                    '--repository', g008StagingRepository.absolutePath
         }
     }
 }
 
-task uploadUpdateVersion(type: Exec) {
-    group = 'Release'
-    description = 'Update the file on S3 containing the latest version'
-    def s3AccessKey = "${ -> getPropertyValueOrThrow('REALM_S3_ACCESS_KEY')}"
-    def s3SecretKey = "${ -> getPropertyValueOrThrow('REALM_S3_SECRET_KEY')}"
-    commandLine 's3cmd', "--access_key=${s3AccessKey}", "--secret_key=${s3SecretKey}", 'put', "${rootDir}/version.txt", 's3://static.realm.io/update/java'
-}
-
-task distribute {
-    group = 'Release'
-    description = 'Distribute release artifacts to S3'
-    dependsOn uploadDistributionPackage
-    dependsOn uploadUpdateVersion
-}
-
-task mavenCentralRealm(type: GradleBuild) {
-    description = 'Publish the Realm AAR and AP to Maven Central'
+task g008Bundle {
     group = 'Publishing'
-    dir = file('realm')
-    tasks = ['publishToSonatype']
-    startParameter.projectProperties = gradle.startParameter.projectProperties
-    configure copyProperties
-}
-
-task mavenCentralAnnotations(type: GradleBuild) {
-    description = 'Publish the Realm Annotations to Maven Central'
-    group = 'Publishing'
-    dir = file('realm-annotations')
-    tasks = ['publishToSonatype']
-    startParameter.projectProperties = gradle.startParameter.projectProperties
-    configure copyProperties
-}
-
-task mavenCentralGradlePlugin(type: GradleBuild) {
-    description = 'Publish the Realm Gradle Plugin to Maven Central'
-    group = 'Publishing'
-    dir = file('gradle-plugin')
-    tasks = ['publishToSonatype']
-    startParameter.projectProperties = gradle.startParameter.projectProperties
-    configure copyProperties
-}
-
-task mavenCentralTransformer(type: GradleBuild) {
-    description = 'Publish the Realm Transformer to Maven Central'
-    group = 'Publishing'
-    dir = file('realm-transformer')
-    tasks = ['publishToSonatype']
-    startParameter.projectProperties = gradle.startParameter.projectProperties
-    configure copyProperties
-}
-
-task mavenCentralUpload {
-    description = 'Publish all the Realm artifacts to Maven Central'
-    group = 'Publishing'
-    dependsOn mavenCentralRealm
-    dependsOn mavenCentralAnnotations
-    dependsOn mavenCentralGradlePlugin
-    dependsOn mavenCentralTransformer
+    description = 'Create a signed deterministic Maven Central-format G008 bundle from local staging'
+    dependsOn g008VerifyLocalStaging
+    doLast {
+        exec {
+            commandLine 'python3', 'tools/g008-publication.py',
+                    '--repository', g008StagingRepository.absolutePath,
+                    '--require-signatures', '--manifest', g008Manifest.absolutePath,
+                    '--bundle', g008BundleFile.absolutePath,
+                    '--plugin-source', 'gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt'
+        }
+    }
 }

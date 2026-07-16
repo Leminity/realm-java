@@ -5,6 +5,12 @@ buildscript {
     ext.coroutines_android_version = projectDependencies.get('KOTLIN_COROUTINES')
     ext.dokka_version = '1.5.0'
     repositories {
+        if (project.hasProperty('g008StagingRepository')) {
+            maven {
+                url project.getProperty('g008StagingRepository')
+                content { includeGroup 'io.github.leminity.realm' }
+            }
+        }
         mavenLocal()
         google()
         mavenCentral()
@@ -20,13 +26,12 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'com.github.skhatri:gradle-s3-plugin:1.0.4'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
-        classpath "io.realm:realm-transformer:${file('../version.txt').text.trim()}"
+        classpath "io.github.leminity.realm:realm-transformer:${file('../version.txt').text.trim()}"
         classpath "io.realm:realm-library-build-transformer:${file('../version.txt').text.trim()}"
         classpath 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
         classpath "gradle.plugin.com.github.spotbugs.snom:spotbugs-gradle-plugin:4.5.0"
-        classpath "io.github.gradle-nexus:publish-plugin:${projectDependencies.get("GRADLE_NEXUS_PLUGIN")}"
     }
 }
 
@@ -42,9 +47,15 @@ allprojects {
     project.ext.ndkVersion = projectDependencies.get('ndkVersion')
     project.ext.cmakeVersion = projectDependencies.get('CMAKE')
     project.ext.buildToolsVersion = projectDependencies.get("ANDROID_BUILD_TOOLS")
-    group = 'io.realm'
+    group = 'io.github.leminity.realm'
     version = file("${rootDir}/../version.txt").text.trim()
     repositories {
+        if (project.hasProperty('g008StagingRepository')) {
+            maven {
+                url project.getProperty('g008StagingRepository')
+                content { includeGroup 'io.github.leminity.realm' }
+            }
+        }
         mavenLocal()
         google()
         mavenCentral()
