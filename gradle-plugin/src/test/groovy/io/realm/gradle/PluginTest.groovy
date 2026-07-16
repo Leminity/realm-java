@@ -19,7 +19,6 @@ package io.realm.gradle
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.TaskOutcome
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
@@ -27,6 +26,8 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 import java.util.jar.JarOutputStream
+import javax.tools.JavaCompiler
+import javax.tools.ToolProvider
 import java.util.regex.Pattern
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -49,6 +50,8 @@ class PluginTest {
     private static final String AGP_VERSION = '9.1.1'
     private static final String FORK_GROUP = 'io.github.leminity.realm'
     private static final String FORK_VERSION = '10.19.0-agp9.1'
+    private static final String OFFICIAL_GROUP = 'io.realm'
+    private static final String OFFICIAL_VERSION = '10.19.0'
 
     @Parameterized.Parameters(name = '{0}-{1}-{2}')
     static Collection<Object[]> fixtures() {
@@ -79,18 +82,15 @@ class PluginTest {
     private File moduleProject
     private File fixtureRepository
 
-    @Before
-    void setUp() {
-        writeFixture(false)
-    }
-
     @Test
     void pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix() {
+        writeFixture(false)
+
         BuildResult result = run(
             ':app:assembleDebug',
             ':app:assembleRelease',
             ':app:verifyRealmPluginContract',
-            '--configuration-cache'
+            '--offline'
         ).build()
 
         assertTaskSucceeded(result, ':app:assembleDebug')
@@ -106,6 +106,9 @@ class PluginTest {
         assertConfigurationContains(result, 'debugCompileClasspath', 'realm-android-library')
         assertConfigurationContains(result, 'releaseCompileClasspath', 'realm-annotations')
         assertConfigurationContains(result, 'releaseCompileClasspath', 'realm-android-library')
+        assertTrue('The plugin must remove owned official Realm dependencies.', result.output.contains('REALM-OFFICIAL-COUNT api=0'))
+        assertGeneratedAccessor(result, 'JavaRealmModel', language == 'java' || language == 'mixed')
+        assertGeneratedAccessor(result, 'KotlinRealmModel', language == 'kotlin' || language == 'mixed')
 
         if (language == 'java') {
             assertConfigurationContains(result, 'annotationProcessor', 'realm-annotations-processor')
@@ -120,16 +123,27 @@ class PluginTest {
 
         assertFalse('A local-DB fixture must never request Object Server artifacts.', result.output.contains('object-server'))
 
-        BuildResult cached = run(
+        List<String> cacheArguments = [
             ':app:assembleDebug',
             ':app:assembleRelease',
-            ':app:verifyRealmPluginContract',
-            '--configuration-cache'
-        ).build()
+            '--configuration-cache',
+            '--offline'
+        ]
+        run(*(cacheArguments as String[])).build()
+        BuildResult cached = run(*(cacheArguments as String[])).build()
         assertTrue(
             'The second TestKit invocation must observe the configuration cache.',
             cached.output.contains('Reusing configuration cache.')
         )
+    }
+
+    @Test
+    void explicitSyncFalseKeepsTheLocalRealmContract() {
+        writeFixture(false, true)
+
+        BuildResult result = run(':app:verifyRealmPluginContract', '--offline').build()
+        assertTrue(result.output.contains('REALM-OFFICIAL-COUNT api=0'))
+        assertFalse(result.output.contains('object-server'))
     }
 
     @Test
@@ -157,10 +171,10 @@ class PluginTest {
             .withArguments((arguments as List<String>) + ['--stacktrace', '--warning-mode', 'all'])
     }
 
-    private void writeFixture(boolean syncEnabled) {
-        consumerProject = temporaryFolder.newFolder('consumer')
+    private void writeFixture(boolean syncEnabled, boolean explicitSyncDisabled = false) {
+        consumerProject = temporaryFolder.newFolder('consumer-' + System.nanoTime())
         moduleProject = new File(consumerProject, 'app')
-        fixtureRepository = temporaryFolder.newFolder('fork-repository')
+        fixtureRepository = temporaryFolder.newFolder('fork-repository-' + System.nanoTime())
         writeForkRepository()
 
         writeFile(new File(consumerProject, 'settings.gradle'), '''
@@ -175,11 +189,11 @@ class PluginTest {
             include ':app'
         '''.stripIndent())
         writeFile(new File(consumerProject, 'build.gradle'), '')
-        writeFile(new File(moduleProject, 'build.gradle'), consumerBuildScript(syncEnabled))
+        writeFile(new File(moduleProject, 'build.gradle'), consumerBuildScript(syncEnabled, explicitSyncDisabled))
         writeSources()
     }
 
-    private String consumerBuildScript(boolean syncEnabled) {
+    private String consumerBuildScript(boolean syncEnabled, boolean explicitSyncDisabled) {
         boolean application = androidPlugin == 'application'
         boolean kotlin = language != 'java'
         String repositoryUri = fixtureRepository.toURI().toString()
@@ -191,7 +205,12 @@ class PluginTest {
             realm {
                 syncEnabled = true
             }
+        '''.stripIndent() : explicitSyncDisabled ? '''
+            realm {
+                syncEnabled = false
+            }
         '''.stripIndent() : ''
+        String javaOnlyKotlinSetting = language == 'java' ? 'enableKotlin = false' : ''
 
         '''
             buildscript {
@@ -218,6 +237,7 @@ class PluginTest {
             android {
                 namespace = 'io.realm.fixture'
                 compileSdk = 37
+                ''' + javaOnlyKotlinSetting + '''
 
                 defaultConfig {
                     ''' + applicationId + '''
@@ -226,6 +246,11 @@ class PluginTest {
                     versionCode = 1
                     versionName = '1.0'
                 }
+            }
+
+            dependencies {
+                api 'io.realm:realm-android-library:''' + OFFICIAL_VERSION + ''''
+                ''' + (kotlin ? "api 'io.realm:realm-android-kotlin-extensions:" + OFFICIAL_VERSION + "'" : '') + '''
             }
 
             ''' + syncBlock + '''
@@ -253,6 +278,9 @@ class PluginTest {
                             println('REALM-COUNT ' + name + '=' + dependencies.size())
                         }
                     }
+                    def official = configurations.getByName('api').dependencies
+                        .findAll { it.group == 'io.realm' }
+                    println('REALM-OFFICIAL-COUNT api=' + official.size())
 
                     ['debugCompileClasspath', 'releaseCompileClasspath'].each { name ->
                         def configuration = configurations.getByName(name)
@@ -264,6 +292,14 @@ class PluginTest {
                     }
 
                     println('REALM-LEGACY-KAPT=' + pluginManager.hasPlugin('com.android.legacy-kapt'))
+
+                    def generated = fileTree(buildDir).matching {
+                        include '**/Generated*RealmAccessor.java'
+                    }.files.collect { it.name }.sort()
+                    println('REALM-GENERATED=' + generated.join('|'))
+                    if (generated.empty) {
+                        throw new GradleException('Expected the fixture Realm processor to generate an accessor.')
+                    }
                 }
             }
         '''.stripIndent()
@@ -272,14 +308,20 @@ class PluginTest {
     private void writeSources() {
         if (language == 'java' || language == 'mixed') {
             writeFile(
-                new File(moduleProject, 'src/main/java/io/realm/fixture/JavaMarker.java'),
-                'package io.realm.fixture; public final class JavaMarker { }'
+                new File(moduleProject, 'src/main/java/io/realm/fixture/JavaRealmModel.java'),
+                '''package io.realm.fixture;
+                   import io.realm.RealmObject;
+                   import io.realm.annotations.RealmClass;
+                   @RealmClass public final class JavaRealmModel extends RealmObject { }'''
             )
         }
         if (language == 'kotlin' || language == 'mixed') {
             writeFile(
-                new File(moduleProject, 'src/main/kotlin/io/realm/fixture/KotlinMarker.kt'),
-                'package io.realm.fixture\\nclass KotlinMarker'
+                new File(moduleProject, 'src/main/kotlin/io/realm/fixture/KotlinRealmModel.kt'),
+                '''package io.realm.fixture
+                   import io.realm.RealmObject
+                   import io.realm.annotations.RealmClass
+                   @RealmClass class KotlinRealmModel : RealmObject()'''
             )
         }
         writeFile(
@@ -289,25 +331,114 @@ class PluginTest {
     }
 
     private void writeForkRepository() {
-        writeJarModule('realm-annotations')
-        writeJarModule('realm-annotations-processor')
-        writeAarModule('realm-android-library')
-        writeAarModule('realm-android-kotlin-extensions')
+        writeAnnotationsModule(FORK_GROUP, FORK_VERSION)
+        writeProcessorModule(FORK_GROUP, FORK_VERSION)
+        writeRealmLibraryModule(FORK_GROUP, FORK_VERSION)
+        writeEmptyAarModule(FORK_GROUP, FORK_VERSION, 'realm-android-kotlin-extensions')
+
+        // The consumer starts with these obsolete coordinates. Realm.kt must remove them.
+        writeRealmLibraryModule(OFFICIAL_GROUP, OFFICIAL_VERSION)
+        writeEmptyAarModule(OFFICIAL_GROUP, OFFICIAL_VERSION, 'realm-android-kotlin-extensions')
     }
 
-    private void writeJarModule(String artifact) {
-        File artifactDirectory = moduleDirectory(artifact)
+    private void writeAnnotationsModule(String group, String version) {
+        File artifactDirectory = moduleDirectory(group, 'realm-annotations', version)
         artifactDirectory.mkdirs()
-        writePom(artifactDirectory, artifact, 'jar')
-        new JarOutputStream(new FileOutputStream(new File(artifactDirectory, artifact + '-' + FORK_VERSION + '.jar'))).close()
+        writePom(artifactDirectory, group, 'realm-annotations', version, 'jar')
+        writeBytes(
+            new File(artifactDirectory, 'realm-annotations-' + version + '.jar'),
+            compiledJar([
+                'io/realm/annotations/RealmClass.java': '''package io.realm.annotations;
+                    import java.lang.annotation.ElementType;
+                    import java.lang.annotation.Retention;
+                    import java.lang.annotation.RetentionPolicy;
+                    import java.lang.annotation.Target;
+                    @Retention(RetentionPolicy.SOURCE) @Target(ElementType.TYPE)
+                    public @interface RealmClass { }'''
+            ])
+        )
     }
 
-    private void writeAarModule(String artifact) {
-        File artifactDirectory = moduleDirectory(artifact)
+    private void writeProcessorModule(String group, String version) {
+        File artifactDirectory = moduleDirectory(group, 'realm-annotations-processor', version)
         artifactDirectory.mkdirs()
-        writePom(artifactDirectory, artifact, 'aar')
+        writePom(artifactDirectory, group, 'realm-annotations-processor', version, 'jar')
+        writeBytes(
+            new File(artifactDirectory, 'realm-annotations-processor-' + version + '.jar'),
+            compiledJar(
+                [
+                    'io/realm/annotations/RealmClass.java': '''package io.realm.annotations;
+                        import java.lang.annotation.ElementType;
+                        import java.lang.annotation.Retention;
+                        import java.lang.annotation.RetentionPolicy;
+                        import java.lang.annotation.Target;
+                        @Retention(RetentionPolicy.SOURCE) @Target(ElementType.TYPE)
+                        public @interface RealmClass { }''',
+                    'io/realm/fixture/processor/FixtureRealmProcessor.java': '''package io.realm.fixture.processor;
+                        import io.realm.annotations.RealmClass;
+                        import java.io.IOException;
+                        import java.io.Writer;
+                        import java.util.Set;
+                        import javax.annotation.processing.AbstractProcessor;
+                        import javax.annotation.processing.Filer;
+                        import javax.annotation.processing.ProcessingEnvironment;
+                        import javax.annotation.processing.RoundEnvironment;
+                        import javax.annotation.processing.SupportedAnnotationTypes;
+                        import javax.annotation.processing.SupportedSourceVersion;
+                        import javax.lang.model.SourceVersion;
+                        import javax.lang.model.element.Element;
+                        import javax.lang.model.element.TypeElement;
+                        import javax.tools.JavaFileObject;
+                        @SupportedAnnotationTypes("io.realm.annotations.RealmClass")
+                        @SupportedSourceVersion(SourceVersion.RELEASE_8)
+                        public final class FixtureRealmProcessor extends AbstractProcessor {
+                            @Override public boolean process(
+                                    Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
+                                if (roundEnvironment.processingOver()) return false;
+                                for (Element element : roundEnvironment.getElementsAnnotatedWith(RealmClass.class)) {
+                                    String model = element.getSimpleName().toString();
+                                    try {
+                                        JavaFileObject file = processingEnv.getFiler().createSourceFile(
+                                                "io.realm.fixture.Generated" + model + "RealmAccessor");
+                                        try (Writer writer = file.openWriter()) {
+                                            writer.write("package io.realm.fixture; public final class Generated"
+                                                    + model + "RealmAccessor { public static final String MODEL = \\""
+                                                    + model + "\\"; }");
+                                        }
+                                    } catch (IOException exception) {
+                                        throw new IllegalStateException(exception);
+                                    }
+                                }
+                                return false;
+                            }
+                        }'''
+                ],
+                ['META-INF/services/javax.annotation.processing.Processor':
+                    'io.realm.fixture.processor.FixtureRealmProcessor\\n'.getBytes('UTF-8')]
+            )
+        )
+    }
 
-        File aar = new File(artifactDirectory, artifact + '-' + FORK_VERSION + '.aar')
+    private void writeRealmLibraryModule(String group, String version) {
+        File artifactDirectory = moduleDirectory(group, 'realm-android-library', version)
+        artifactDirectory.mkdirs()
+        writePom(artifactDirectory, group, 'realm-android-library', version, 'aar')
+        writeAar(
+            new File(artifactDirectory, 'realm-android-library-' + version + '.aar'),
+            compiledJar([
+                'io/realm/RealmObject.java': 'package io.realm; public class RealmObject { }'
+            ])
+        )
+    }
+
+    private void writeEmptyAarModule(String group, String version, String artifact) {
+        File artifactDirectory = moduleDirectory(group, artifact, version)
+        artifactDirectory.mkdirs()
+        writePom(artifactDirectory, group, artifact, version, 'aar')
+        writeAar(new File(artifactDirectory, artifact + '-' + version + '.aar'), emptyJar())
+    }
+
+    private static void writeAar(File aar, byte[] classesJar) {
         ZipOutputStream output = new ZipOutputStream(new FileOutputStream(aar))
         try {
             writeZipEntry(
@@ -322,22 +453,55 @@ class PluginTest {
         }
     }
 
-    private File moduleDirectory(String artifact) {
-        new File(fixtureRepository, FORK_GROUP.replace('.', '/') + '/' + artifact + '/' + FORK_VERSION)
+    private File moduleDirectory(String group, String artifact, String version) {
+        new File(fixtureRepository, group.replace('.', '/') + '/' + artifact + '/' + version)
     }
 
-    private void writePom(File artifactDirectory, String artifact, String packaging) {
+    private void writePom(File artifactDirectory, String group, String artifact, String version, String packaging) {
         writeFile(
-            new File(artifactDirectory, artifact + '-' + FORK_VERSION + '.pom'),
+            new File(artifactDirectory, artifact + '-' + version + '.pom'),
             '''<project xmlns="http://maven.apache.org/POM/4.0.0">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>''' + FORK_GROUP + '''</groupId>
+  <groupId>''' + group + '''</groupId>
   <artifactId>''' + artifact + '''</artifactId>
-  <version>''' + FORK_VERSION + '''</version>
+  <version>''' + version + '''</version>
   <packaging>''' + packaging + '''</packaging>
 </project>
 '''
         )
+    }
+
+    private byte[] compiledJar(Map<String, String> sources, Map<String, byte[]> resources = [:]) {
+        File compilerRoot = temporaryFolder.newFolder('compiled-' + System.nanoTime())
+        File sourceRoot = new File(compilerRoot, 'src')
+        File classRoot = new File(compilerRoot, 'classes')
+        List<File> sourceFiles = []
+        sources.each { relativePath, contents ->
+            File source = new File(sourceRoot, relativePath)
+            writeFile(source, contents.stripIndent())
+            sourceFiles.add(source)
+        }
+
+        JavaCompiler compiler = ToolProvider.systemJavaCompiler
+        assertNotNull('A JDK compiler is required to create the isolated fixture artifacts.', compiler)
+        List<String> arguments = ['-source', '8', '-target', '8', '-d', classRoot.absolutePath]
+        arguments.addAll(sourceFiles.collect { it.absolutePath })
+        assertEquals('The fixture artifact sources must compile.', 0, compiler.run(null, null, null, *(arguments as String[])))
+
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+        JarOutputStream output = new JarOutputStream(bytes)
+        try {
+            classRoot.eachFileRecurse { file ->
+                if (file.isFile()) {
+                    String name = classRoot.toPath().relativize(file.toPath()).toString().replace(File.separatorChar, '/' as char)
+                    writeZipEntry(output, name, file.bytes)
+                }
+            }
+            resources.each { name, contents -> writeZipEntry(output, name, contents) }
+        } finally {
+            output.close()
+        }
+        bytes.toByteArray()
     }
 
     private static byte[] emptyJar() {
@@ -356,6 +520,11 @@ class PluginTest {
     private static void writeFile(File file, String contents) {
         file.parentFile.mkdirs()
         file.setText(contents, 'UTF-8')
+    }
+
+    private static void writeBytes(File file, byte[] contents) {
+        file.parentFile.mkdirs()
+        file.bytes = contents
     }
 
     private static String pluginClasspath() {
@@ -379,6 +548,21 @@ class PluginTest {
             'Expected exactly ' + expected + ' forked dependencies in ' + configuration + '.\\n' + result.output,
             result.output.contains('REALM-COUNT ' + configuration + '=' + expected)
         )
+    }
+
+    private static void assertGeneratedAccessor(BuildResult result, String model, boolean expected) {
+        String accessor = 'Generated' + model + 'RealmAccessor.java'
+        if (expected) {
+            assertTrue(
+                'Expected a concrete accessor generated for ' + model + '.\\n' + result.output,
+                result.output.contains(accessor)
+            )
+        } else {
+            assertFalse(
+                'Did not expect an accessor for an absent ' + model + '.\\n' + result.output,
+                result.output.contains(accessor)
+            )
+        }
     }
 
     private static void assertTaskSucceeded(BuildResult result, String taskPath) {
