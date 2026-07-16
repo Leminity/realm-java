@@ -30,6 +30,7 @@ import javax.tools.JavaCompiler
 import javax.tools.ToolProvider
 import java.util.regex.Pattern
 import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 import static org.junit.Assert.assertEquals
@@ -373,9 +374,7 @@ class PluginTest {
         File artifactDirectory = moduleDirectory(group, 'realm-annotations-processor', version)
         artifactDirectory.mkdirs()
         writePom(artifactDirectory, group, 'realm-annotations-processor', version, 'jar')
-        writeBytes(
-            new File(artifactDirectory, 'realm-annotations-processor-' + version + '.jar'),
-            compiledJar(
+        byte[] processorJar = compiledJar(
                 [
                     'io/realm/annotations/RealmClass.java': '''package io.realm.annotations;
                         import java.lang.annotation.ElementType;
@@ -426,7 +425,8 @@ class PluginTest {
                 ['META-INF/services/javax.annotation.processing.Processor':
                     "io.realm.fixture.processor.FixtureRealmProcessor\n".getBytes('UTF-8')]
             )
-        )
+        assertProcessorServiceEntry(processorJar)
+        writeBytes(new File(artifactDirectory, 'realm-annotations-processor-' + version + '.jar'), processorJar)
     }
 
     private void writeRealmLibraryModule(String group, String version) {
@@ -519,6 +519,33 @@ class PluginTest {
             output.close()
         }
         bytes.toByteArray()
+    }
+
+    private static void assertProcessorServiceEntry(byte[] jar) {
+        String path = 'META-INF/services/javax.annotation.processing.Processor'
+        ZipInputStream input = new ZipInputStream(new ByteArrayInputStream(jar))
+        try {
+            ZipEntry entry
+            while ((entry = input.nextEntry) != null) {
+                if (entry.name == path) {
+                    ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                    byte[] buffer = new byte[256]
+                    int read
+                    while ((read = input.read(buffer)) != -1) {
+                        bytes.write(buffer, 0, read)
+                    }
+                    assertEquals(
+                        'The processor service entry must end with an actual newline byte.',
+                        'io.realm.fixture.processor.FixtureRealmProcessor\n',
+                        new String(bytes.toByteArray(), 'UTF-8')
+                    )
+                    return
+                }
+            }
+            assertTrue('The processor JAR must contain its ServiceLoader entry.', false)
+        } finally {
+            input.close()
+        }
     }
 
     private static byte[] emptyJar() {
