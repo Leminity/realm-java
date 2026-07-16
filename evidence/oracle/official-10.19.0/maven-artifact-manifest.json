@@ -1,0 +1,90 @@
+{
+  "source_repository": "https://repo1.maven.org/maven2/",
+  "captured_utc": "2026-07-16T02:55:12.903848+00:00",
+  "coordinates": [
+    {
+      "groupId": "io.realm",
+      "artifactId": "realm-gradle-plugin",
+      "version": "10.19.0",
+      "packaging": "jar",
+      "pom_url": "https://repo1.maven.org/maven2/io/realm/realm-gradle-plugin/10.19.0/realm-gradle-plugin-10.19.0.pom",
+      "artifact_url": "https://repo1.maven.org/maven2/io/realm/realm-gradle-plugin/10.19.0/realm-gradle-plugin-10.19.0.jar",
+      "pom_sha1_maven_central": "81e84c5cf0173dea5966d8d67233bd2592ba55ef",
+      "pom_sha256_local": "1cc596a3dabd84317a04637c3473106e3a09792ec9a79298104c0ffab1e4f131",
+      "artifact_sha1_maven_central": "15ec71849f543dd2e6571e8803d21d2d557e28f3",
+      "artifact_sha256_local": "6d9a2f169be56af757b2d6d654cd4cc2490db1d375b4c9bd50dd74d6e8729e81",
+      "artifact_size_bytes": 16484,
+      "direct_dependencies": []
+    },
+    {
+      "groupId": "io.realm",
+      "artifactId": "realm-transformer",
+      "version": "10.19.0",
+      "packaging": "jar",
+      "pom_url": "https://repo1.maven.org/maven2/io/realm/realm-transformer/10.19.0/realm-transformer-10.19.0.pom",
+      "artifact_url": "https://repo1.maven.org/maven2/io/realm/realm-transformer/10.19.0/realm-transformer-10.19.0.jar",
+      "pom_sha1_maven_central": "b5d1b83688ba5f3cc9e795cee4fb2f88d3025304",
+      "pom_sha256_local": "d0cae74735316636446c84912a449b9d7232907fa216a3b1931dc04a0f490b96",
+      "artifact_sha1_maven_central": "a78dfb3469f1b00bda9cf6b7cf6037f0299d444b",
+      "artifact_sha256_local": "ca1b1b40de104d4500f3236c003fd4a377effe12952c548071b756f471efecb6",
+      "artifact_size_bytes": 92098,
+      "direct_dependencies": []
+    },
+    {
+      "groupId": "io.realm",
+      "artifactId": "realm-annotations",
+      "version": "10.19.0",
+      "packaging": "jar",
+      "pom_url": "https://repo1.maven.org/maven2/io/realm/realm-annotations/10.19.0/realm-annotations-10.19.0.pom",
+      "artifact_url": "https://repo1.maven.org/maven2/io/realm/realm-annotations/10.19.0/realm-annotations-10.19.0.jar",
+      "pom_sha1_maven_central": "70293f809237a65d47a65465be527fa34ddb5f2e",
+      "pom_sha256_local": "86ee70048005eaa851e5ceed527b9f65e69decdf5f4b3fe32f9ef99f8efd1bbd",
+      "artifact_sha1_maven_central": "4376fe78c94dee12446a95ef02cc1dd4b1a37f86",
+      "artifact_sha256_local": "758a1f965a24eac1bc47d5711a6739f2847224afa0591b351e64a17c6ac2a5b3",
+      "artifact_size_bytes": 5249,
+      "direct_dependencies": []
+    },
+    {
+      "groupId": "io.realm",
+      "artifactId": "realm-annotations-processor",
+      "version": "10.19.0",
+      "packaging": "jar",
+      "pom_url": "https://repo1.maven.org/maven2/io/realm/realm-annotations-processor/10.19.0/realm-annotations-processor-10.19.0.pom",
+      "artifact_url": "https://repo1.maven.org/maven2/io/realm/realm-annotations-processor/10.19.0/realm-annotations-processor-10.19.0.jar",
+      "pom_sha1_maven_central": "08b56d82844c37427eb37c99fcebfcf84ca0b639",
+      "pom_sha256_local": "4405e02f9021e37c0c35d7e704e29b52d4b77aa15da9127567c9f5234f9488f6",
+      "artifact_sha1_maven_central": "31c30aa22a252b97a0d99e5a78c3958b932a2cf2",
+      "artifact_sha256_local": "710f82ae98c3ab5b27b06478fc43630fb208ae5babd2b394fcb12a2bd4001131",
+      "artifact_size_bytes": 209566,
+      "direct_dependencies": []
+    },
+    {
+      "groupId": "io.realm",
+      "artifactId": "realm-android-library",
+      "version": "10.19.0",
+      "packaging": "aar",
+      "pom_url": "https://repo1.maven.org/maven2/io/realm/realm-android-library/10.19.0/realm-android-library-10.19.0.pom",
+      "artifact_url": "https://repo1.maven.org/maven2/io/realm/realm-android-library/10.19.0/realm-android-library-10.19.0.aar",
+      "pom_sha1_maven_central": "82eed1e4af5aa6f80ef25ae677e3647d1405381d",
+      "pom_sha256_local": "d3edca29a9db069da94021b46ffe33081cfd82acd7b4804acf686b87517b2fc7",
+      "artifact_sha1_maven_central": "952b0d99cdd43ae149a6bdb28d6f8ba47294917a",
+      "artifact_sha256_local": "2a54afec5cdf79240037707accbf1b964ee06290b83fc1ed1748352d3faebc58",
+      "artifact_size_bytes": 13722281,
+      "direct_dependencies": []
+    },
+    {
+      "groupId": "io.realm",
+      "artifactId": "realm-android-kotlin-extensions",
+      "version": "10.19.0",
+      "packaging": "aar",
+      "pom_url": "https://repo1.maven.org/maven2/io/realm/realm-android-kotlin-extensions/10.19.0/realm-android-kotlin-extensions-10.19.0.pom",
+      "artifact_url": "https://repo1.maven.org/maven2/io/realm/realm-android-kotlin-extensions/10.19.0/realm-android-kotlin-extensions-10.19.0.aar",
+      "pom_sha1_maven_central": "bd94958048b42dac7bedd49d3a6e882d01a852f2",
+      "pom_sha256_local": "835174ba3a53232aacfd20b3ca7eb149366aea6d0d4ff1a1f31e2bfc30a8808c",
+      "artifact_sha1_maven_central": "2ad12a1db7aea3792cd42c0c739e75eb0f4e4f3c",
+      "artifact_sha256_local": "cea228b11202d1f279ec4ed6f6cbf972d44bf86cb403bc513e00355ae8e3ffb6",
+      "artifact_size_bytes": 14921,
+      "direct_dependencies": []
+    }
+  ]
+}

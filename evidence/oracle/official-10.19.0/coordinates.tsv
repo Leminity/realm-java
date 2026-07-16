@@ -1,0 +1,7 @@
+artifact_id	extension
+realm-gradle-plugin	jar
+realm-transformer	jar
+realm-annotations	jar
+realm-annotations-processor	jar
+realm-android-library	aar
+realm-android-kotlin-extensions	aar
