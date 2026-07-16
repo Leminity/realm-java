@@ -21,7 +21,10 @@ from xml.etree import ElementTree
 
 
 GROUP = "io.github.leminity.realm"
-VERSION = "10.19.0-agp9.1"
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+VERSION = (REPOSITORY_ROOT / "version.txt").read_text(encoding="utf-8").strip()
+if not VERSION:
+    raise RuntimeError("version.txt must contain the G008 release version")
 ARTIFACTS = {
     "realm-gradle-plugin": "jar",
     "realm-transformer": "jar",

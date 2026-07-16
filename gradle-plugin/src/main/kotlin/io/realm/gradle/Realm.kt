@@ -17,7 +17,6 @@ private const val ANDROID_APPLICATION_PLUGIN_ID = "com.android.application"
 private const val ANDROID_LIBRARY_PLUGIN_ID = "com.android.library"
 private const val LEGACY_KAPT_PLUGIN_ID = "com.android.legacy-kapt"
 private const val FORK_GROUP = "io.github.leminity.realm"
-private const val FORK_VERSION = "10.19.0-agp9.1"
 
 // TODO Run a Task or Visitor to collect runtimeClassPath, then serialize it
 //      Run another task that depends on the output of the first task in order to deserialize the ClassPool and process each class apart
@@ -196,6 +195,6 @@ open class Realm : Plugin<Project> {
             }
         }
 
-        private fun forkCoordinate(artifact: String) = "$FORK_GROUP:$artifact:$FORK_VERSION"
+        private fun forkCoordinate(artifact: String) = "$FORK_GROUP:$artifact:${Version.VERSION}"
     }
 }

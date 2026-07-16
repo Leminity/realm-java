@@ -5,9 +5,18 @@ def getPropertyValue(String propertyName) {
     return project.findProperty(propertyName) ?: System.getenv(propertyName) ?: ""
 }
 
+def releaseVersionFile = new File(buildscript.sourceFile.getParentFile(), "version.txt")
+if (!releaseVersionFile.isFile()) {
+    throw new GradleException("G008 release version file is missing: ${releaseVersionFile}")
+}
+def releaseVersion = releaseVersionFile.getText("UTF-8").trim()
+if (!releaseVersion) {
+    throw new GradleException("G008 release version file must not be empty: ${releaseVersionFile}")
+}
+
 def rootExt = rootProject.ext
 rootExt["realmPublicationGroup"] = "io.github.leminity.realm"
-rootExt["realmPublicationVersion"] = "10.19.0-agp9.1"
+rootExt["realmPublicationVersion"] = releaseVersion
 rootExt["g008StagingRepository"] = getPropertyValue("g008StagingRepository")
 rootExt["g008SigningKey"] = getPropertyValue("g008SigningKey")
 rootExt["g008SigningPassword"] = getPropertyValue("g008SigningPassword")

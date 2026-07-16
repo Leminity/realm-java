@@ -12,6 +12,8 @@ usage() {
 [[ $# -eq 2 && $1 == "--repository" ]] || usage
 repository="$(cd "$2" && pwd)"
 root="$(git rev-parse --show-toplevel)"
+version="$(tr -d '[:space:]' < "$root/version.txt")"
+[[ -n "$version" ]] || { echo "version.txt must contain the G008 release version" >&2; exit 2; }
 consumer="$(mktemp -d)"
 gradle_user_home="$(mktemp -d)"
 trap 'rm -rf "$consumer" "$gradle_user_home"' EXIT
@@ -35,12 +37,12 @@ plugins { id 'java' }
 
 configurations { g008 }
 dependencies {
-    g008 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1'
-    g008 'io.github.leminity.realm:realm-transformer:10.19.0-agp9.1'
-    g008 'io.github.leminity.realm:realm-annotations:10.19.0-agp9.1'
-    g008 'io.github.leminity.realm:realm-annotations-processor:10.19.0-agp9.1'
-    g008 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.1'
-    g008 'io.github.leminity.realm:realm-android-kotlin-extensions:10.19.0-agp9.1'
+    g008 'io.github.leminity.realm:realm-gradle-plugin:__G008_VERSION__'
+    g008 'io.github.leminity.realm:realm-transformer:__G008_VERSION__'
+    g008 'io.github.leminity.realm:realm-annotations:__G008_VERSION__'
+    g008 'io.github.leminity.realm:realm-annotations-processor:__G008_VERSION__'
+    g008 'io.github.leminity.realm:realm-android-library:__G008_VERSION__'
+    g008 'io.github.leminity.realm:realm-android-kotlin-extensions:__G008_VERSION__'
 }
 
 tasks.register('verifyG008Consumer') {
@@ -52,7 +54,7 @@ tasks.register('verifyG008Consumer') {
             'realm-gradle-plugin', 'realm-transformer', 'realm-annotations',
             'realm-annotations-processor', 'realm-android-library',
             'realm-android-kotlin-extensions'
-        ].collect { "io.github.leminity.realm:${it}:10.19.0-agp9.1" }.toSet()
+        ].collect { "io.github.leminity.realm:${it}:__G008_VERSION__" }.toSet()
         if (resolved != expected) {
             throw new GradleException("G008 consumer resolved ${resolved}; expected ${expected}")
         }
@@ -60,6 +62,8 @@ tasks.register('verifyG008Consumer') {
     }
 }
 BUILD
+
+sed -i "s/__G008_VERSION__/${version}/g" "$consumer/build.gradle"
 
 # A fresh user home proves resolution is not satisfied by a stale cache. The
 # generated settings intentionally omit mavenLocal, and route the fork group

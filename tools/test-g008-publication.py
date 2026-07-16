@@ -12,6 +12,7 @@ from pathlib import Path
 
 
 MODULE_PATH = Path(__file__).with_name("g008-publication.py")
+REPOSITORY_ROOT = MODULE_PATH.parents[1]
 SPEC = importlib.util.spec_from_file_location("g008_publication", MODULE_PATH)
 assert SPEC and SPEC.loader
 G008 = importlib.util.module_from_spec(SPEC)
@@ -116,6 +117,39 @@ class G008PublicationTests(unittest.TestCase):
         G008.write_checksums(self.repository)
         with self.assertRaisesRegex(G008.ValidationError, "JNI ABI directories"):
             G008.validate_repository(self.repository, False, None)
+
+    def test_version_file_is_the_only_release_version_source(self) -> None:
+        version_file = REPOSITORY_ROOT / "version.txt"
+        self.assertEqual(G008.VERSION, version_file.read_text(encoding="utf-8").strip())
+
+        publication_properties = (REPOSITORY_ROOT / "mavencentral-properties.gradle").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('new File(buildscript.sourceFile.getParentFile(), "version.txt")', publication_properties)
+        self.assertNotIn(G008.VERSION, publication_properties)
+
+        plugin_source = (
+            REPOSITORY_ROOT / "gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt"
+        ).read_text(encoding="utf-8")
+        self.assertIn("Version.VERSION", plugin_source)
+        self.assertNotIn("FORK_VERSION", plugin_source)
+        self.assertNotIn(G008.VERSION, plugin_source)
+
+        validator_source = MODULE_PATH.read_text(encoding="utf-8")
+        self.assertIn('REPOSITORY_ROOT / "version.txt"', validator_source)
+        self.assertNotIn('VERSION = "', validator_source)
+
+        consumer_source = (REPOSITORY_ROOT / "tools/g008-clean-consumer.sh").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('"$root/version.txt"', consumer_source)
+        self.assertNotIn(G008.VERSION, consumer_source)
+
+        plugin_test_source = (
+            REPOSITORY_ROOT / "gradle-plugin/src/test/groovy/io/realm/gradle/PluginTest.groovy"
+        ).read_text(encoding="utf-8")
+        self.assertIn("releaseVersion()", plugin_test_source)
+        self.assertNotIn(G008.VERSION, plugin_test_source)
 
 
 if __name__ == "__main__":

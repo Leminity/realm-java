@@ -79,8 +79,11 @@ test {
 
 task generateVersionClass(type: Copy) {
     from 'src/main/templates/Version.kt'
-    into 'build/generated-src/main/kotlin/io/realm'
+    into 'build/generated-src/main/kotlin/io/realm/gradle'
     filter(ReplaceTokens, tokens: [version: version])
+    doFirst {
+        delete 'build/generated-src/main/kotlin/io/realm/Version.kt'
+    }
     outputs.upToDateWhen { false }
 }
 
@@ -119,4 +122,8 @@ publishing {
 java {
     withSourcesJar()
     withJavadocJar()
+}
+
+tasks.named('sourcesJar').configure {
+    dependsOn generateVersionClass
 }

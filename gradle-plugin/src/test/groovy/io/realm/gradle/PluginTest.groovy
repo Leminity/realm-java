@@ -50,9 +50,24 @@ class PluginTest {
 
     private static final String AGP_VERSION = '9.1.1'
     private static final String FORK_GROUP = 'io.github.leminity.realm'
-    private static final String FORK_VERSION = '10.19.0-agp9.1'
+    private static final String FORK_VERSION = releaseVersion()
     private static final String OFFICIAL_GROUP = 'io.realm'
     private static final String OFFICIAL_VERSION = '10.19.0'
+
+    private static String releaseVersion() {
+        File current = new File(System.getProperty('user.dir')).canonicalFile
+        while (current != null) {
+            File versionFile = new File(current, 'version.txt')
+            if (versionFile.isFile()) {
+                String version = versionFile.getText('UTF-8').trim()
+                if (version) {
+                    return version
+                }
+            }
+            current = current.parentFile
+        }
+        throw new IllegalStateException('Unable to locate non-empty version.txt for plugin fixtures')
+    }
 
     @Parameterized.Parameters(name = '{0}-{1}-{2}')
     static Collection<Object[]> fixtures() {
