@@ -58,11 +58,13 @@ retained unsupported source history.
 | `tools/verify-toolchain.sh --sdk-root "$HOME/Android/Sdk" --evidence-dir /tmp/g003-toolchain-verification` | PASS (SDK XML warnings only) |
 | `tools/verify-g003-independent-builds.sh` before Lane A/B integration | Expected FAIL: `GRADLE_BUILD_TOOLS=7.4.0`, proving the exact-toolchain gate is red before the repair |
 
-`tools/test-verify-baseline.sh` cannot complete in this initial worktree until
-its nested Realm Core submodules are fully checked out; it fails in
-`capture-baseline.py` before the allowlist assertions. The phase-aware path
-predicate was separately exercised for the exact G003 verifier/evidence paths
-and rejects adjacent unapproved paths.
+`tools/test-verify-baseline.sh` is not runnable in this OMX worker worktree:
+after initializing its nested Realm Core submodules, `capture-baseline.py`
+stops at `git symbolic-ref --short HEAD` because team worktrees are detached.
+This occurs before the allowlist assertions and is an execution-environment
+gap, not a regression assertion failure. The phase-aware path predicate was
+separately exercised for the exact G003 verifier/evidence paths and rejects
+adjacent unapproved paths.
 
 ## Integration handoff
 
