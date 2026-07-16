@@ -92,8 +92,7 @@ class PluginTest {
             ':app:verifyRealmPluginContract',
             ':app:dependencies',
             '--configuration',
-            'api',
-            '--offline'
+            'api'
         ).build()
 
         assertTaskSucceeded(result, ':app:assembleDebug')
@@ -128,6 +127,9 @@ class PluginTest {
 
         assertFalse('A local-DB fixture must never request Object Server artifacts.', result.output.contains('object-server'))
 
+        BuildResult offline = run(':app:verifyRealmPluginContract', '--offline').build()
+        assertTrue('The warmed fixture must resolve its local Realm contract offline.', offline.output.contains('REALM-OFFICIAL-COUNT api=0'))
+
         List<String> cacheArguments = [
             ':app:assembleDebug',
             ':app:assembleRelease',
@@ -146,16 +148,19 @@ class PluginTest {
     void explicitSyncFalseKeepsTheLocalRealmContract() {
         writeFixture(false, true)
 
-        BuildResult result = run(':app:verifyRealmPluginContract', '--offline').build()
+        BuildResult result = run(':app:verifyRealmPluginContract').build()
         assertTrue(result.output.contains('REALM-OFFICIAL-COUNT api=0'))
         assertFalse(result.output.contains('object-server'))
+
+        BuildResult offline = run(':app:verifyRealmPluginContract', '--offline').build()
+        assertTrue('Explicit syncEnabled=false must remain runnable offline after warm-up.', offline.output.contains('REALM-OFFICIAL-COUNT api=0'))
     }
 
     @Test
     void syncIsRejectedBeforeAnyObjectServerDependencyCanResolve() {
         writeFixture(true)
 
-        BuildResult result = run(':app:help', '--offline').buildAndFail()
+        BuildResult result = run(':app:help').buildAndFail()
         String lowerCaseOutput = result.output.toLowerCase(Locale.ROOT)
 
         assertTrue('syncEnabled=true must fail with an explicit Sync error.', lowerCaseOutput.contains('sync'))
