@@ -566,10 +566,9 @@ class PluginTest {
     private void assertResolvedConfigurationContains(BuildResult result, String configuration, String artifact) {
         assertTrue(
             'Expected ' + configuration + ' to resolve the forked ' + artifact + ' coordinate.\n' + result.output,
-            result.output.readLines().any { line ->
-                line.startsWith('REALM-RESOLVED ' + configuration + '=')
-                    && line.contains(FORK_GROUP + ':' + artifact + ':' + FORK_VERSION)
-            }
+            result.output.contains(
+                'REALM-RESOLVED ' + configuration + '=' + FORK_GROUP + ':' + artifact + ':' + FORK_VERSION
+            )
         )
     }
 
