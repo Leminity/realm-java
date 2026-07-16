@@ -8,6 +8,18 @@ readonly EXPECTED_CORE=5533505d18fda93a7a971d58a191db5005583c92
 readonly EXPECTED_CATCH=3f0283de7a9c43200033da996ff9093be3ac84dc
 readonly EXPECTED_SHA1=d9ae30f34095107ece9dceb224839f0dc2f9c1c7
 readonly EXPECTED_SHA2=0e9aebf34101c6aa89355fd76ac9cd886735dee1
+readonly REQUIRED_GRADLE_URL='https\://services.gradle.org/distributions/gradle-9.6.1-bin.zip'
+readonly REQUIRED_GRADLE_SHA256=9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14
+readonly -a APPROVED_WRAPPER_PATHS=(
+  examples/gradle/wrapper/gradle-wrapper.properties
+  gradle-plugin/gradle/wrapper/gradle-wrapper.properties
+  gradle/wrapper/gradle-wrapper.properties
+  library-benchmarks/gradle/wrapper/gradle-wrapper.properties
+  library-build-transformer/gradle/wrapper/gradle-wrapper.properties
+  realm-annotations/gradle/wrapper/gradle-wrapper.properties
+  realm-transformer/gradle/wrapper/gradle-wrapper.properties
+  realm/gradle/wrapper/gradle-wrapper.properties
+)
 
 is_baseline_allowed_path() {
   local path="$1"
@@ -43,6 +55,48 @@ is_baseline_allowed_path() {
   return 1
 }
 
+is_approved_wrapper_pin() {
+  [[ "$1" == "$REQUIRED_GRADLE_URL" && "$2" == "$REQUIRED_GRADLE_SHA256" ]]
+}
+
+verify_approved_wrapper_pins() {
+  local wrapper url sha
+
+  for wrapper in "${APPROVED_WRAPPER_PATHS[@]}"; do
+    url="$(sed -n 's/^distributionUrl=//p' "$wrapper")"
+    sha="$(sed -n 's/^distributionSha256Sum=//p' "$wrapper")"
+    if ! is_approved_wrapper_pin "$url" "$sha"; then
+      printf 'unexpected Gradle wrapper pin in %s\n' "$wrapper" >&2
+      return 1
+    fi
+  done
+}
+
+verify_baseline_capture() {
+  local baseline="$1"
+  local current="$2"
+
+  python3 - "$baseline" "$current" <<'PY'
+import json
+import sys
+
+baseline_path, current_path = sys.argv[1:]
+with open(baseline_path, encoding="utf-8") as source:
+    baseline = json.load(source)
+with open(current_path, encoding="utf-8") as source:
+    current = json.load(source)
+
+# Wrapper URLs deliberately advance from the immutable v10.19.0 baseline to
+# the exact G002 pins. Every other captured field must remain byte-for-value
+# equivalent after JSON parsing.
+baseline.pop("wrappers", None)
+current.pop("wrappers", None)
+if baseline != current:
+    print("immutable baseline capture differs outside approved wrapper pins", file=sys.stderr)
+    raise SystemExit(1)
+PY
+}
+
 main() {
   local root path core
   local -a invalid_paths=()
@@ -71,7 +125,8 @@ main() {
   [[ "$(git -C "$core/src/external/sha-2" rev-parse HEAD)" == "$EXPECTED_SHA2" ]]
 
   python3 tools/capture-baseline.py --output /tmp/realm-baseline-verify.json
-  cmp -s /tmp/realm-baseline-verify.json evidence/provenance/baseline.json
+  verify_baseline_capture evidence/provenance/baseline.json /tmp/realm-baseline-verify.json
+  verify_approved_wrapper_pins
   rm -f /tmp/realm-baseline-verify.json
   tools/test-verify-release-tag.sh
 
