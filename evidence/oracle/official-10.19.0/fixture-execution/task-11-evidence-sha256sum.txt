@@ -1,0 +1,11 @@
+# Recompute with: sha256sum -c task-11-evidence-sha256sum.txt
+4484bdd6d5e16c817d4dfc5cda05334055c86428c861c1d22e8cf67ce42fee49  task-11-kvm-container-accel-check.log
+bbb25b35937bdb24a853815d3765e6374fa313abb7dbba491fd617bd045bf1a0  task-11-kvm-container-runtime.log
+57e1872e138a30e7f6fb95c3a9e4b135a0da81e90b8d176a232b3447f4dcb939  task-11-4k-kvm-runtime.log
+585898b625b6f974d93885daf4adb8701bdac5b97cd18e4c44737cee30135654  task-11-4k-internal-manifestfix-build.log
+de2afcf267d9385e4a15c50d080161d0e299f755633588df79e6a6afb8c4cfff  task-11-4k-internal-manifestfix-install-dexopt.log
+3929513d373f846be2a46e7f3ec3b629ca79c9fa4ac581bd8fb6bce25cd82cce  task-11-4k-internal-manifestfix-direct-instrumentation.log
+03efe32b20c15284156ee3983a210cff4e58162fe01f2aa729a67e7857335774  task-11-4k-internal-host-verifier.log
+4ece7368a03ff93cc9be8b26f76e7b95b7e1dc6716c38d2ffc1c977685536df9  task-11-final-oracle-artifacts.log
+c876737b5d54ac22ca596941b835021f5d148c8465d8540adb8b30b84ea274ae  task-11-attempt-8-terminal-state.log
+ce2ae0bd72362170c2e9172a5368d565f482341de5fbeafb42526db5055d462c  task-11-attempt-9-kvm-direct-instrumentation.log

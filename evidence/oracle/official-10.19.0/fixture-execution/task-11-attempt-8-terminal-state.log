@@ -1,0 +1,44 @@
+CAPTURED_AT_UTC=2026-07-16T04:38:58Z
+DEVICE_STATE=device
+API=37
+
+PAGE_SIZE=16384
+
+BUILD_FINGERPRINT=google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys
+
+RUNNER_PROCESS_COUNT=0
+REMOTE_LIST_BEGIN
+total 16
+-rw-r----- 1 u0_a232 ext_data_rw    0 2026-07-16 13:38 official-10.19.0-plain.realm.lock
+drwxr-s--- 2 u0_a232 ext_data_rw 4096 2026-07-16 13:22 official-10.19.0-plain.realm.management
+REMOTE_LIST_END
+REMOTE_REALM_FILE_COUNT=0
+
+MANIFEST_PRESENT=no
+INSTRUMENTATION_LOG_TAIL_BEGIN
+COMMAND=timeout 900 <sdk-adb> -s emulator-5554 shell am instrument -w -r io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+DEVICE=device
+API=37
+
+PAGE_SIZE=16384
+
+REMOVE_PRIOR_OUTPUT=PASS
+INSTRUMENTATION_STATUS: class=io.realm.fixtureoracle.OfficialFixtureOracleTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.realm.fixtureoracle.OfficialFixtureOracleTest:
+INSTRUMENTATION_STATUS: test=generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_HOST_RC=124
+INSTRUMENTATION_LOG_TAIL_END
+RECENT_FIXTURE_LOGCAT_BEGIN
+07-16 13:34:49.863   491   491 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:ps -T -p 9945 -o TID,STAT,TIME,CMD 2>/dev/null | grep roidJUnitRunner; find /sdcard/Android/data/io.realm.fixtureoracle/files/official-10.19.0-oracle -type f -ls 2>/dev/null'
+07-16 13:35:37.626   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:ls -l /sdcard/Android/data/io.realm.fixtureoracle/files/official-10.19.0-oracle 2>&1'
+07-16 13:38:00.482   491   491 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:ps -A | grep fixtureoracle; find /sdcard/Android/data/io.realm.fixtureoracle/files/official-10.19.0-oracle -type f -ls 2>/dev/null'
+07-16 13:38:58.478   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:ls -l '/sdcard/Android/data/io.realm.fixtureoracle/files/official-10.19.0-oracle' 2>&1'
+07-16 13:38:59.087   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:find '/sdcard/Android/data/io.realm.fixtureoracle/files/official-10.19.0-oracle' -maxdepth 1 -type f -name '*.realm' -printf '%f\n' 2>/dev/null | wc -l'
+07-16 13:39:00.141   491   491 I adbd    : adbd service requested 'shell,v2,TERM=dumb,raw:test -f '/sdcard/Android/data/io.realm.fixtureoracle/files/official-10.19.0-oracle/fixture-manifest.json' && echo yes || echo no'
+RECENT_FIXTURE_LOGCAT_END
+TERMINAL_EVIDENCE_CAPTURE=PASS

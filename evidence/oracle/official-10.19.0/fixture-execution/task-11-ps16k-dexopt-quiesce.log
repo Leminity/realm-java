@@ -1,0 +1,57 @@
+UTC=2026-07-16T04:08:12Z
+compile_target:
+Success
+compile_test:
+Success
+force_stop_nonessential:
+cpuinfo_after_dexopt_quiesce:
+Load: 32.18 / 33.22 / 30.5
+CPU usage from 16646ms to 7192ms ago (2026-07-16 13:08:20.257 to 2026-07-16 13:08:29.711):
+  41% 1841/system_server: 12% user + 28% kernel / faults: 860 minor
+  12% 7051/com.google.android.googlequicksearchbox:googleapp: 4.3% user + 7.6% kernel / faults: 1678 minor
+  11% 7056/com.google.android.googlequicksearchbox:interactor: 4.3% user + 6.9% kernel / faults: 1598 minor
+  10% 6941/com.google.android.gms: 4.9% user + 5.8% kernel / faults: 1133 minor
+  10% 6213/com.google.android.gms.persistent: 3.3% user + 6.9% kernel / faults: 2098 minor
+  8.8% 3277/com.android.systemui: 3.7% user + 5.1% kernel / faults: 448 minor
+  7.1% 6902/com.google.android.gms.unstable: 2.7% user + 4.4% kernel / faults: 1038 minor 1 major
+  6.2% 5810/com.google.android.providers.media.module: 2.8% user + 3.3% kernel / faults: 548 minor
+  6.1% 488/surfaceflinger: 2.1% user + 4% kernel
+  4.8% 454/android.hardware.graphics.composer3-service.ranchu: 0.7% user + 4.1% kernel
+  4.5% 443/android.hardware.sensors-service.multihal: 0.6% user + 3.9% kernel
+  2.2% 262/logd: 0.3% user + 1.8% kernel / faults: 9 minor
+  1.5% 7113/artd: 0.4% user + 1% kernel / faults: 237 minor
+  1.4% 522/logcat: 0.1% user + 1.2% kernel
+  1.5% 44/kworker/1:1-virtio_vsock: 0% user + 1.5% kernel
+  1.1% 425/statsd: 0.2% user + 0.9% kernel
+  1.1% 1764/mediaserver: 0.4% user + 0.7% kernel / faults: 2 minor
+  0.9% 327/jbd2/dm-6-8: 0% user + 0.9% kernel
+  0.9% 491/adbd: 0.2% user + 0.7% kernel / faults: 1434 minor
+  0.8% 2894/kworker/u8:3-loop12: 0% user + 0.8% kernel
+  0.7% 18/rcu_preempt: 0% user + 0.7% kernel
+  0.6% 531/media.extractor: 0.3% user + 0.3% kernel / faults: 2 minor
+  0.3% 1761/zygote64: 0% user + 0.3% kernel / faults: 43 minor
+  0.4% 3035/kworker/1:0H-kverityd: 0% user + 0.4% kernel
+  0.3% 3906/kworker/u9:0-fscrypt_read_queue: 0% user + 0.3% kernel
+  0.2% 62/khvcd: 0% user + 0.2% kernel
+  0.2% 263/lmkd: 0% user + 0.2% kernel
+  0.2% 264/servicemanager: 0.1% user + 0.1% kernel
+  0% 521/traced: 0% user + 0% kernel
+  0.1% 1765/netd: 0.1% user + 0% kernel / faults: 5 minor
+  0.1% 10/kworker/0:0H-kverityd: 0% user + 0.1% kernel
+  0% 19/rcuog/0: 0% user + 0% kernel
+  0% 29/migration/1: 0% user + 0% kernel
+  0% 33/rcuop/1: 0% user + 0% kernel
+  0% 39/kcompactd0: 0% user + 0% kernel
+  0% 265/hwservicemanager: 0% user + 0% kernel
+  0% 275/vold: 0% user + 0% kernel
+  0% 533/media.metrics: 0% user + 0% kernel
+  0% 1250/kworker/u8:2-ext4-rsv-conversion: 0% user + 0% kernel
+  0% 1666/kworker/0:2-events: 0% user + 0% kernel
+  0% 1767/iptables-restore: 0% user + 0% kernel
+  0% 2049/android.hardware.biometrics.fingerprint-service.ranchu: 0% user + 0% kernel
+  0% 2195/com.android.networkstack.process: 0% user + 0% kernel / faults: 2 minor
+ +0% 7174/com.android.phone: 0% user + 0% kernel
+100% TOTAL: 33% user + 65% kernel + 0.7% softirq
+device_state:
+device
+page_size=16384

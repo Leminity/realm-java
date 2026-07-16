@@ -1,0 +1,12 @@
+APP_APK_SHA256=ba627a1c2492f104c109fb4e3305c17ff675a11863de8a6f11562d8d23ddafcf
+TEST_APK_SHA256=a51ab460e9a20ef277c14555d7c9c3aff4dec085bc5cbd38e0850a06e7cc0b67
+APP_INSTALL=Performing Streamed Install
+Success
+TEST_INSTALL=Performing Streamed Install
+Success
+TARGET_DEXOPT=Success
+TEST_DEXOPT=Success
+TARGET_ENABLED=package:io.realm.fixtureoracle
+package:io.realm.fixtureoracle.test
+TEST_ENABLED=package:io.realm.fixtureoracle.test
+INSTALL_DEXOPT_RESULT=PASS

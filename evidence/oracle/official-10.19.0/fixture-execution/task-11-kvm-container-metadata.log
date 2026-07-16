@@ -1,0 +1,1 @@
+CONTAINER_ID=2f465430ccb0af012df61dd1ae61dbc84142119dae5f575fdc689afe1b2faee2\nIMAGE=realm-api37-kvm-runtime:local\nHOST_NETWORK=host\nKVM=[{"CgroupPermissions":"rwm","PathInContainer":"/dev/kvm","PathOnHost":"/dev/kvm"}]

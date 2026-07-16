@@ -1,0 +1,9 @@
+ADB_CONNECT=already connected to localhost:5575
+STATE=device
+BOOT=1
+
+API=36
+
+PAGE_SIZE=4096
+
+FINGERPRINT=google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys

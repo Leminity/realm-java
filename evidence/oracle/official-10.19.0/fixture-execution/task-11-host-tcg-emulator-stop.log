@@ -1,0 +1,7 @@
+CAPTURED_AT_UTC=2026-07-16T04:42:00Z
+HOST_TCG_QEMU_BEFORE
+262226 /home/leminity/Android/Sdk/emulator/qemu/linux-x86_64/qemu-system-x86_64-headless -avd realm-api37-ps16k -no-window -no-audio -no-boot-anim -no-snapshot -wipe-data -gpu swiftshader_indirect -accel off -memory 2048 -cores 2
+GRACEFUL_EMULATOR_STOP=OK: killing emulator, bye bye
+OK
+
+HOST_TCG_QEMU_STOPPED=PASS

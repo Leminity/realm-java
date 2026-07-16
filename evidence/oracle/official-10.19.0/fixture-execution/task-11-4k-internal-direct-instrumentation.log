@@ -1,0 +1,59 @@
+COMMAND=timeout 120 <sdk-adb> -s localhost:5575 shell am instrument -w -r io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+SERIAL=localhost:5575
+DEVICE=device
+API=36
+
+PAGE_SIZE=4096
+
+REMOVE_PRIOR_INTERNAL_OUTPUT=PASS
+INSTRUMENTATION_STATUS: class=io.realm.fixtureoracle.OfficialFixtureOracleTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.realm.fixtureoracle.OfficialFixtureOracleTest:
+INSTRUMENTATION_STATUS: test=generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.fixtureoracle.OfficialFixtureOracleTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stack=java.io.FileNotFoundException: schema.json
+	at android.content.res.AssetManager.nativeOpenAsset(Native Method)
+	at android.content.res.AssetManager.open(AssetManager.java:1010)
+	at android.content.res.AssetManager.open(AssetManager.java:987)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.readAsset(OfficialFixtureOracleTest.java:115)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.writeManifest(OfficialFixtureOracleTest.java:103)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader(OfficialFixtureOracleTest.java:39)
+
+INSTRUMENTATION_STATUS: stream=
+Error in generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader(io.realm.fixtureoracle.OfficialFixtureOracleTest):
+java.io.FileNotFoundException: schema.json
+	at android.content.res.AssetManager.nativeOpenAsset(Native Method)
+	at android.content.res.AssetManager.open(AssetManager.java:1010)
+	at android.content.res.AssetManager.open(AssetManager.java:987)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.readAsset(OfficialFixtureOracleTest.java:115)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.writeManifest(OfficialFixtureOracleTest.java:103)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader(OfficialFixtureOracleTest.java:39)
+
+INSTRUMENTATION_STATUS: test=generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.025
+There was 1 failure:
+1) generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader(io.realm.fixtureoracle.OfficialFixtureOracleTest)
+java.io.FileNotFoundException: schema.json
+	at android.content.res.AssetManager.nativeOpenAsset(Native Method)
+	at android.content.res.AssetManager.open(AssetManager.java:1010)
+	at android.content.res.AssetManager.open(AssetManager.java:987)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.readAsset(OfficialFixtureOracleTest.java:115)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.writeManifest(OfficialFixtureOracleTest.java:103)
+	at io.realm.fixtureoracle.OfficialFixtureOracleTest.generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader(OfficialFixtureOracleTest.java:39)
+
+FAILURES!!!
+Tests run: 1,  Failures: 1
+
+
+INSTRUMENTATION_CODE: -1
+INSTRUMENTATION_HOST_RC=0

@@ -29,14 +29,14 @@ public final class OfficialFixtureOracleTest {
         Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
         Realm.init(context);
         byte[] key = parseFixtureKey(BuildConfig.FIXTURE_KEY_HEX);
-        File output = new File(context.getExternalFilesDir(null), "official-10.19.0-oracle");
+        File output = new File(context.getFilesDir(), "official-10.19.0-oracle");
         if (!output.exists() && !output.mkdirs()) throw new IOException("Cannot create " + output);
 
         File plain = generateFixture(output, "official-10.19.0-plain.realm", null);
         File encrypted = generateFixture(output, "official-10.19.0-encrypted.realm", key);
         verifySemanticRead(output, "official-10.19.0-plain.realm", null);
         verifySemanticRead(output, "official-10.19.0-encrypted.realm", key);
-        writeManifest(context, output, plain, encrypted, key);
+        writeManifest(InstrumentationRegistry.getInstrumentation().getContext(), output, plain, encrypted, key);
     }
 
     private static File generateFixture(File directory, String name, byte[] key) {
@@ -92,7 +92,7 @@ public final class OfficialFixtureOracleTest {
 
     private static byte[] parseFixtureKey(String hex) {
         if (hex == null || !hex.matches("[0-9a-fA-F]{128}")) {
-            throw new IllegalStateException("Pass a 64-byte test-only key with -PfixtureKeyHex=<128 hex chars>");
+            throw new IllegalStateException("Provide FIXTURE_KEY_HEX as a 64-byte test-only environment secret");
         }
         byte[] key = new byte[64];
         for (int i = 0; i < key.length; i++) key[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);

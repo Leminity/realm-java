@@ -1,0 +1,14 @@
+Task 11 official fixture oracle command record — acceptance attempt 6
+UTC started: 2026-07-16T04:01:05Z
+Device: emulator-5554
+API: 37
+PAGE_SIZE: 16384
+sys.boot_completed: 1
+dev.bootcomplete: 1
+Retained fixed test-key SHA-256: fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108
+Generator inputs SHA-256: 317c4fa4850e42d5d35c3c2d5fd2fcb0b8c7f91b50283986bce8a503b3234936
+AAPT2 override SHA-256: 1a6a396b9cd071f7040071fdd108718cb98c3c9f4960044f373b288993d19eb7
+Command (fixed key loaded locally; key omitted): timeout 900 compatibility-fixtures/official-10.19.0-generator/run-official-oracle.sh
+
+exit_code=1
+UTC finished=2026-07-16T04:02:06Z

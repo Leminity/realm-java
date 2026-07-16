@@ -1,0 +1,10 @@
+Task 11 fixed-key direct instrumentation fallback
+UTC started: 2026-07-16T04:05:03Z
+Device: emulator-5554
+API: 37
+PAGE_SIZE: 16384
+Fixed test-key SHA-256: fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108
+Reason: connectedDebugAndroidTest attempt 6 aborted before test dispatch; run one non-concurrent direct invocation of the already-installed same fixed-key APK.
+Command: timeout 900 adb -s emulator-5554 shell am instrument -w -r io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+exit_code=0
+UTC_finished=2026-07-16T04:06:20Z

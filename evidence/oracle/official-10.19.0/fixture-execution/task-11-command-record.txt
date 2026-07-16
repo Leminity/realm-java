@@ -1,0 +1,11 @@
+Task 11 official fixture oracle command record
+UTC started: 2026-07-16T03:39:35Z
+Device: emulator-5554
+API: 37
+PAGE_SIZE: 16384
+sys.boot_completed:
+Key SHA-256: f02c8da4663bad53b4d1145bef9d603911159b17d8093101c5fd9db6a24c2da7
+Command (key omitted): cd compatibility-fixtures/official-10.19.0-generator && ./gradlew --no-daemon connectedDebugAndroidTest -PfixtureKeyHex=<redacted-64-byte-key>; adb pull official fixtures; verify-generated-fixtures.py
+
+exit_code=1
+UTC finished=2026-07-16T03:39:54Z

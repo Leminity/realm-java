@@ -1,0 +1,10 @@
+Task 11 candidate fixed-key 16 KiB direct instrumentation after full quiesce
+UTC started: 2026-07-16T04:11:38Z
+Device: emulator-5554
+API: 37
+PAGE_SIZE: 16384
+Fixed test-key SHA-256: fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108
+Preparation: target/test dexopt speed; disabled user-0 nonessential launcher/Search/Photos/Bard/Play Store where present; GMS/system/package/adb/fixture packages retained; no emulator restart/kill.
+Command: timeout 900 adb -s emulator-5554 shell am instrument -w -r io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+exit_code=0
+UTC_finished=2026-07-16T04:12:18Z

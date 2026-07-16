@@ -28,9 +28,10 @@ listed and hashed in `upstream-source-locations.md` and `upstream-source-sha256.
    nullable values, dates, binary data, links, lists, and a queryable indexed field.
    Save a canonical JSON golden record sorted by primary key.
 3. Set an explicit schema version. Generate `plain.realm` with no encryption and
-   `encrypted.realm` using a fixed **test-only 64-byte** key supplied through an
-   excluded local test secret/CI secret; record only the key identifier and SHA-256,
-   never the key material.
+   `encrypted.realm` using the fixed **test-only 64-byte** vector in
+   `fixed-test-key.hex`. This deliberately non-secret reproducibility input is retained
+   with the oracle for later fork and wrong-key checks; record its SHA-256 in the
+   fixture manifest and never place it in command logs or Gradle arguments.
 4. Close each Realm, reopen it with the same official 10.19.0 reader, and export the
    canonical record. The export must exactly equal the golden record. Record fixture
    SHA-256, size, schema version, runtime/device details, and official artifact-manifest
@@ -58,11 +59,21 @@ Never mutate a committed/original oracle fixture in place. The result is not acc
 until the baseline reader pass, fork reader pass, reverse reader pass, wrong-key
 integrity check, and fixture-manifest hash are all present.
 
-## Executable generator status (task 8)
+## Executable generator status
 
 `app/src/androidTest/java/io/realm/fixtureoracle/OfficialFixtureOracleTest.java` is the
-executable official-reader generator. `run-official-oracle.sh` injects a non-committed
-64-byte test key, runs the connected instrumentation test, pulls both fixture files,
-and verifies the generated manifest plus file hashes on the host. As recorded in
-`../../evidence/oracle/official-10.19.0/fixture-execution/task-8-prerequisite-blocker.md`,
-this runtime is currently **BLOCKED**: it has not generated a fixture PASS.
+executable official-reader generator. It creates, closes, and semantically reopens both
+files under the target app's internal files directory; Realm mmap files must not be
+created under emulated-storage FUSE. It reads schema and golden-data assets from the
+instrumentation context, where the androidTest assets reside.
+
+`run-official-oracle.sh` uses the fixed test key, runs instrumentation, then exports only
+the closed plain file, encrypted file, and manifest through debug `run-as` plus `tar`.
+It deliberately excludes Realm lock, management, and FIFO files. The host verifier checks
+the manifest's official-reader result, the fixed-key fingerprint, and both fixture hashes.
+
+Task-11 execution evidence is under
+`../../evidence/oracle/official-10.19.0/fixture-execution/`: the official 10.19.0 baseline
+passes on the isolated KVM API-36, 4 KiB oracle. Separate API-37, 16 KiB attempts are
+preserved as pre-change official-runtime failure evidence; they do not replace the required
+fork API-37, 16 KiB compatibility gate.

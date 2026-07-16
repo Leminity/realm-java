@@ -1,0 +1,45 @@
+INSTRUMENTATION_STATUS: stack=java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/test/platform/io/OutputDirCalculator$outputDir$2;
+	at androidx.test.platform.io.OutputDirCalculator.<init>(OutputDirCalculator.kt:27)
+	at androidx.test.platform.io.FileTestStorage.<init>(FileTestStorage.java:45)
+	at androidx.test.runner.AndroidJUnitRunner.registerTestStorage(AndroidJUnitRunner.java:664)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:441)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2637)
+Caused by: java.lang.ClassNotFoundException: androidx.test.platform.io.OutputDirCalculator$outputDir$2
+	at java.lang.VMClassLoader.findLoadedClass(Native Method)
+	at java.lang.ClassLoader.findLoadedClass(ClassLoader.java:1283)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:628)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:580)
+	... 5 more
+Caused by: java.lang.NoClassDefFoundError: Failed resolution of: Lkotlin/jvm/internal/Lambda;
+	... 5 more
+Caused by: java.lang.ClassNotFoundException: Didn't find class "kotlin.jvm.internal.Lambda" on path: DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~NBzUmqwOixDeJP23n5HrZA==/io.realm.fixtureoracle.test-Wx38xbYQOoZIa7Kz8RFU8A==/base.apk", zip file "/data/app/~~nq_FErTYQcedpcn3hGNWeg==/io.realm.fixtureoracle-dk7wDygoCtZ9ZP7iIN6eiw==/base.apk"],nativeLibraryDirectories=[/data/app/~~NBzUmqwOixDeJP23n5HrZA==/io.realm.fixtureoracle.test-Wx38xbYQOoZIa7Kz8RFU8A==/lib/x86_64, /data/app/~~nq_FErTYQcedpcn3hGNWeg==/io.realm.fixtureoracle-dk7wDygoCtZ9ZP7iIN6eiw==/lib/x86_64, /data/app/~~NBzUmqwOixDeJP23n5HrZA==/io.realm.fixtureoracle.test-Wx38xbYQOoZIa7Kz8RFU8A==/base.apk!/lib/x86_64, /data/app/~~nq_FErTYQcedpcn3hGNWeg==/io.realm.fixtureoracle-dk7wDygoCtZ9ZP7iIN6eiw==/base.apk!/lib/x86_64, /system/lib64, /system_ext/lib64]]
+	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:644)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:580)
+	... 5 more
+
+INSTRUMENTATION_STATUS: stream=
+Process crashed before executing the test(s):
+java.lang.NoClassDefFoundError: Failed resolution of: Landroidx/test/platform/io/OutputDirCalculator$outputDir$2;
+	at androidx.test.platform.io.OutputDirCalculator.<init>(OutputDirCalculator.kt:27)
+	at androidx.test.platform.io.FileTestStorage.<init>(FileTestStorage.java:45)
+	at androidx.test.runner.AndroidJUnitRunner.registerTestStorage(AndroidJUnitRunner.java:664)
+	at androidx.test.runner.AndroidJUnitRunner.onStart(AndroidJUnitRunner.java:441)
+	at android.app.Instrumentation$InstrumentationThread.run(Instrumentation.java:2637)
+Caused by: java.lang.ClassNotFoundException: androidx.test.platform.io.OutputDirCalculator$outputDir$2
+	at java.lang.VMClassLoader.findLoadedClass(Native Method)
+	at java.lang.ClassLoader.findLoadedClass(ClassLoader.java:1283)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:628)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:580)
+	... 5 more
+Caused by: java.lang.NoClassDefFoundError: Failed resolution of: Lkotlin/jvm/internal/Lambda;
+	... 5 more
+Caused by: java.lang.ClassNotFoundException: Didn't find class "kotlin.jvm.internal.Lambda" on path: DexPathList[[zip file "/system/framework/android.test.runner.jar", zip file "/system/framework/android.test.mock.jar", zip file "/system/framework/android.test.base.jar", zip file "/data/app/~~NBzUmqwOixDeJP23n5HrZA==/io.realm.fixtureoracle.test-Wx38xbYQOoZIa7Kz8RFU8A==/base.apk", zip file "/data/app/~~nq_FErTYQcedpcn3hGNWeg==/io.realm.fixtureoracle-dk7wDygoCtZ9ZP7iIN6eiw==/base.apk"],nativeLibraryDirectories=[/data/app/~~NBzUmqwOixDeJP23n5HrZA==/io.realm.fixtureoracle.test-Wx38xbYQOoZIa7Kz8RFU8A==/lib/x86_64, /data/app/~~nq_FErTYQcedpcn3hGNWeg==/io.realm.fixtureoracle-dk7wDygoCtZ9ZP7iIN6eiw==/lib/x86_64, /data/app/~~NBzUmqwOixDeJP23n5HrZA==/io.realm.fixtureoracle.test-Wx38xbYQOoZIa7Kz8RFU8A==/base.apk!/lib/x86_64, /data/app/~~nq_FErTYQcedpcn3hGNWeg==/io.realm.fixtureoracle-dk7wDygoCtZ9ZP7iIN6eiw==/base.apk!/lib/x86_64, /system/lib64, /system_ext/lib64]]
+	at dalvik.system.BaseDexClassLoader.findClass(BaseDexClassLoader.java:259)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:644)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:580)
+	... 5 more
+
+INSTRUMENTATION_STATUS_CODE: -2
+INSTRUMENTATION_RESULT: shortMsg=Process crashed.
+INSTRUMENTATION_CODE: 0

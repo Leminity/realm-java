@@ -1,0 +1,16 @@
+COMMAND=timeout 900 <sdk-adb> -s emulator-5554 shell am instrument -w -r io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+DEVICE=device
+API=37
+
+PAGE_SIZE=16384
+
+REMOVE_PRIOR_OUTPUT=PASS
+INSTRUMENTATION_STATUS: class=io.realm.fixtureoracle.OfficialFixtureOracleTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.realm.fixtureoracle.OfficialFixtureOracleTest:
+INSTRUMENTATION_STATUS: test=generatePlainAndEncryptedFixturesAndVerifyWithOfficialReader
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_HOST_RC=124

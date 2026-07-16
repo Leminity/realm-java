@@ -1,0 +1,14 @@
+Task 11 official fixture oracle command record — attempt 3
+UTC started: 2026-07-16T03:42:51Z
+Device: emulator-5554
+API: 37
+PAGE_SIZE: 16384
+sys.boot_completed:
+Key SHA-256: 09168fc9240e1a09cc582d8d3d24928d882ee05b5b8e04793579d5060ae227b2
+Generator inputs SHA-256: e53b8956115bfcda9834fc7b33443066c719d73430ca14b65d8d4221a2565c31
+AAPT2 override: /home/leminity/Android/Sdk/build-tools/36.0.0/aapt2
+AAPT2 SHA-256: 1a6a396b9cd071f7040071fdd108718cb98c3c9f4960044f373b288993d19eb7
+Command (key omitted): cd compatibility-fixtures/official-10.19.0-generator && ANDROID_AAPT2_FROM_MAVEN_OVERRIDE=<Build-Tools-36-aapt2> ./gradlew --no-daemon connectedDebugAndroidTest -PfixtureKeyHex=<redacted-64-byte-key>; adb pull official fixtures; verify-generated-fixtures.py
+
+exit_code=1
+UTC finished=2026-07-16T03:43:01Z

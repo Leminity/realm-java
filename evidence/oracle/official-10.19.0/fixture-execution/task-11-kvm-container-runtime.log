@@ -1,0 +1,7 @@
+ADB_CONNECT=already connected to localhost:5655
+STATE=device
+BOOT=1
+
+API=37
+
+PAGE_SIZE=16384

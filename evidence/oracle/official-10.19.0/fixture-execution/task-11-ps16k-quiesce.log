@@ -1,0 +1,107 @@
+UTC=2026-07-16T04:06:50Z
+cpuinfo_before:
+Load: 31.56 / 33.73 / 30.27
+CPU usage from 32415ms to 23048ms ago (2026-07-16 13:06:17.392 to 2026-07-16 13:06:26.759):
+  50% 3598/com.google.android.apps.nexuslauncher: 26% user + 24% kernel / faults: 6533 minor
+  41% 1841/system_server: 14% user + 26% kernel / faults: 1000 minor
+  19% 6213/com.google.android.gms.persistent: 8.5% user + 11% kernel / faults: 599 minor 7 major
+  14% 3277/com.android.systemui: 5.9% user + 8.3% kernel / faults: 1803 minor
+  11% 6553/com.google.android.apps.photos: 5.5% user + 5.8% kernel / faults: 1339 minor
+  9.2% 6587/com.google.android.gms: 4.4% user + 4.8% kernel / faults: 822 minor
+  8.9% 488/surfaceflinger: 3.2% user + 5.6% kernel
+  7.4% 5810/com.google.android.providers.media.module: 3% user + 4.3% kernel / faults: 628 minor
+  7.3% 454/android.hardware.graphics.composer3-service.ranchu: 2.1% user + 5.1% kernel
+  4.8% 443/android.hardware.sensors-service.multihal: 1.3% user + 3.5% kernel
+  2.6% 262/logd: 0.6% user + 2% kernel / faults: 13 minor
+  2.3% 327/jbd2/dm-6-8: 0% user + 2.3% kernel
+  1.7% 522/logcat: 0.3% user + 1.4% kernel
+  1.7% 1764/mediaserver: 0% user + 1.7% kernel / faults: 2 minor
+  1.4% 44/kworker/1:1-virtio_vsock: 0% user + 1.4% kernel
+  0.9% 425/statsd: 0.3% user + 0.6% kernel
+  0.7% 6214/com.google.android.googlequicksearchbox:search: 0.4% user + 0.3% kernel / faults: 19 minor
+  0.5% 531/media.extractor: 0% user + 0.5% kernel / faults: 2 minor
+  0.5% 2894/kworker/u8:3-loop12: 0% user + 0.5% kernel
+  0.4% 18/rcu_preempt: 0% user + 0.4% kernel
+  0.4% 264/servicemanager: 0.2% user + 0.2% kernel
+  0.2% 1250/kworker/u8:2-ext4-rsv-conversion: 0% user + 0.2% kernel
+  0.4% 3035/kworker/1:0H-kverityd: 0% user + 0.4% kernel
+  0.3% 1761/zygote64: 0% user + 0.3% kernel / faults: 43 minor
+  0.2% 30/ksoftirqd/1: 0% user + 0.2% kernel
+  0.2% 62/khvcd: 0% user + 0.2% kernel
+  0.2% 2049/android.hardware.biometrics.fingerprint-service.ranchu: 0.1% user + 0.1% kernel
+  0% 10/kworker/0:0H-kverityd: 0% user + 0% kernel
+  0.1% 19/rcuog/0: 0% user + 0.1% kernel
+  0% 33/rcuop/1: 0% user + 0% kernel
+  0% 39/kcompactd0: 0% user + 0% kernel
+  0% 80/erofs_worker/1: 0% user + 0% kernel
+  0% 263/lmkd: 0% user + 0% kernel
+  0% 334/tombstoned: 0% user + 0% kernel
+  0.1% 442/android.hardware.radio-service.ranchu: 0% user + 0.1% kernel
+  0% 471/android.hardware.power-service.example: 0% user + 0% kernel
+  0% 496/android.hardware.graphics.allocator-service.ranchu: 0% user + 0% kernel
+  0% 1762/audioserver: 0% user + 0% kernel
+  0% 2075/ot-daemon: 0% user + 0% kernel
+ +0% 6630/com.android.phone: 0% user + 0% kernel
+100% TOTAL: 36% user + 62% kernel + 1.2% softirq
+quiesced_packages:
+com.google.android.googlequicksearchbox (force-stopped)
+com.android.vending (force-stopped)
+cpuinfo_after:
+Load: 29.26 / 33.06 / 30.13
+CPU usage from 33080ms to 9314ms ago (2026-07-16 13:06:26.759 to 2026-07-16 13:06:50.525):
+  38% 1841/system_server: 13% user + 24% kernel / faults: 9991 minor
+  36% 3598/com.google.android.apps.nexuslauncher: 23% user + 13% kernel / faults: 8859 minor
+  22% 6213/com.google.android.gms.persistent: 10% user + 11% kernel / faults: 5189 minor 67 major
+  13% 3277/com.android.systemui: 5.5% user + 7.7% kernel / faults: 10033 minor 4 major
+  12% 6587/com.google.android.gms: 5.2% user + 6.7% kernel / faults: 3296 minor 8 major
+  8.8% 6630/com.android.phone: 3.4% user + 5.4% kernel / faults: 2296 minor
+  7.6% 5810/com.google.android.providers.media.module: 3.3% user + 4.2% kernel / faults: 1517 minor
+  6% 454/android.hardware.graphics.composer3-service.ranchu: 2% user + 3.9% kernel
+  5.3% 488/surfaceflinger: 1.8% user + 3.5% kernel
+  4.8% 443/android.hardware.sensors-service.multihal: 0.5% user + 4.2% kernel
+  3.1% 1764/mediaserver: 0.8% user + 2.3% kernel / faults: 14 minor
+  2.4% 262/logd: 0.6% user + 1.7% kernel / faults: 54 minor
+  1.9% 327/jbd2/dm-6-8: 0% user + 1.9% kernel
+  1.7% 531/media.extractor: 0.4% user + 1.2% kernel / faults: 14 minor
+  1% 4018/kworker/1:4-virtio_vsock: 0% user + 1% kernel
+  1.2% 425/statsd: 0.2% user + 0.9% kernel
+  1.1% 522/logcat: 0.2% user + 0.8% kernel
+  0.8% 264/servicemanager: 0.2% user + 0.5% kernel / faults: 1 minor
+  0.5% 491/adbd: 0% user + 0.4% kernel / faults: 2274 minor
+  0.6% 2894/kworker/u8:3-loop12: 0% user + 0.6% kernel
+  0.5% 44/kworker/1:1-virtio_vsock: 0% user + 0.5% kernel
+  0.3% 1250/kworker/u8:2-ext4-rsv-conversion: 0% user + 0.3% kernel
+  0.2% 517/drmserver: 0% user + 0.2% kernel
+  0.3% 1761/zygote64: 0% user + 0.3% kernel / faults: 86 minor
+  0.3% 3035/kworker/1:0H-kverityd: 0% user + 0.3% kernel
+  0.2% 30/ksoftirqd/1: 0% user + 0.2% kernel
+  0.1% 62/khvcd: 0% user + 0.1% kernel
+  0.1% 80/erofs_worker/1: 0% user + 0.1% kernel
+  0% 289/keystore2: 0% user + 0% kernel / faults: 2 minor
+  0.1% 442/android.hardware.radio-service.ranchu: 0.1% user + 0% kernel
+  0.1% 1666/kworker/0:2-events: 0% user + 0.1% kernel
+  0.1% 18/rcu_preempt: 0% user + 0.1% kernel
+  0% 533/media.metrics: 0% user + 0% kernel / faults: 6 minor
+  0% 2195/com.android.networkstack.process: 0% user + 0% kernel / faults: 6 minor
+  0% 10/kworker/0:0H-kverityd: 0% user + 0% kernel
+  0% 33/rcuop/1: 0% user + 0% kernel
+  0% 496/android.hardware.graphics.allocator-service.ranchu: 0% user + 0% kernel
+  0% 1765/netd: 0% user + 0% kernel / faults: 1 minor
+  0% 1767/iptables-restore: 0% user + 0% kernel
+  0% 2049/android.hardware.biometrics.fingerprint-service.ranchu: 0% user + 0% kernel
+  0% 2075/ot-daemon: 0% user + 0% kernel
+  0% 19/rcuog/0: 0% user + 0% kernel
+  0% 20/rcuop/0: 0% user + 0% kernel
+  0% 39/kcompactd0: 0% user + 0% kernel
+  0% 258/prng_seeder: 0% user + 0% kernel
+  0% 334/tombstoned: 0% user + 0% kernel
+  0% 478/android.hardware.threadnetwork-service: 0% user + 0% kernel
+  0% 1768/ip6tables-restore: 0% user + 0% kernel
+ +0% 6652/chbox:googleapp: 0% user + 0% kernel
+ +0% 6702/com.google.android.gms.unstable: 0% user + 0% kernel
+100% TOTAL: 43% user + 55% kernel + 1.1% softirq
+device:
+device
+api=37
+page_size=16384
+boot_completed=1

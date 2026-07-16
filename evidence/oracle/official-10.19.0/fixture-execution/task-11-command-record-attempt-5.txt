@@ -1,0 +1,14 @@
+Task 11 official fixture oracle command record — attempt 5
+UTC started: 2026-07-16T03:49:12Z
+Device: emulator-5554
+API: 37
+PAGE_SIZE: 16384
+sys.boot_completed: 1
+dev.bootcomplete: 1
+Key SHA-256: a56df9e1ae60081ce209c775925aa86518f9e57f6baa2a1b615a08fb590d53c2
+Generator inputs SHA-256: b1a44819862dd0346b307f2ddc2591b78c368307189dbd569835c9a40ca1ceb1
+AAPT2 override SHA-256: 1a6a396b9cd071f7040071fdd108718cb98c3c9f4960044f373b288993d19eb7
+Command (key omitted): cd compatibility-fixtures/official-10.19.0-generator && FIXTURE_KEY_HEX=<redacted-64-byte-key> ./gradlew --no-daemon -Pandroid.aapt2FromMavenOverride=<Build-Tools-36-aapt2> connectedDebugAndroidTest; adb pull official fixtures; verify-generated-fixtures.py
+
+exit_code=130
+UTC finished=2026-07-16T03:54:15Z

@@ -1,0 +1,39 @@
+RESULT=PASS
+OFFICIAL_RUNTIME=io.realm:10.19.0
+ORACLE_RUNTIME=KVM_API36_4K
+ADB_SERIAL=localhost:5575
+CONSOLE_PORT=5574
+API=36
+
+PAGE_SIZE=4096
+
+FIXED_KEY_SHA256=fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108
+INSTRUMENTATION_ASSERTION=OK (1 test)
+HOST_VERIFIER_ASSERTION=PASS official reader manifest, key fingerprint, and plain/encrypted fixture hashes verified
+GENERATOR_INPUT_MANIFEST_SHA256=dd746133dd9941948441c7373cad83e85bd646af075d9a3b1f8bb8038e20e0f8
+ORACLE_TEST_SHA256=5d19909d927000dff15335e9b1ec84626a0f1f5f88ae6c6f402a8f6bc910e882
+RUNNER_SHA256=31671aaf99a894937fb9adc87e774112301005b1ca5a3f6bdcd8e1e1ae55a8f3
+FIXTURE_HASHES
+46ccf472ba5ae55edb22ae640075df006b377be738ce651abe7507641347b734  compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/official-10.19.0-plain.realm
+792abb7cc4ef3aafe99fd091e0dcd4f1cb713800f60304cc9a4ca6c1d37a23df  compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/official-10.19.0-encrypted.realm
+3aa08c68d046ebb96079f12aa3a6985ef2cffff3827d6c9e18557565875d7344  compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/fixture-manifest.json
+FIXTURE_MANIFEST
+{
+  "realm_version": "10.19.0",
+  "official_artifact_manifest_sha256": "255be75f1dca64e2cc94574ced12c5acaa2bb749f8c7a3998056631f08c203a1",
+  "schema_sha256": "1685e31f637636584b76e7a18e4dad362146e96dbc4a0190b382effdbf05d70c",
+  "golden_data_sha256": "016717bd6a066c765a3c7d8418767671e22803af691e5aeee0432255653a2423",
+  "encryption_key_sha256": "fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108",
+  "plain_fixture_sha256": "46ccf472ba5ae55edb22ae640075df006b377be738ce651abe7507641347b734",
+  "encrypted_fixture_sha256": "792abb7cc4ef3aafe99fd091e0dcd4f1cb713800f60304cc9a4ca6c1d37a23df",
+  "official_reader_semantic_validation": true,
+  "sdk_int": 36,
+  "build_fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys"
+}
+PROVENANCE_LOGS
+task-11-kvm-container-accel-check.log
+task-11-4k-kvm-runtime.log
+task-11-4k-internal-manifestfix-install-dexopt.log
+task-11-4k-internal-manifestfix-direct-instrumentation.log
+task-11-4k-internal-host-verifier.log
+API37_16K_OFFICIAL_BASELINE_FAILURES_PRESERVED=attempt-8,attempt-9

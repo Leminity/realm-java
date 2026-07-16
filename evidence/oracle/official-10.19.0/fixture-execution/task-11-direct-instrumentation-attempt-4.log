@@ -1,0 +1,10 @@
+onError: commandError=true message=INSTRUMENTATION_FAILED: io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+android.util.AndroidException: INSTRUMENTATION_FAILED: io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner
+	at com.android.commands.am.Instrument.run(Instrument.java:549)
+	at com.android.commands.am.Am.runInstrument(Am.java:215)
+	at com.android.commands.am.Am.onRun(Am.java:85)
+	at com.android.internal.os.BaseCommand.run(BaseCommand.java:63)
+	at com.android.commands.am.Am.main(Am.java:54)
+	at com.android.internal.os.RuntimeInit.nativeFinishInit(Native Method)
+	at com.android.internal.os.RuntimeInit.main(RuntimeInit.java:367)
+direct_instrumentation_exit=1

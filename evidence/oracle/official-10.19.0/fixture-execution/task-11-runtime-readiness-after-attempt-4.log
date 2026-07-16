@@ -1,0 +1,16 @@
+UTC=2026-07-16T03:47:49Z
+adb_devices:
+List of devices attached
+emulator-5554          device product:sdk_gphone16k_x86_64 model:sdk_gphone16k_x86_64 device:emu64xa16k transport_id:2
+
+api=37
+page_size=16384
+sys.boot_completed=1
+
+dev.bootcomplete=1
+
+fixture_package_paths:
+activity_service:
+Service activity: found
+package_service:
+Service package: found

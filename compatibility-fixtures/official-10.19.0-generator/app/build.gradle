@@ -4,7 +4,10 @@ plugins {
 
 apply plugin: 'realm-android'
 
-def fixtureKeyHex = providers.gradleProperty('fixtureKeyHex').orElse('').get()
+def fixtureKeyHex = providers.gradleProperty('fixtureKeyHex')
+    .orElse(providers.environmentVariable('FIXTURE_KEY_HEX'))
+    .orElse('')
+    .get()
 
 android {
     namespace 'io.realm.fixtureoracle'
@@ -34,5 +37,6 @@ dependencies {
     // Directly pinned official runtime; no fork coordinate is permitted in this project.
     implementation 'io.realm:realm-android-library:10.19.0'
     androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.10'
     androidTestImplementation 'junit:junit:4.13.2'
 }
