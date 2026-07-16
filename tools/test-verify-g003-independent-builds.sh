@@ -32,4 +32,48 @@ for forbidden in \
   fi
 done
 
+# Exercise the full --run control flow with local fake wrappers. This crosses
+# every run_gradle return without invoking Gradle or using the network, and
+# protects against function-local cleanup traps leaking into later calls.
+matrix_root="$temp_dir/matrix-root"
+matrix_evidence="$temp_dir/matrix-evidence"
+mkdir -p "$matrix_root"
+git -C "$root" archive --format=tar HEAD | tar -xf - -C "$matrix_root"
+cp "$verifier" "$matrix_root/tools/verify-g003-independent-builds.sh"
+chmod +x "$matrix_root/tools/verify-g003-independent-builds.sh"
+
+for wrapper in \
+  gradlew \
+  realm-annotations/gradlew \
+  realm-transformer/gradlew \
+  library-build-transformer/gradlew \
+  realm/gradlew \
+  gradle-plugin/gradlew; do
+  cat > "$matrix_root/$wrapper" <<'GRADLEW'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '> Task :synthetic:%s\n' "${1:-help}"
+printf 'BUILD SUCCESSFUL\n'
+GRADLEW
+  chmod +x "$matrix_root/$wrapper"
+done
+
+declare -A poms=(
+  [realm-annotations/build/publications/realmPublication/pom-default.xml]=realm-annotations
+  [realm-transformer/build/publications/realmPublication/pom-default.xml]=realm-transformer
+  [realm/realm-annotations-processor/build/publications/realmPublication/pom-default.xml]=realm-annotations-processor
+  [realm/realm-library/build/publications/realmPublication/pom-default.xml]=realm-android-library
+  [realm/kotlin-extensions/build/publications/realmPublication/pom-default.xml]=realm-android-kotlin-extensions
+  [gradle-plugin/build/publications/realmPublication/pom-default.xml]=realm-gradle-plugin
+)
+for pom in "${!poms[@]}"; do
+  mkdir -p "$(dirname "$matrix_root/$pom")"
+  printf '<project><artifactId>%s</artifactId></project>\n' "${poms[$pom]}" > "$matrix_root/$pom"
+done
+
+"$matrix_root/tools/verify-g003-independent-builds.sh" \
+  --run --evidence-dir "$matrix_evidence" > "$temp_dir/matrix.log"
+grep -Fqx "G003 independent-build matrix: PASS (evidence: $matrix_evidence)" "$temp_dir/matrix.log"
+[[ "$(find "$matrix_evidence" -maxdepth 1 -name '*.log' -type f | wc -l)" -eq 12 ]]
+
 printf 'G003 independent-build verifier regression tests: PASS\n'
