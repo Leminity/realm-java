@@ -424,7 +424,7 @@ class PluginTest {
                         }'''
                 ],
                 ['META-INF/services/javax.annotation.processing.Processor':
-                    'io.realm.fixture.processor.FixtureRealmProcessor\\n'.getBytes('UTF-8')]
+                    "io.realm.fixture.processor.FixtureRealmProcessor\n".getBytes('UTF-8')]
             )
         )
     }
