@@ -5,7 +5,7 @@ buildscript {
 
     repositories {
         mavenCentral()
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -32,16 +32,18 @@ def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../dependencies.list"))
 dependencies {
     implementation gradleApi()
-    implementation 'org.ow2.asm:asm:6.2'
-    implementation 'org.ow2.asm:asm-util:6.2'
+    implementation 'org.ow2.asm:asm:9.7.1'
+    implementation 'org.ow2.asm:asm-util:9.7.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlin_version}"
     compileOnly "com.android.tools.build:gradle:${properties.get("GRADLE_BUILD_TOOLS")}"
 
     testImplementation group:'junit', name:'junit', version:'4.12'
 }
 
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
 compileKotlin {
     kotlinOptions.jvmTarget = "11"

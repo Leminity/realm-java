@@ -1,8 +1,7 @@
 import java.security.MessageDigest
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.android.legacy-kapt'
 apply plugin: 'com.github.spotbugs-base'
 apply plugin: 'pmd'
 apply plugin: 'checkstyle'
@@ -22,14 +21,13 @@ kapt {
 }
 
 android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion rootProject.ext.minSdkVersion
-        targetSdkVersion rootProject.ext.compileSdkVersion
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.compileSdkVersion
         versionName version
-        project.archivesBaseName = "realm-android-library"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         externalNativeBuild {
@@ -156,6 +154,10 @@ android {
             proguardFiles 'proguard-rules-build-common.pro', 'proguard-rules-build-objectServer.pro'
         }
     }
+}
+
+base {
+    archivesName = "realm-android-library"
 }
 
 io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)

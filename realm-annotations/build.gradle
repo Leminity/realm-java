@@ -3,13 +3,12 @@ buildscript {
     properties.load(new FileInputStream("${projectDir}/../dependencies.list"))
 
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
     }
     dependencies {
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:${properties.get('BUILD_INFO_EXTRACTOR_GRADLE')}"
         classpath "io.github.gradle-nexus:publish-plugin:${properties.get("GRADLE_NEXUS_PLUGIN")}"
     }
 }
@@ -17,14 +16,10 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 group = 'io.realm'
 version = file("${projectDir}/../version.txt").text.trim()
 
 apply from: "${rootDir}/../mavencentral-publications.gradle"
-apply from: "${rootDir}/../mavencentral-publish.gradle"
 
 publishing {
     publications {
