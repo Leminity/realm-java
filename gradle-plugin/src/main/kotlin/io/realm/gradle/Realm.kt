@@ -1,13 +1,11 @@
 package io.realm.gradle
 
-import com.android.build.gradle.AppPlugin
-import com.android.build.gradle.LibraryPlugin
+import com.android.build.api.dsl.CommonExtension
 import io.realm.transformer.registerRealmTransformerTask
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.UnknownConfigurationException
-import org.gradle.api.plugins.PluginCollection
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -15,74 +13,97 @@ val logger: Logger = LoggerFactory.getLogger("realm-logger")
 
 const val ANDROID_TEST_IMPLEMENTATION = "androidTestImplementation"
 
+private const val ANDROID_APPLICATION_PLUGIN_ID = "com.android.application"
+private const val ANDROID_LIBRARY_PLUGIN_ID = "com.android.library"
+private const val LEGACY_KAPT_PLUGIN_ID = "com.android.legacy-kapt"
+private const val FORK_GROUP = "io.github.leminity.realm"
+private const val FORK_VERSION = "10.19.0-agp9.1"
+
 // TODO Run a Task or Visitor to collect runtimeClassPath, then serialize it
 //      Run another task that depends on the output of the first task in order to deserialize the ClassPool and process each class apart
 open class Realm : Plugin<Project> {
     override fun apply(project: Project) {
-        // Make sure the project is either an Android application or library
-        val isAndroidApp: PluginCollection<AppPlugin> =
-            project.plugins.withType(AppPlugin::class.java)
-        val isAndroidLib: PluginCollection<LibraryPlugin> =
-            project.plugins.withType(LibraryPlugin::class.java)
-
-        if (isAndroidApp.isEmpty() && isAndroidLib.isEmpty()) {
-            throw GradleException("'com.android.application' or 'com.android.library' plugin required.")
-        }
-
-        checkCompatibleAGPVersion()
-
-        val isKotlinProject: Boolean =
-            project.plugins.findPlugin("kotlin-android") != null || project.plugins.findPlugin("kotlin-multiplatform") != null
-        val hasAnnotationProcessorConfiguration =
-            project.configurations.findByName("annotationProcessor") != null
-        // TODO add a parameter in 'realm' block if this should be specified by users
-        val dependencyConfigurationName: String = getDependencyConfigurationName(project)
-        val extension = project.extensions.create("realm", RealmPluginExtension::class.java)
-
-        extension.isKotlinExtensionsEnabled = isKotlinProject
-
-        registerRealmTransformerTask(project)
-
-        project.dependencies.add(
-            dependencyConfigurationName,
-            "io.realm:realm-annotations:${Version.VERSION}"
-        )
-        if (isKotlinProject) {
-            project.dependencies.add(
-                "kapt",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
-            )
-            project.dependencies.add(
-                "kaptAndroidTest",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
-            )
-        } else {
-            assert(hasAnnotationProcessorConfiguration)
-            project.dependencies.add(
-                "annotationProcessor",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
-            )
-            project.dependencies.add(
-                "androidTestAnnotationProcessor",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
-            )
-        }
-
-        // FIXME When injected, dependencies are not propagating correctly from the main release to the 
-        // android test releases. We solve it by inject them into the instrumented tests manually.
-        project.afterEvaluate { 
-            listOf(
-                dependencyConfigurationName,
-                ANDROID_TEST_IMPLEMENTATION // force adds the dependencies to the instrumented tests configuration
-            ).forEach { dependencyConfigurationName: String ->
-                setDependencies(
-                    project,
-                    dependencyConfigurationName,
-                    extension.isSyncEnabled,
-                    extension.isKotlinExtensionsEnabled
-                )
+        var configured = false
+        val configureOnce = {
+            if (!configured) {
+                configured = true
+                configureAndroidProject(project)
             }
         }
+
+        // These callbacks also cover consumers that apply realm-android before the Android plugin.
+        project.pluginManager.withPlugin(ANDROID_APPLICATION_PLUGIN_ID) { configureOnce() }
+        project.pluginManager.withPlugin(ANDROID_LIBRARY_PLUGIN_ID) { configureOnce() }
+
+        project.afterEvaluate {
+            if (!configured) {
+                throw GradleException("'$ANDROID_APPLICATION_PLUGIN_ID' or '$ANDROID_LIBRARY_PLUGIN_ID' plugin required.")
+            }
+        }
+    }
+
+    private fun configureAndroidProject(project: Project) {
+        checkCompatibleAGPVersion()
+
+        val dependencyConfigurationName = getDependencyConfigurationName(project)
+        val extension = project.extensions.create("realm", RealmPluginExtension::class.java)
+
+        registerRealmTransformerTask(project)
+        project.dependencies.add(
+            dependencyConfigurationName,
+            forkCoordinate("realm-annotations")
+        )
+
+        project.afterEvaluate {
+            val isKotlinProject = project.extensions
+                .getByType(CommonExtension::class.java)
+                .enableKotlin
+            extension.isKotlinExtensionsEnabled = isKotlinProject
+
+            if (extension.isSyncEnabled) {
+                throw GradleException(
+                    "Realm Sync/ObjectServer is unsupported by this fork. " +
+                        "Set realm { syncEnabled = false } to use the local database artifacts."
+                )
+            }
+
+            if (isKotlinProject) {
+                configureKapt(project)
+            } else {
+                configureJavaAnnotationProcessor(project)
+            }
+
+            // FIXME When injected, dependencies are not propagating correctly from the main release to the
+            // android test releases. We solve it by injecting them into the instrumented tests manually.
+            listOf(
+                dependencyConfigurationName,
+                ANDROID_TEST_IMPLEMENTATION
+            ).forEach { configurationName ->
+                setDependencies(project, configurationName, extension.isKotlinExtensionsEnabled)
+            }
+        }
+    }
+
+    private fun configureKapt(project: Project) {
+        var dependenciesAdded = false
+        project.pluginManager.withPlugin(LEGACY_KAPT_PLUGIN_ID) {
+            if (!dependenciesAdded) {
+                dependenciesAdded = true
+                project.dependencies.add("kapt", forkCoordinate("realm-annotations-processor"))
+                project.dependencies.add("kaptAndroidTest", forkCoordinate("realm-annotations-processor"))
+            }
+        }
+
+        // Applying a plugin already present is idempotent; the callback above owns dependency injection.
+        project.pluginManager.apply(LEGACY_KAPT_PLUGIN_ID)
+    }
+
+    private fun configureJavaAnnotationProcessor(project: Project) {
+        check(project.configurations.findByName("annotationProcessor") != null) {
+            "Android annotationProcessor configuration is required for Java Realm models."
+        }
+        project.dependencies.add("annotationProcessor", forkCoordinate("realm-annotations-processor"))
+        project.dependencies.add("androidTestAnnotationProcessor", forkCoordinate("realm-annotations-processor"))
     }
 
     companion object {
@@ -125,7 +146,6 @@ open class Realm : Plugin<Project> {
         private fun setDependencies(
             project: Project,
             dependencyConfigurationName: String,
-            syncEnabled: Boolean,
             kotlinExtensionsEnabled: Boolean
         ) {
             // remove libraries first
@@ -133,7 +153,7 @@ open class Realm : Plugin<Project> {
                 project.configurations.getByName(dependencyConfigurationName).dependencies.iterator()
             while (iterator.hasNext()) {
                 val item = iterator.next()
-                if (item.group == "io.realm") {
+                if (item.group == FORK_GROUP || item.group == "io.realm") {
                     if (item.name.startsWith("realm-android-library")) {
                         iterator.remove()
                     }
@@ -143,23 +163,19 @@ open class Realm : Plugin<Project> {
                 }
             }
 
-            // then add again
-            val syncArtifactName =
-                "realm-android-library${if (syncEnabled) "-object-server" else ""}"
             project.dependencies.add(
                 dependencyConfigurationName,
-                "io.realm:${syncArtifactName}:${Version.VERSION}"
+                forkCoordinate("realm-android-library")
             )
 
             if (kotlinExtensionsEnabled) {
-                val kotlinExtArtifactName =
-                    "realm-android-kotlin-extensions${if (syncEnabled) "-object-server" else ""}"
                 project.dependencies.add(
                     dependencyConfigurationName,
-                    "io.realm:${kotlinExtArtifactName}:${Version.VERSION}"
+                    forkCoordinate("realm-android-kotlin-extensions")
                 )
             }
         }
 
+        private fun forkCoordinate(artifact: String) = "$FORK_GROUP:$artifact:$FORK_VERSION"
     }
 }
