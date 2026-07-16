@@ -58,7 +58,8 @@ sourceSets {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation "io.realm:realm-transformer:${version}"
+    implementation "io.github.leminity.realm:realm-transformer:10.19.0-agp9.1"
+    runtimeOnly "com.android.tools.build:gradle-kotlin:${props.get("GRADLE_BUILD_TOOLS")}"
     /*Note: the latest Android Gradle plugin has now built in support for annotation processors and warns and/or blocks android-apt,
      see this https://bitbucket.org/hvisser/android-apt/wiki/Migration page on how to migrate
      and this https://www.littlerobots.nl/blog/Whats-next-for-android-apt/ for more info.
