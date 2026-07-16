@@ -20,7 +20,10 @@ done < <(git diff --name-only "$EXPECTED_COMMIT...HEAD")
 
 for allowed in \
   'evidence/audit/g002-toolchain-final.md' \
-  'evidence/audit/task-9-preflight.md'; do
+  'evidence/audit/task-9-preflight.md' \
+  'evidence/audit/g003-independent-build-recovery.md' \
+  'tools/verify-g003-independent-builds.sh' \
+  'tools/test-verify-g003-independent-builds.sh'; do
   if ! is_baseline_allowed_path "$allowed"; then
     printf 'approved audit path was rejected: %s\n' "$allowed" >&2
     exit 1
@@ -32,6 +35,7 @@ for disallowed in \
   'realm/realm-library/src/main/cpp/realm/unsafe.cpp' \
   'compatibility-fixtures/unapproved/app/src/main/java/Injected.java' \
   'evidence/toolchain/unapproved/README.md' \
+  'evidence/audit/g003-unapproved.md' \
   'tools/unapproved-helper.sh' \
   'unexpected-root-file.md'; do
   if is_baseline_allowed_path "$disallowed"; then

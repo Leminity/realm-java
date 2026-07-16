@@ -11,11 +11,17 @@ readonly EXPECTED_GRADLE='9.6.1'
 readonly EXPECTED_KOTLIN='2.2.10'
 readonly EXPECTED_NDK='29.0.14206865'
 readonly EXPECTED_JAVA_MAJOR='17'
+readonly EXPECTED_ANDROID_BUILD_TOOLS='36.0.0'
+readonly EXPECTED_COMPILE_TARGET_SDK='37'
+readonly EXPECTED_MIN_SDK='21'
 readonly EXPECTED_GRADLE_URL='https\://services.gradle.org/distributions/gradle-9.6.1-bin.zip'
 readonly EXPECTED_GRADLE_SHA256='9c0f7faeeb306cb14e4279a3e084ca6b596894089a0638e68a07c945a32c9e14'
+readonly DEFAULT_RELEASE_TASK='installRealmJava'
 
 readonly -a WRAPPERS=(
   gradle/wrapper/gradle-wrapper.properties
+  examples/gradle/wrapper/gradle-wrapper.properties
+  library-benchmarks/gradle/wrapper/gradle-wrapper.properties
   realm-annotations/gradle/wrapper/gradle-wrapper.properties
   realm-transformer/gradle/wrapper/gradle-wrapper.properties
   library-build-transformer/gradle/wrapper/gradle-wrapper.properties
@@ -36,14 +42,16 @@ readonly -a SUPPORTED_BUILD_SCRIPTS=(
   mavencentral-publications.gradle
   mavencentral-publish.gradle
 )
-readonly -a FORBIDDEN_LOG_PATTERN=(
+readonly -a FORBIDDEN_HOST_PATTERN=(
   'static\.realm\.io'
   's3://'
   's3cmd'
   'oss\.sonatype\.org'
+)
+readonly -a FORBIDDEN_TASK_PATTERN=(
   'publishToSonatype'
-  '(^|[^[:alnum:]])examples?([^[:alnum:]]|$)'
-  'library-benchmarks'
+  ':[Ee]xamples:'
+  ':library-benchmarks:'
   'object[Ss]erver'
   'syncIntegrationTest'
   'androidTestObjectServer'
@@ -64,8 +72,8 @@ repositories/opt-outs in the supported build scripts.
 
 Options:
   --run                    Also run the ordered independent-build matrix.
-  --release-task TASK      Dry-run TASK in the root and assert its graph is
-                           free of unsupported release work.
+  --release-task TASK      Use TASK for the mandatory root release-graph
+                           dry-run (default: installRealmJava).
   --evidence-dir PATH      Directory for --run command logs.
   --check-log PATH         Check an existing Gradle log for forbidden graph or
                            network activity (used by the regression test).
@@ -84,11 +92,19 @@ require_line() {
 }
 
 check_log_for_forbidden_activity() {
-  local log=$1 pattern
+  local log=$1 pattern task_lines
   [[ -f "$log" ]] || fail "missing Gradle log: $log"
-  for pattern in "${FORBIDDEN_LOG_PATTERN[@]}"; do
+  for pattern in "${FORBIDDEN_HOST_PATTERN[@]}"; do
     if grep -Ein -- "$pattern" "$log" >/dev/null; then
       fail "unsupported graph or network activity ($pattern) in $log"
+    fi
+  done
+  task_lines="$(mktemp)"
+  trap 'rm -f "$task_lines"' RETURN
+  grep -E '^> Task ' "$log" > "$task_lines" || true
+  for pattern in "${FORBIDDEN_TASK_PATTERN[@]}"; do
+    if grep -Ein -- "$pattern" "$task_lines" >/dev/null; then
+      fail "unsupported task graph activity ($pattern) in $log"
     fi
   done
 }
@@ -108,6 +124,7 @@ verify_static() {
   require_line "gradle=$EXPECTED_GRADLE" dependencies.list
   require_line "KOTLIN=$EXPECTED_KOTLIN" dependencies.list
   require_line "ndkVersion=$EXPECTED_NDK" dependencies.list
+  require_line "ANDROID_BUILD_TOOLS=$EXPECTED_ANDROID_BUILD_TOOLS" dependencies.list
 
   for wrapper in "${WRAPPERS[@]}"; do
     require_line "distributionUrl=$EXPECTED_GRADLE_URL" "$wrapper"
@@ -130,6 +147,16 @@ verify_static() {
 
   if grep -REn --include='*.gradle' -- 'kotlin-android' realm >/dev/null; then
     fail 'Android modules must use AGP built-in Kotlin, not kotlin-android'
+  fi
+
+  grep -Eq "compileSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_COMPILE_TARGET_SDK" realm/build.gradle || \
+    fail "expected compileSdk $EXPECTED_COMPILE_TARGET_SDK in realm/build.gradle"
+  grep -Eq "minSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_MIN_SDK" realm/build.gradle || \
+    fail "expected minSdk $EXPECTED_MIN_SDK in realm/build.gradle"
+
+  if grep -REn --include='*.gradle' --include='*.kt' --include='*.java' \
+      'org\.gradle\.internal\.' gradle-plugin/build.gradle gradle-plugin/src/main >/dev/null; then
+    fail 'supported Gradle plugin code still imports org.gradle.internal APIs'
   fi
 
   if grep -Fq '/.m2/repository/io/realm' build.gradle; then
@@ -181,11 +208,46 @@ run_matrix() {
   run_gradle gradle-plugin-help gradle-plugin help
   run_gradle gradle-plugin-test-metadata gradle-plugin test generatePomFileForRealmPublication
 
-  if [[ -n "$release_task" ]]; then
-    run_gradle "root-${release_task//:/_}-dry-run" . --dry-run "$release_task"
-  fi
+  release_task="${release_task:-$DEFAULT_RELEASE_TASK}"
+  run_gradle "root-${release_task//:/_}-dry-run" . --dry-run "$release_task"
+  verify_public_metadata_allowlist
 
   printf 'G003 independent-build matrix: PASS (evidence: %s)\n' "$evidence_dir"
+}
+
+verify_public_metadata_allowlist() {
+  local pom artifact_id
+  local -a poms=(
+    realm-annotations/build/publications/realmPublication/pom-default.xml
+    realm-transformer/build/publications/realmPublication/pom-default.xml
+    realm/realm-annotations-processor/build/publications/realmPublication/pom-default.xml
+    realm/realm-library/build/publications/realmPublication/pom-default.xml
+    realm/kotlin-extensions/build/publications/realmPublication/pom-default.xml
+    gradle-plugin/build/publications/realmPublication/pom-default.xml
+  )
+  local -a expected=(
+    realm-android-kotlin-extensions
+    realm-android-library
+    realm-annotations
+    realm-annotations-processor
+    realm-gradle-plugin
+    realm-transformer
+  )
+  local -a actual=()
+
+  for pom in "${poms[@]}"; do
+    [[ -f "$root/$pom" ]] || fail "missing supported publication metadata: $pom"
+    artifact_id="$(sed -n 's:.*<artifactId>\([^<]*\)</artifactId>.*:\1:p' "$root/$pom" | head -n 1)"
+    [[ -n "$artifact_id" ]] || fail "missing artifactId in $pom"
+    actual+=("$artifact_id")
+    if grep -Ein -- 'object[Ss]erver|sync|realm-library-build-transformer' "$root/$pom" >/dev/null; then
+      fail "unsupported publication metadata in $pom"
+    fi
+  done
+
+  if [[ "$(printf '%s\n' "${actual[@]}" | sort)" != "$(printf '%s\n' "${expected[@]}" | sort)" ]]; then
+    fail "public metadata artifact allowlist differs from the required six coordinates"
+  fi
 }
 
 while [[ $# -gt 0 ]]; do
