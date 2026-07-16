@@ -20,3 +20,7 @@ For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/comman
 BUILD SUCCESSFUL in 7s
 4 actionable tasks: 1 executed, 3 up-to-date
 Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+G004 fixture application/java: PASS
+G004 fixture application/kotlin: PASS
+G004 fixture library/java: PASS
+G004 fixture library/kotlin: PASS
