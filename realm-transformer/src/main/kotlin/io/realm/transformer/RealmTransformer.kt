@@ -16,9 +16,9 @@
 
 package io.realm.transformer
 
+import com.android.build.api.dsl.SdkComponents
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.UnitTest
-import com.android.build.gradle.internal.publishing.AndroidArtifacts
 import io.realm.analytics.RealmAnalytics
 import io.realm.transformer.build.BuildTemplate
 import io.realm.transformer.build.FullBuild
@@ -26,7 +26,6 @@ import io.realm.transformer.build.IncrementalBuild
 import io.realm.transformer.ext.areIncrementalBuildsDisabled
 import io.realm.transformer.ext.getAgpVersion
 import io.realm.transformer.ext.getAppId
-import io.realm.transformer.ext.getBootClasspath
 import io.realm.transformer.ext.getMinSdk
 import io.realm.transformer.ext.getTargetSdk
 import io.realm.transformer.ext.targetType
@@ -86,6 +85,7 @@ data class ProjectMetaData(
 fun registerRealmTransformerTask(project: Project) {
     val androidComponents =
         project.extensions.getByType(AndroidComponentsExtension::class.java)
+    val sdkComponents = project.extensions.getByType(SdkComponents::class.java)
     androidComponents.onVariants { variant ->
         variant.components
             .filterNot {
@@ -103,13 +103,8 @@ fun registerRealmTransformerTask(project: Project) {
                         RealmTransformerTask::class.java
                     ) { task ->
                         task.apply {
-                            referencedInputs.setFrom(component.runtimeConfiguration.incoming.artifactView { c ->
-                                c.attributes.attribute(
-                                    AndroidArtifacts.ARTIFACT_TYPE,
-                                    AndroidArtifacts.ArtifactType.CLASSES_JAR.type
-                                )
-                            }.files)
-                            bootClasspath.setFrom(project.getBootClasspath())
+                            referencedInputs.setFrom(variant.compileClasspath)
+                            bootClasspath.setFrom(sdkComponents.bootClasspath)
                             offline.set(project.gradle.startParameter.isOffline)
                             targetType.set(project.targetType())
                             usesKotlin.set(project.usesKotlin())
