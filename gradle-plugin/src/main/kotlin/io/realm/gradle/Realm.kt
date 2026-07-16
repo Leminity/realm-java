@@ -48,6 +48,13 @@ open class Realm : Plugin<Project> {
         val dependencyConfigurationName = getDependencyConfigurationName(project)
         val extension = project.extensions.create("realm", RealmPluginExtension::class.java)
 
+        // AGP 9 finalizes Kotlin processor wiring before afterEvaluate. Apply the legacy KAPT
+        // bridge while the Android plugin is being configured; processor dependencies remain
+        // selected after evaluation so Java-only projects keep annotationProcessor semantics.
+        if (usesKotlinSources(project)) {
+            project.pluginManager.apply(LEGACY_KAPT_PLUGIN_ID)
+        }
+
         registerRealmTransformerTask(project)
         project.dependencies.add(
             dependencyConfigurationName,
@@ -92,8 +99,6 @@ open class Realm : Plugin<Project> {
             }
         }
 
-        // Applying a plugin already present is idempotent; the callback above owns dependency injection.
-        project.pluginManager.apply(LEGACY_KAPT_PLUGIN_ID)
     }
 
     private fun configureJavaAnnotationProcessor(project: Project) {
