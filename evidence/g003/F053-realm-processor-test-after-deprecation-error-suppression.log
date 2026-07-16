@@ -1,0 +1,528 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Configure project :realm-library
+Implicitly enabling Unified Test Platform because UTP is now the only test runner. Please remove android.experimental.androidTest.useUnifiedTestPlatform=false from your gradle.properties file.
+Implicitly enabling Unified Test Platform because UTP is now the only test runner. Please remove android.experimental.androidTest.useUnifiedTestPlatform=false from your gradle.properties file.
+
+> Task :realm-annotations-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-annotations-processor:generateVersionClass
+> Task :realm-annotations-processor:processResources UP-TO-DATE
+> Task :realm-annotations-processor:processTestResources UP-TO-DATE
+> Task :realm-annotations-processor:generatePomFileForRealmPublication
+
+> Task :realm-annotations-processor:compileKotlin
+w: ATTENTION!
+This build uses unsafe internal compiler arguments:
+
+-XXLanguage:+InlineClasses
+
+This mode is not recommended for production use,
+as no stability/compatibility guarantees are given on
+compiler or generated code. Use it at your own risk!
+
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt:116:1 'inline' modifier is deprecated. Use 'value' instead.
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt:126:1 'inline' modifier is deprecated. Use 'value' instead.
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/src/main/java/io/realm/processor/Utils.kt:572:13 'when' is exhaustive so 'else' is redundant here.
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/WordTokenizer.kt:74:41 'fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/WordTokenizer.kt:74:76 'fun toInt(): Int' is deprecated. Conversion of Char to Number is deprecated. Use Char.code property instead.
+
+> Task :realm-annotations-processor:compileJava
+> Task :realm-annotations-processor:classes
+> Task :realm-annotations-processor:jar
+> Task :realm-annotations-processor:compileTestKotlin NO-SOURCE
+> Task :realm-annotations-processor:compileTestJava
+> Task :realm-annotations-processor:testClasses
+
+> Task :realm-annotations-processor:test
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsFieldNotFound FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:172
+
+RealmBacklinkProcessorTest > failOnLinkingObjectsWithInvalidFieldType FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:63
+
+RealmBacklinkProcessorTest > compileBacklinks FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:42
+
+RealmBacklinkProcessorTest > failOnLinkingObjectsWithNonFinalField FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:76
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsWithLinkedFields FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:91
+
+RealmBacklinkProcessorTest > ignoreStaticLinkingObjects FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:158
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsWithFieldWrongType FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:186
+
+RealmBacklinkProcessorTest > compileBacklinkClassesWithSimpleNameConflicts FAILED
+    java.lang.RuntimeException at RealmBacklinkProcessorTest.java:221
+        Caused by: java.lang.NullPointerException at RealmBacklinkProcessorTest.java:221
+
+RealmBacklinkProcessorTest > compileSyntheticBacklinks FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:51
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsWithRequiredFields FAILED
+    java.lang.RuntimeException at RealmBacklinkProcessorTest.java:130
+        Caused by: java.lang.NullPointerException at RealmBacklinkProcessorTest.java:130
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsMissingGeneric FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:118
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsMissingFieldName FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmBacklinkProcessorTest.java:105
+
+RealmBacklinkProcessorTest > failsOnLinkingObjectsWithIgnoreFields FAILED
+    java.lang.RuntimeException at RealmBacklinkProcessorTest.java:143
+        Caused by: java.lang.NullPointerException at RealmBacklinkProcessorTest.java:143
+
+RealmCounterProcessorTest > compileIndexedMutableRealmInteger FAILED
+    java.lang.RuntimeException at RealmCounterProcessorTest.java:64
+        Caused by: java.lang.NullPointerException at RealmCounterProcessorTest.java:64
+
+RealmCounterProcessorTest > compileStaticMutableRealmInteger FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmCounterProcessorTest.java:86
+
+RealmCounterProcessorTest > compileMutableRealmInteger FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmCounterProcessorTest.java:42
+
+RealmCounterProcessorTest > failUnlessFinalMutableRealmInteger FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmCounterProcessorTest.java:110
+
+RealmCounterProcessorTest > compileRequiredMutableRealmInteger FAILED
+    java.lang.RuntimeException at RealmCounterProcessorTest.java:75
+        Caused by: java.lang.NullPointerException at RealmCounterProcessorTest.java:75
+
+RealmCounterProcessorTest > failOnPKMutableRealmInteger FAILED
+    java.lang.RuntimeException at RealmCounterProcessorTest.java:97
+        Caused by: java.lang.NullPointerException at RealmCounterProcessorTest.java:97
+
+RealmCounterProcessorTest > compileIgnoredMutableRealmInteger FAILED
+    java.lang.RuntimeException at RealmCounterProcessorTest.java:53
+        Caused by: java.lang.NullPointerException at RealmCounterProcessorTest.java:53
+
+RealmEmbeddedObjectsTest > compileWithMultipleOptionalParents FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:62
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:62
+
+RealmEmbeddedObjectsTest > compileAndCompareParentToEmbeddedObjectFile FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:33
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:33
+
+RealmEmbeddedObjectsTest > failToCompileIfMissingFieldDescriptor FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:87
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:87
+
+RealmEmbeddedObjectsTest > compileAndCompareEmbeddedObjectFile FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:20
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:20
+
+RealmEmbeddedObjectsTest > failToCompileIfSingleParentIsMissingFinal FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:73
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:73
+
+RealmEmbeddedObjectsTest > failToCompileWithMultipleRequiredParents FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:114
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:114
+
+RealmEmbeddedObjectsTest > compileWithSingleRequiredParent FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:48
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:48
+
+RealmEmbeddedObjectsTest > failToCompileWithPrimaryKey FAILED
+    java.lang.RuntimeException at RealmEmbeddedObjectsTest.java:100
+        Caused by: java.lang.NullPointerException at RealmEmbeddedObjectsTest.java:100
+
+RealmNameTest > compileModuleWithNamePolicyFile FAILED
+    java.lang.RuntimeException at RealmNameTest.java:39
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:39
+
+RealmNameTest > compileModulesWithConflictingPoliciesAndMixedClassDefinitionsFails FAILED
+    java.lang.RuntimeException at RealmNameTest.java:109
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:109
+
+RealmNameTest > compareProcessedNamingPolicyClassFile FAILED
+    java.lang.RuntimeException at RealmNameTest.java:54
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:54
+
+RealmNameTest > compareProcessedDefaultClassFile FAILED
+    java.lang.RuntimeException at RealmNameTest.java:68
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:68
+
+RealmNameTest > compileModulesWithConflictingPoliciesForNamedClassesFails FAILED
+    java.lang.RuntimeException at RealmNameTest.java:95
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:95
+
+RealmNameTest > compileOnlyFieldNamePolicyFile FAILED
+    java.lang.RuntimeException at RealmNameTest.java:30
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:30
+
+RealmNameTest > compileModulesWithConflictingPoliciesForAllClassesFails FAILED
+    java.lang.RuntimeException at RealmNameTest.java:82
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:82
+
+RealmNameTest > compileOnlyClassNamePolicyFile FAILED
+    java.lang.RuntimeException at RealmNameTest.java:21
+        Caused by: java.lang.NullPointerException at RealmNameTest.java:21
+
+RealmProcessorTest > compileIndexTypes FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:298
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:298
+
+RealmProcessorTest > compileRealmDictionaryModelRealmModelRequiredFails FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:550
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:550
+
+RealmProcessorTest > compileBooleanFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:233
+
+RealmProcessorTest > compileLibraryModuleWrongTypeFail FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:226
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:226
+
+RealmProcessorTest > compileAppModuleWrongTypeFail FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:210
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:210
+
+RealmProcessorTest > compileRealmSetModel FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:558
+
+RealmProcessorTest > compileBooleansProxyFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:248
+
+RealmProcessorTest > compileConflictingFieldName FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:402
+
+RealmProcessorTest > compareProcessedAllTypesFile FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:158
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:158
+
+RealmProcessorTest > compileLibraryModuleMixedParametersFail FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:218
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:218
+
+RealmProcessorTest > compileRequiredTypes FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:359
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:359
+
+RealmProcessorTest > compileAppModuleCustomClasses FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:168
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:168
+
+RealmProcessorTest > compileWithInterfaceForList FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:485
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:485
+
+RealmProcessorTest > compileLibraryModulesCustomClasses FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:192
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:192
+
+RealmProcessorTest > compileProcessedAllTypesFile FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:143
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:143
+
+RealmProcessorTest > validRealmModelUsingInheritance FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:461
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:461
+
+RealmProcessorTest > compilePrimaryKeyTypes FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:328
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:328
+
+RealmProcessorTest > compileInvalidRequiredTypes FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:378
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:378
+
+RealmProcessorTest > compileSimpleFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:76
+
+RealmProcessorTest > compileWithRealmModelFieldInReamlModel FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:477
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:477
+
+RealmProcessorTest > compileProcessedSimpleFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:84
+
+RealmProcessorTest > compareProcessedBooleansFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:256
+
+RealmProcessorTest > compileTransientFields FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:418
+
+RealmProcessorTest > compareProcessedSimpleFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:108
+
+RealmProcessorTest > compileInvalidPrimaryKeyTypes FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:343
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:343
+
+RealmProcessorTest > compileAppModuleAllClasses FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:176
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:176
+
+RealmProcessorTest > compileProcessedBooleansFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:241
+
+RealmProcessorTest > compileRealmDictionaryModel FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:525
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:525
+
+RealmProcessorTest > compileSetWithEmbeddedObjectNotSupported FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:394
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:394
+
+RealmProcessorTest > compileInvalidIndexTypes FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:313
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:313
+
+RealmProcessorTest > compileAppModuleMixedParametersFail FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:201
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:201
+
+RealmProcessorTest > compareProcessedNullTypesFile FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:126
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:126
+
+RealmProcessorTest > compileLibraryModulesAllClasses FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:184
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:184
+
+RealmProcessorTest > compileAllTypesProxyFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:150
+
+RealmProcessorTest > compileWithInterfaceForObject FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:493
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:493
+
+RealmProcessorTest > compileRealmDictionaryModelRealmAnyRequiredFails FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:542
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:542
+
+RealmProcessorTest > failOnInvalidRealmModel_1 FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:435
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:435
+
+RealmProcessorTest > failOnInvalidRealmModel_3 FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:453
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:453
+
+RealmProcessorTest > compileAllTypesFile FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:135
+
+RealmProcessorTest > compareNonLatinName FAILED
+    com.google.common.truth.AssertionErrorWithFacts at RealmProcessorTest.java:501
+
+RealmProcessorTest > compileProcessedNullTypesFile FAILED
+    java.lang.RuntimeException at RealmProcessorTest.java:118
+        Caused by: java.lang.NullPointerException at RealmProcessorTest.java:118
+
+97 tests completed, 77 failed, 3 skipped
+
+> Task :realm-annotations-processor:test FAILED
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':realm-annotations-processor:test'.
+> There were failing tests. See the report at: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/build/reports/tests/test/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+* Exception is:
+org.gradle.api.tasks.TaskExecutionException: Execution failed for task ':realm-annotations-processor:test'.
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.lambda$executeIfValid$1(ExecuteActionsTaskExecuter.java:135)
+	at org.gradle.internal.Try$Failure.ifSuccessfulOrElse(Try.java:288)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:133)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.execute(ExecuteActionsTaskExecuter.java:121)
+	at org.gradle.api.internal.tasks.execution.ProblemsTaskPathTrackingTaskExecuter.execute(ProblemsTaskPathTrackingTaskExecuter.java:41)
+	at org.gradle.api.internal.tasks.execution.ResolveTaskExecutionModeExecuter.execute(ResolveTaskExecutionModeExecuter.java:51)
+	at org.gradle.api.internal.tasks.execution.FinalizePropertiesTaskExecuter.execute(FinalizePropertiesTaskExecuter.java:46)
+	at org.gradle.api.internal.tasks.execution.SkipTaskWithNoActionsExecuter.execute(SkipTaskWithNoActionsExecuter.java:57)
+	at org.gradle.api.internal.tasks.execution.SkipOnlyIfTaskExecuter.execute(SkipOnlyIfTaskExecuter.java:74)
+	at org.gradle.api.internal.tasks.execution.CatchExceptionTaskExecuter.execute(CatchExceptionTaskExecuter.java:36)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.executeTask(EventFiringTaskExecuter.java:77)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:55)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter$1.call(EventFiringTaskExecuter.java:52)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.api.internal.tasks.execution.EventFiringTaskExecuter.execute(EventFiringTaskExecuter.java:52)
+	at org.gradle.execution.plan.DefaultNodeExecutor.executeLocalTaskNode(DefaultNodeExecutor.java:55)
+	at org.gradle.execution.plan.DefaultNodeExecutor.execute(DefaultNodeExecutor.java:34)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:355)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$InvokeNodeExecutorsAction.execute(DefaultTaskExecutionGraph.java:343)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.lambda$execute$0(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:339)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph$BuildOperationAwareExecutionAction.execute(DefaultTaskExecutionGraph.java:328)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.execute(DefaultPlanExecutor.java:459)
+	at org.gradle.execution.plan.DefaultPlanExecutor$ExecutorWorker.run(DefaultPlanExecutor.java:376)
+	at org.gradle.execution.plan.DefaultPlanExecutor.process(DefaultPlanExecutor.java:111)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.executeWithServices(DefaultTaskExecutionGraph.java:146)
+	at org.gradle.execution.taskgraph.DefaultTaskExecutionGraph.execute(DefaultTaskExecutionGraph.java:131)
+	at org.gradle.execution.SelectedTaskExecutionAction.execute(SelectedTaskExecutionAction.java:35)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor$ExecuteTasks.call(BuildOperationFiringBuildWorkerExecutor.java:43)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.execution.BuildOperationFiringBuildWorkerExecutor.execute(BuildOperationFiringBuildWorkerExecutor.java:40)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.lambda$executeTasks$11(DefaultBuildLifecycleController.java:323)
+	at org.gradle.internal.model.StateTransitionController.doTransition(StateTransitionController.java:304)
+	at org.gradle.internal.model.StateTransitionController.lambda$tryTransition$9(StateTransitionController.java:215)
+	at org.gradle.internal.work.DefaultSynchronizer.withLock(DefaultSynchronizer.java:45)
+	at org.gradle.internal.model.StateTransitionController.tryTransition(StateTransitionController.java:215)
+	at org.gradle.internal.build.DefaultBuildLifecycleController.executeTasks(DefaultBuildLifecycleController.java:314)
+	at org.gradle.internal.build.DefaultBuildWorkGraphController$DefaultBuildWorkGraph.runWork(DefaultBuildWorkGraphController.java:220)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.lambda$runAndReleaseLocks$0(DefaultWorkerLeaseService.java:300)
+	at org.gradle.internal.work.ResourceLockStatistics$1.measure(ResourceLockStatistics.java:43)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAndReleaseLocks(DefaultWorkerLeaseService.java:298)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocksAcquired(DefaultWorkerLeaseService.java:294)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.withLocks(DefaultWorkerLeaseService.java:286)
+	at org.gradle.internal.work.DefaultWorkerLeaseService.runAsWorkerThread(DefaultWorkerLeaseService.java:130)
+	at org.gradle.composite.internal.DefaultBuildController.doRun(DefaultBuildController.java:182)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.lambda$run$0(DefaultBuildController.java:199)
+	at org.gradle.internal.operations.CurrentBuildOperationRef.with(CurrentBuildOperationRef.java:84)
+	at org.gradle.composite.internal.DefaultBuildController$BuildOpRunnable.run(DefaultBuildController.java:199)
+	at org.gradle.internal.concurrent.ExecutorPolicy$CatchAndRecordFailures.onExecute(ExecutorPolicy.java:64)
+	at org.gradle.internal.concurrent.AbstractManagedExecutor$1.run(AbstractManagedExecutor.java:47)
+Caused by: org.gradle.api.internal.exceptions.MarkedVerificationException: There were failing tests. See the report at: file:///mnt/d/workspace/jiran/realm/.omx/team/g003-gradle-9-indepen-6fc3cb75/worktrees/worker-1/realm/realm-annotations-processor/build/reports/tests/test/index.html
+	at org.gradle.api.tasks.testing.AbstractTestTask.executeTests(AbstractTestTask.java:615)
+	at org.gradle.api.tasks.testing.Test.executeTests(Test.java:760)
+	at org.gradle.internal.reflect.JavaMethod.invoke(JavaMethod.java:125)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.doExecute(StandardTaskAction.java:58)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:51)
+	at org.gradle.api.internal.project.taskfactory.StandardTaskAction.execute(StandardTaskAction.java:29)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$3.run(TaskExecution.java:259)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:30)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$1.execute(DefaultBuildOperationRunner.java:27)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.run(DefaultBuildOperationRunner.java:48)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeAction(TaskExecution.java:244)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeActions(TaskExecution.java:227)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.executeWithPreviousOutputFiles(TaskExecution.java:210)
+	at org.gradle.api.internal.tasks.execution.TaskExecution.execute(TaskExecution.java:176)
+	at org.gradle.internal.execution.steps.ExecuteStep.executeInternal(ExecuteStep.java:167)
+	at org.gradle.internal.execution.steps.ExecuteStep.access$000(ExecuteStep.java:47)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:137)
+	at org.gradle.internal.execution.steps.ExecuteStep$1.call(ExecuteStep.java:134)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:210)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$CallableBuildOperationWorker.execute(DefaultBuildOperationRunner.java:205)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:67)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner$2.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:167)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.execute(DefaultBuildOperationRunner.java:60)
+	at org.gradle.internal.operations.DefaultBuildOperationRunner.call(DefaultBuildOperationRunner.java:54)
+	at org.gradle.internal.execution.steps.ExecuteStep.execute(ExecuteStep.java:134)
+	at org.gradle.internal.execution.steps.ExecuteStep$Mutable.execute(ExecuteStep.java:80)
+	at org.gradle.internal.execution.steps.CancelExecutionStep.execute(CancelExecutionStep.java:42)
+	at org.gradle.internal.execution.steps.TimeoutStep.executeWithoutTimeout(TimeoutStep.java:75)
+	at org.gradle.internal.execution.steps.TimeoutStep.execute(TimeoutStep.java:55)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:51)
+	at org.gradle.internal.execution.steps.PreCreateOutputParentsStep.execute(PreCreateOutputParentsStep.java:29)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:67)
+	at org.gradle.internal.execution.steps.RemovePreviousOutputsStep.executeMutable(RemovePreviousOutputsStep.java:39)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:42)
+	at org.gradle.internal.execution.steps.BroadcastChangingOutputsStep.execute(BroadcastChangingOutputsStep.java:24)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:69)
+	at org.gradle.internal.execution.steps.CaptureOutputsAfterExecutionStep.execute(CaptureOutputsAfterExecutionStep.java:46)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:39)
+	at org.gradle.internal.execution.steps.ResolveInputChangesStep.executeMutable(ResolveInputChangesStep.java:28)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithoutCache(BuildCacheStep.java:189)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeAndStoreInCache(BuildCacheStep.java:145)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$executeWithCache$4(BuildCacheStep.java:104)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$executeWithCache$5(BuildCacheStep.java:104)
+	at org.gradle.internal.Try$Success.map(Try.java:170)
+	at org.gradle.internal.execution.steps.BuildCacheStep.executeWithCache(BuildCacheStep.java:88)
+	at org.gradle.internal.execution.steps.BuildCacheStep.lambda$execute$0(BuildCacheStep.java:75)
+	at org.gradle.internal.Either$Left.fold(Either.java:116)
+	at org.gradle.internal.execution.caching.CachingState.fold(CachingState.java:62)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:74)
+	at org.gradle.internal.execution.steps.BuildCacheStep.execute(BuildCacheStep.java:49)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:46)
+	at org.gradle.internal.execution.steps.StoreExecutionStateStep.executeMutable(StoreExecutionStateStep.java:35)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.executeBecause(SkipUpToDateStep.java:75)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.lambda$execute$2(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:53)
+	at org.gradle.internal.execution.steps.SkipUpToDateStep.execute(SkipUpToDateStep.java:35)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:37)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsFinishedStep.execute(MarkSnapshottingInputsFinishedStep.java:27)
+	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:70)
+	at org.gradle.internal.execution.steps.ResolveMutableCachingStateStep.executeDelegate(ResolveMutableCachingStateStep.java:32)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:69)
+	at org.gradle.internal.execution.steps.AbstractResolveCachingStateStep.execute(AbstractResolveCachingStateStep.java:37)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:63)
+	at org.gradle.internal.execution.steps.ResolveChangesStep.executeMutable(ResolveChangesStep.java:34)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:79)
+	at org.gradle.internal.execution.steps.ValidateStep$Mutable.executeDelegate(ValidateStep.java:65)
+	at org.gradle.internal.execution.steps.ValidateStep.execute(ValidateStep.java:105)
+	at org.gradle.internal.execution.steps.ValidateStep$Mutable.execute(ValidateStep.java:65)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.executeMutable(CaptureMutableStateBeforeExecutionStep.java:86)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:65)
+	at org.gradle.internal.execution.steps.CaptureMutableStateBeforeExecutionStep.execute(CaptureMutableStateBeforeExecutionStep.java:45)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeWithNonEmptySources(SkipEmptyMutableWorkStep.java:210)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:90)
+	at org.gradle.internal.execution.steps.SkipEmptyMutableWorkStep.executeMutable(SkipEmptyMutableWorkStep.java:53)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.legacy.MarkSnapshottingInputsStartedStep.execute(MarkSnapshottingInputsStartedStep.java:38)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:36)
+	at org.gradle.internal.execution.steps.LoadPreviousExecutionStateStep.executeMutable(LoadPreviousExecutionStateStep.java:23)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:77)
+	at org.gradle.internal.execution.steps.HandleStaleOutputsStep.executeMutable(HandleStaleOutputsStep.java:43)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.lambda$executeMutable$0(AssignMutableWorkspaceStep.java:34)
+	at org.gradle.api.internal.tasks.execution.TaskExecution$4.withWorkspace(TaskExecution.java:305)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:30)
+	at org.gradle.internal.execution.steps.AssignMutableWorkspaceStep.executeMutable(AssignMutableWorkspaceStep.java:21)
+	at org.gradle.internal.execution.steps.MutableStep.execute(MutableStep.java:26)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:40)
+	at org.gradle.internal.execution.steps.ChoosePipelineStep.execute(ChoosePipelineStep.java:23)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.lambda$execute$2(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:67)
+	at org.gradle.internal.execution.steps.ExecuteWorkBuildOperationFiringStep.execute(ExecuteWorkBuildOperationFiringStep.java:39)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:46)
+	at org.gradle.internal.execution.steps.IdentityCacheStep.execute(IdentityCacheStep.java:34)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:56)
+	at org.gradle.internal.execution.steps.IdentifyStep.execute(IdentifyStep.java:38)
+	at org.gradle.internal.execution.impl.DefaultExecutionEngine$1.execute(DefaultExecutionEngine.java:68)
+	at org.gradle.api.internal.tasks.execution.ExecuteActionsTaskExecuter.executeIfValid(ExecuteActionsTaskExecuter.java:132)
+	... 61 more
+
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 5m 38s
+9 actionable tasks: 7 executed, 2 up-to-date
