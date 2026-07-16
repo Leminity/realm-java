@@ -7,6 +7,7 @@ import hashlib
 import importlib.util
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 
@@ -42,8 +43,14 @@ def populate_repository(repository: Path) -> None:
         directory = G008.coordinate_directory(repository, artifact)
         directory.mkdir(parents=True)
         for name in G008.expected_deployables(artifact, extension):
-            content = pom(artifact, G008.FORK_EDGES[artifact]) if name.endswith(".pom") else name
-            (directory / name).write_text(content, encoding="utf-8")
+            path = directory / name
+            if name.endswith(".aar"):
+                with zipfile.ZipFile(path, "w") as archive:
+                    for abi in sorted(G008.ANDROID_ABIS):
+                        archive.writestr(f"jni/{abi}/librealm-jni.so", abi)
+            else:
+                content = pom(artifact, G008.FORK_EDGES[artifact]) if name.endswith(".pom") else name
+                path.write_text(content, encoding="utf-8")
     G008.write_checksums(repository)
 
 
@@ -99,6 +106,16 @@ class G008PublicationTests(unittest.TestCase):
     def test_required_signatures_are_cryptographically_enforced(self) -> None:
         with self.assertRaisesRegex(G008.ValidationError, "missing PGP signature"):
             G008.validate_repository(self.repository, True, None)
+
+    def test_base_library_aar_rejects_x86_or_missing_abi(self) -> None:
+        aar = G008.coordinate_directory(self.repository, "realm-android-library") / (
+            f"realm-android-library-{G008.VERSION}.aar"
+        )
+        with zipfile.ZipFile(aar, "a") as archive:
+            archive.writestr("jni/x86/librealm-jni.so", "x86")
+        G008.write_checksums(self.repository)
+        with self.assertRaisesRegex(G008.ValidationError, "JNI ABI directories"):
+            G008.validate_repository(self.repository, False, None)
 
 
 if __name__ == "__main__":

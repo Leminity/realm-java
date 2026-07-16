@@ -13,7 +13,7 @@ Build tasks
 -----------
 assemble - Build the supported Realm libraries and Gradle plugin
 assembleAnnotations - Assemble the Realm annotations
-assembleBenchmarks - Assemble benchmark tests for the library 
+assembleBenchmarks - Assemble benchmark tests for the library
 assembleExamples - Assemble the Realm examples
 assembleGradlePlugin - Assemble the Realm Gradle plugin
 assembleRealm - Assemble the Realm project
@@ -79,7 +79,7 @@ Test tasks
 check - Run the JVM tests and checks in the supported Realm project
 checkExamples - Run the JVM tests and checks the examples
 checkRealm - Run the JVM tests and checks Realm project
-connectedBenchmarks - Run all the benchmark tests for the library 
+connectedBenchmarks - Run all the benchmark tests for the library
 connectedUnitTests - Run the Android unit tests of the Realm project
 
 Verification tasks

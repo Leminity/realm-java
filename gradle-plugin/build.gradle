@@ -66,7 +66,7 @@ dependencies {
     implementation localGroovy()
     implementation "io.github.leminity.realm:realm-transformer:${version}"
     runtimeOnly "com.android.tools.build:gradle-kotlin:${props.get("GRADLE_BUILD_TOOLS")}"
-    compileOnly "com.android.tools.build:gradle:${props.get("GRADLE_BUILD_TOOLS")}" 
+    compileOnly "com.android.tools.build:gradle:${props.get("GRADLE_BUILD_TOOLS")}"
 
     testImplementation gradleTestKit()
     testImplementation 'junit:junit:4.12'

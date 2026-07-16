@@ -30,6 +30,7 @@ ARTIFACTS = {
     "realm-android-library": "aar",
     "realm-android-kotlin-extensions": "aar",
 }
+ANDROID_ABIS = frozenset(("armeabi-v7a", "arm64-v8a", "x86_64"))
 FORK_EDGES = {
     "realm-gradle-plugin": {("realm-transformer", VERSION)},
     "realm-transformer": {("realm-annotations", VERSION)},
@@ -173,6 +174,27 @@ def validate_payload(path: Path) -> None:
             raise ValidationError(f"{path}: release payload contains a credential/private-key marker")
 
 
+def validate_base_library_aar(path: Path) -> None:
+    """Keep the public native payload to the exact non-x86 Realm ABI set."""
+    try:
+        with zipfile.ZipFile(path) as archive:
+            entries = archive.namelist()
+    except zipfile.BadZipFile as error:
+        raise ValidationError(f"invalid realm-android-library AAR {path}: {error}") from error
+    abis = {
+        entry.split("/", 2)[1]
+        for entry in entries
+        if entry.startswith("jni/") and len(entry.split("/", 2)) >= 3
+    }
+    if abis != ANDROID_ABIS:
+        raise ValidationError(
+            f"{path}: JNI ABI directories must be {sorted(ANDROID_ABIS)}, got {sorted(abis)}"
+        )
+    for abi in ANDROID_ABIS:
+        if not any(entry.startswith(f"jni/{abi}/") and entry.endswith(".so") for entry in entries):
+            raise ValidationError(f"{path}: JNI ABI {abi} has no native library")
+
+
 def write_checksums(repository: Path) -> None:
     # Gradle file repositories emit mutable maven-metadata files. They are not
     # release-version inputs and are excluded from the immutable Central bundle.
@@ -277,6 +299,8 @@ def validate_repository(repository: Path, require_signatures: bool, plugin_sourc
                 raise ValidationError(f"{artifact}: denied release payload {name}")
         for name in deployables:
             validate_payload(directory / name)
+        if artifact == "realm-android-library":
+            validate_base_library_aar(directory / f"{artifact}-{VERSION}.{extension}")
         if require_signatures:
             validate_signatures(directory, deployables)
         validate_checksums(directory, deployables)
