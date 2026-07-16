@@ -62,22 +62,28 @@ def normalizePublishedPomDependencies(artifactId) {
             ]
     ]
     return {
-        def dependenciesNodes = asNode().dependencies
+        def dependenciesNodes = asNode().children().findAll { node ->
+            node instanceof Node && node.name().toString() == 'dependencies'
+        }
         if (dependenciesNodes.isEmpty()) {
             return
         }
         def dependenciesNode = dependenciesNodes[0]
         def suppressed = suppressions.get(artifactId, [])
         def renamed = renames.get(artifactId, [:])
-        dependenciesNode.dependency().toList().each { dependency ->
-            def key = [dependency.groupId.text(), dependency.artifactId.text()]
+        dependenciesNode.children().findAll { node ->
+            node instanceof Node && node.name().toString() == 'dependency'
+        }.each { dependency ->
+            def groupId = dependency.children().find { node -> node.name().toString() == 'groupId' }
+            def artifactId = dependency.children().find { node -> node.name().toString() == 'artifactId' }
+            def key = [groupId.text(), artifactId.text()]
             if (suppressed.contains(key)) {
                 dependenciesNode.remove(dependency)
                 return
             }
             def replacement = renamed.get(key)
             if (replacement != null) {
-                dependency.artifactId[0].setValue(replacement)
+                artifactId.setValue(replacement)
             }
         }
     }
