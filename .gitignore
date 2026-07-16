@@ -55,3 +55,6 @@ realm/realm-library/distribution
 # Cmake output
 realm/realm-library/.externalNativeBuild
 realm/realm-library/.cxx
+
+# Local OMX orchestration state belongs to the workspace, not the fork.
+.omx/

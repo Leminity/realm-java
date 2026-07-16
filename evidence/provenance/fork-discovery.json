@@ -1,0 +1,9 @@
+{
+  "candidate": "https://github.com/Leminity/realm-java.git",
+  "preflight_check": "git ls-remote --exit-code --heads https://github.com/Leminity/realm-java.git",
+  "preflight_outcome": "unavailable: remote: Repository not found.",
+  "authorization_check": "gh auth status confirmed the active github.com account Leminity with repo and workflow scopes",
+  "authorized_action": "gh repo fork realm/realm-java --fork-name realm-java --clone=false --remote=false",
+  "outcome": "created public Leminity/realm-java fork; local origin configured to the same HTTPS URL",
+  "safety_boundary": "No Maven Central publication, release, or fork tag was created."
+}

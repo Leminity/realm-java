@@ -1,0 +1,3 @@
+validated tag=v10.19.0-agp9.1 pom_version=10.19.0-agp9.1
+validated tag=v10.19.0-agp9.27 pom_version=10.19.0-agp9.27
+release-tag parser tests: PASS
