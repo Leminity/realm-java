@@ -1,0 +1,12 @@
+evidence/oracle/official-10.19.0/artifacts/realm-android-kotlin-extensions-10.19.0.aar: OK
+evidence/oracle/official-10.19.0/artifacts/realm-android-library-10.19.0.aar: OK
+evidence/oracle/official-10.19.0/artifacts/realm-annotations-10.19.0.jar: OK
+evidence/oracle/official-10.19.0/artifacts/realm-annotations-processor-10.19.0.jar: OK
+evidence/oracle/official-10.19.0/artifacts/realm-gradle-plugin-10.19.0.jar: OK
+evidence/oracle/official-10.19.0/artifacts/realm-transformer-10.19.0.jar: OK
+evidence/oracle/official-10.19.0/poms/realm-android-kotlin-extensions-10.19.0.pom: OK
+evidence/oracle/official-10.19.0/poms/realm-android-library-10.19.0.pom: OK
+evidence/oracle/official-10.19.0/poms/realm-annotations-10.19.0.pom: OK
+evidence/oracle/official-10.19.0/poms/realm-annotations-processor-10.19.0.pom: OK
+evidence/oracle/official-10.19.0/poms/realm-gradle-plugin-10.19.0.pom: OK
+evidence/oracle/official-10.19.0/poms/realm-transformer-10.19.0.pom: OK

@@ -1,0 +1,1 @@
+{"schema_version":7,"types":[{"name":"FixturePerson","primary_key":"id","fields":["id:long","name:string","active:boolean","createdAt:date","payload:binary","parent:FixturePerson?"]}]}

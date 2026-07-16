@@ -57,3 +57,12 @@ For each fixture, always operate on a working copy:
 Never mutate a committed/original oracle fixture in place. The result is not accepted
 until the baseline reader pass, fork reader pass, reverse reader pass, wrong-key
 integrity check, and fixture-manifest hash are all present.
+
+## Executable generator status (task 8)
+
+`app/src/androidTest/java/io/realm/fixtureoracle/OfficialFixtureOracleTest.java` is the
+executable official-reader generator. `run-official-oracle.sh` injects a non-committed
+64-byte test key, runs the connected instrumentation test, pulls both fixture files,
+and verifies the generated manifest plus file hashes on the host. As recorded in
+`../../evidence/oracle/official-10.19.0/fixture-execution/task-8-prerequisite-blocker.md`,
+this runtime is currently **BLOCKED**: it has not generated a fixture PASS.

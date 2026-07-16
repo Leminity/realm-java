@@ -1,0 +1,11 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.0'
+        // Official, unmodified baseline plugin required by the fixture generator.
+        classpath 'io.realm:realm-gradle-plugin:10.19.0'
+    }
+}

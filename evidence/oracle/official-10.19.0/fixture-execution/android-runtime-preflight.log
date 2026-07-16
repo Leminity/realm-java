@@ -1,0 +1,10 @@
+--- Android runtime availability ---
+sdk_root=/home/leminity/Android/Sdk
+adb=present
+emulator=missing
+sdkmanager=missing
+platforms=android-36.1
+
+build_tools=36.0.0
+
+List of devices attached

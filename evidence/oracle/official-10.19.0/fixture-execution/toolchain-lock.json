@@ -1,0 +1,60 @@
+{
+  "captured_utc": "2026-07-16T03:11:28.903774+00:00",
+  "execution_status": "BLOCKED_BEFORE_G002",
+  "official_realm_version": "10.19.0",
+  "official_artifact_manifest_sha256": "255be75f1dca64e2cc94574ced12c5acaa2bb749f8c7a3998056631f08c203a1",
+  "schema_sha256": "1685e31f637636584b76e7a18e4dad362146e96dbc4a0190b382effdbf05d70c",
+  "golden_data_sha256": "016717bd6a066c765a3c7d8418767671e22803af691e5aeee0432255653a2423",
+  "encryption_key_sha256": null,
+  "required_g002": {
+    "jdk": "17",
+    "gradle": "9.6.1",
+    "agp": "9.1.1",
+    "compile_sdk": "37",
+    "target_sdk": "37",
+    "min_sdk": "21",
+    "ndk": "29.0.14206865",
+    "emulator_or_attached_device": "API 37",
+    "android_command_line_tools": "required"
+  },
+  "observed": {
+    "java_version": {
+      "command": [
+        "java",
+        "-version"
+      ],
+      "exit_code": 0,
+      "output": "openjdk version \"17.0.19\" 2026-04-21\nOpenJDK Runtime Environment Homebrew (build 17.0.19+0)\nOpenJDK 64-Bit Server VM Homebrew (build 17.0.19+0, mixed mode, sharing)\n"
+    },
+    "gradle_wrapper_properties_sha256": "c2a4001c40c12510cc2298a9ddbfe2b17fee6f14299ebb11d488258bf9d2ae75",
+    "gradle_7_5": {
+      "command": [
+        "compatibility-fixtures/official-10.19.0-generator/gradlew",
+        "--version"
+      ],
+      "exit_code": 0,
+      "output": "\n------------------------------------------------------------\nGradle 7.5\n------------------------------------------------------------\n\nBuild time:   2022-07-14 12:48:15 UTC\nRevision:     c7db7b958189ad2b0c1472b6fe663e6d654a5103\n\nKotlin:       1.6.21\nGroovy:       3.0.10\nAnt:          Apache Ant(TM) version 1.10.11 compiled on July 10 2021\nJVM:          17.0.19 (Homebrew 17.0.19+0)\nOS:           Linux 6.6.87.2-microsoft-standard-WSL2 amd64\n\n"
+    },
+    "agp_7_4_jar_sha256": "8528c64be0ea19bad7a3a793c5e2a5ee0acb34c7898d1cab01880728bf6a8eb8",
+    "sdk_root": "/home/leminity/Android/Sdk",
+    "sdk_platform_directories": [
+      "android-36.1"
+    ],
+    "sdk_build_tools_directories": [
+      "36.0.0"
+    ],
+    "adb_exists": true,
+    "emulator_exists": false,
+    "sdkmanager_exists": false,
+    "adb_devices": {
+      "command": [
+        "/home/leminity/Android/Sdk/platform-tools/adb",
+        "devices",
+        "-l"
+      ],
+      "exit_code": 0,
+      "output": "List of devices attached\n\n"
+    }
+  },
+  "generated_fixture_files": []
+}

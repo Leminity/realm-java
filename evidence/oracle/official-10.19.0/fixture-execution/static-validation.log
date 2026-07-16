@@ -1,0 +1,4 @@
+--- static validation ---
+PASS: generator scripts parse; schema/data JSON parse; official Realm 10.19.0 coordinates and bidirectional-reader test are present
+schema_sha256=1685e31f637636584b76e7a18e4dad362146e96dbc4a0190b382effdbf05d70c
+golden_data_sha256=016717bd6a066c765a3c7d8418767671e22803af691e5aeee0432255653a2423

@@ -1,0 +1,124 @@
+{
+  "files": [
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gitignore",
+      "sha256": "a75c406d742dd044a54cd710b58a7f1c9fa589b870d3ba4bc1db52256fc1d8af"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/7.5/checksums/checksums.lock",
+      "sha256": "f0b4d2e67e297f489d62b26b6e93595e74f95b65bd48d079407c3ec0f7a9f30c"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/7.5/dependencies-accessors/dependencies-accessors.lock",
+      "sha256": "d9b8976f4238b40a8cbb858ed80c90efef1f46e892a8bbff3dbd922e2d02ac80"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/7.5/dependencies-accessors/gc.properties",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/7.5/fileChanges/last-build.bin",
+      "sha256": "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/7.5/fileHashes/fileHashes.lock",
+      "sha256": "325de67635e0542a39873f5afbf574cbacbe8cfe94f8519074b3a9b0b6dcd2ff"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/7.5/gc.properties",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/buildOutputCleanup/buildOutputCleanup.lock",
+      "sha256": "62c0f68a07753fe7299a885803fdb6dd07c58606d7966781bd928c5bbcbc256f"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/buildOutputCleanup/cache.properties",
+      "sha256": "6a621977e414980afc0aef0996c11e6d1692b13affb8993aaa654aeb60f73b76"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/.gradle/vcs-1/gc.properties",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/build.gradle",
+      "sha256": "9bd0ef0814a603ccb1ed27847b044e2f2447ee188580f0e060afa9a2b7540a7a"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/androidTest/assets/golden-data.json",
+      "sha256": "016717bd6a066c765a3c7d8418767671e22803af691e5aeee0432255653a2423"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/androidTest/assets/schema.json",
+      "sha256": "1685e31f637636584b76e7a18e4dad362146e96dbc4a0190b382effdbf05d70c"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/androidTest/java/io/realm/fixtureoracle/OfficialFixtureOracleTest.java",
+      "sha256": "bc63ed443ba8d0dfa646b346d3f0c92bcd47ad4fdc259ccd2b307aa273f53c8b"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/main/AndroidManifest.xml",
+      "sha256": "f1a0b6a85a061300beccc5ce008180be8eaa8571f5e582dbb3f17c45e999a371"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/main/java/io/realm/fixtureoracle/FixtureOracleApplication.java",
+      "sha256": "632f88d6781030ec16692f74991a720e4f805f6e8fe81be75cb6da53faec38c6"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/main/java/io/realm/fixtureoracle/FixturePerson.java",
+      "sha256": "006df517f52d78cc79c3371553cf16eb84a0c456db48cd6b528e20f79fe636e3"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/app/src/main/res/values/strings.xml",
+      "sha256": "0b7f3154772fdc21eb93757b6e62133f0634c983ede2829ceeb0841183933919"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/build.gradle",
+      "sha256": "a5262dae51e10bef324095f36202cb68153ddc01812e5b1720dcb846c272a261"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/fixture-oracle-procedure.md",
+      "sha256": "96d562fb08b6b6798f9d814bc9b05a264b02e6b47631ce9691de357f247394ad"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/gradle/wrapper/gradle-wrapper.jar",
+      "sha256": "91a239400bb638f36a1795d8fdf7939d532cdc7d794d1119b7261aac158b1e60"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/gradle/wrapper/gradle-wrapper.properties",
+      "sha256": "c2a4001c40c12510cc2298a9ddbfe2b17fee6f14299ebb11d488258bf9d2ae75"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/gradle.properties",
+      "sha256": "bcec3f41f03e1fcecc807afe61c5e1e8c922a1dfd8141bb684431b93b82770fa"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/gradlew",
+      "sha256": "8deee7d70dd19cf8180712bd9a4fc2f957ad4ce81f64ce825aec066275fdf761"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/prepare-fixture-key.sh",
+      "sha256": "0cdfdf9d17f055ddc729e0b96815504c4f817217642947deac5cecbbf2e0fd34"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/run-official-oracle.sh",
+      "sha256": "029ee643c6ef11f68ea35593efc2e8f397d667cc38f62ec823d9466dd7d35b3d"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/settings.gradle",
+      "sha256": "b87cb02aa5a07599d07967a24acb1b297647aa19396551abc796750dd8c78a2a"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/upstream-source-locations.md",
+      "sha256": "2c58ccd87be65e63a4d880d41f7f1fa7bb35798be7fbd898b405e5e6ab50d163"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/upstream-source-sha256.txt",
+      "sha256": "c2bbf15c96a5cef1052420358f51f6aa29b2c58816f345518df67a6f41091e61"
+    },
+    {
+      "path": "compatibility-fixtures/official-10.19.0-generator/verify-generated-fixtures.py",
+      "sha256": "a51d36209ba8b792cf9b06d26df22a30e7419fb36c3764d1bc31fcb08c8197e3"
+    }
+  ]
+}

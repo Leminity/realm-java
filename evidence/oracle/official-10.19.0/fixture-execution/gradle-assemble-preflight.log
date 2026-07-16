@@ -1,0 +1,345 @@
+--- corrected isolated Gradle assemble preflight ---
+To honour the JVM settings for this build a single-use Daemon process will be forked. See https://docs.gradle.org/7.5/userguide/gradle_daemon.html#sec:disabling_the_daemon.
+Daemon will be stopped at the end of the build
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+A problem occurred configuring root project 'official-10.19.0-fixture-oracle'.
+> Could not resolve all files for configuration ':classpath'.
+   > Could not resolve io.realm:realm-gradle-plugin:10.19.0.
+     Required by:
+         project :
+      > No cached version of io.realm:realm-gradle-plugin:10.19.0 available for offline mode.
+      > No cached version of io.realm:realm-gradle-plugin:10.19.0 available for offline mode.
+   > Could not resolve com.android.tools.build:gradle-settings-api:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build:gradle-settings-api:7.4.0 available for offline mode.
+      > No cached version of com.android.tools.build:gradle-settings-api:7.4.0 available for offline mode.
+   > Could not resolve com.android.tools:sdk-common:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:manifest-merger:30.4.0
+      > No cached version of com.android.tools:sdk-common:30.4.0 available for offline mode.
+      > No cached version of com.android.tools:sdk-common:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools:sdklib:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:manifest-merger:30.4.0
+      > No cached version of com.android.tools:sdklib:30.4.0 available for offline mode.
+      > No cached version of com.android.tools:sdklib:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools:repository:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools:repository:30.4.0 available for offline mode.
+      > No cached version of com.android.tools:repository:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.ddms:ddmlib:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of com.android.tools.ddms:ddmlib:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.ddms:ddmlib:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.build:aapt2-proto:7.4.0-8841542.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build:aapt2-proto:7.4.0-8841542 available for offline mode.
+      > No cached version of com.android.tools.build:aapt2-proto:7.4.0-8841542 available for offline mode.
+   > Could not resolve com.android.tools.build:aaptcompiler:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build:aaptcompiler:7.4.0 available for offline mode.
+      > No cached version of com.android.tools.build:aaptcompiler:7.4.0 available for offline mode.
+   > Could not resolve com.android.tools.analytics-library:crash:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.analytics-library:crash:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.analytics-library:crash:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.analytics-library:shared:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.analytics-library:shared:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.analytics-library:shared:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.lint:lint-model:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.lint:lint-model:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.lint:lint-model:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.lint:lint-typedef-remover:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.lint:lint-typedef-remover:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.lint:lint-typedef-remover:30.4.0 available for offline mode.
+   > Could not resolve androidx.databinding:databinding-compiler-common:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of androidx.databinding:databinding-compiler-common:7.4.0 available for offline mode.
+      > No cached version of androidx.databinding:databinding-compiler-common:7.4.0 available for offline mode.
+   > Could not resolve androidx.databinding:databinding-common:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of androidx.databinding:databinding-common:7.4.0 available for offline mode.
+      > No cached version of androidx.databinding:databinding-common:7.4.0 available for offline mode.
+   > Could not resolve com.android.databinding:baseLibrary:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.databinding:baseLibrary:7.4.0 available for offline mode.
+      > No cached version of com.android.databinding:baseLibrary:7.4.0 available for offline mode.
+   > Could not resolve com.android.tools.build:builder-test-api:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:gradle-api:7.4.0
+      > No cached version of com.android.tools.build:builder-test-api:7.4.0 available for offline mode.
+      > No cached version of com.android.tools.build:builder-test-api:7.4.0 available for offline mode.
+   > Could not resolve com.android.tools.layoutlib:layoutlib-api:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of com.android.tools.layoutlib:layoutlib-api:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.layoutlib:layoutlib-api:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.utp:android-device-provider-ddmlib-proto:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.utp:android-device-provider-ddmlib-proto:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.utp:android-device-provider-ddmlib-proto:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.utp:android-device-provider-gradle-proto:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.utp:android-device-provider-gradle-proto:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.utp:android-device-provider-gradle-proto:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.utp:android-test-plugin-host-additional-test-output-proto:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.utp:android-test-plugin-host-additional-test-output-proto:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.utp:android-test-plugin-host-additional-test-output-proto:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.utp:android-test-plugin-host-coverage-proto:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.utp:android-test-plugin-host-coverage-proto:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.utp:android-test-plugin-host-coverage-proto:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.utp:android-test-plugin-host-retention-proto:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.utp:android-test-plugin-host-retention-proto:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.utp:android-test-plugin-host-retention-proto:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.utp:android-test-plugin-result-listener-gradle-proto:30.4.0 available for offline mode.
+   > Could not resolve org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder-model:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:gradle-api:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:manifest-merger:30.4.0
+      > No cached version of org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10 available for offline mode.
+      > No cached version of org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10 available for offline mode.
+   > Could not resolve com.android.tools.build:transform-api:2.0.0-deprecated-use-gradle-api.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build:transform-api:2.0.0-deprecated-use-gradle-api available for offline mode.
+      > No cached version of com.android.tools.build:transform-api:2.0.0-deprecated-use-gradle-api available for offline mode.
+   > Could not resolve org.apache.httpcomponents:httpmime:4.5.6.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of org.apache.httpcomponents:httpmime:4.5.6 available for offline mode.
+      > No cached version of org.apache.httpcomponents:httpmime:4.5.6 available for offline mode.
+   > Could not resolve commons-io:commons-io:2.4.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of commons-io:commons-io:2.4 available for offline mode.
+      > No cached version of commons-io:commons-io:2.4 available for offline mode.
+   > Could not resolve org.ow2.asm:asm:9.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:gradle-api:7.4.0
+      > No cached version of org.ow2.asm:asm:9.2 available for offline mode.
+      > No cached version of org.ow2.asm:asm:9.2 available for offline mode.
+   > Could not resolve org.ow2.asm:asm-analysis:9.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of org.ow2.asm:asm-analysis:9.2 available for offline mode.
+      > No cached version of org.ow2.asm:asm-analysis:9.2 available for offline mode.
+   > Could not resolve org.ow2.asm:asm-commons:9.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of org.ow2.asm:asm-commons:9.2 available for offline mode.
+      > No cached version of org.ow2.asm:asm-commons:9.2 available for offline mode.
+   > Could not resolve org.ow2.asm:asm-util:9.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of org.ow2.asm:asm-util:9.2 available for offline mode.
+      > No cached version of org.ow2.asm:asm-util:9.2 available for offline mode.
+   > Could not resolve org.bouncycastle:bcpkix-jdk15on:1.67.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:apkzlib:7.4.0
+      > No cached version of org.bouncycastle:bcpkix-jdk15on:1.67 available for offline mode.
+      > No cached version of org.bouncycastle:bcpkix-jdk15on:1.67 available for offline mode.
+   > Could not resolve org.glassfish.jaxb:jaxb-runtime:2.3.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of org.glassfish.jaxb:jaxb-runtime:2.3.2 available for offline mode.
+      > No cached version of org.glassfish.jaxb:jaxb-runtime:2.3.2 available for offline mode.
+   > Could not resolve net.sf.jopt-simple:jopt-simple:4.9.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of net.sf.jopt-simple:jopt-simple:4.9 available for offline mode.
+      > No cached version of net.sf.jopt-simple:jopt-simple:4.9 available for offline mode.
+   > Could not resolve com.android.tools.build:bundletool:1.11.4.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build:bundletool:1.11.4 available for offline mode.
+      > No cached version of com.android.tools.build:bundletool:1.11.4 available for offline mode.
+   > Could not resolve com.android.tools.build.jetifier:jetifier-core:1.0.0-beta10.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build.jetifier:jetifier-core:1.0.0-beta10 available for offline mode.
+      > No cached version of com.android.tools.build.jetifier:jetifier-core:1.0.0-beta10 available for offline mode.
+   > Could not resolve com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10 available for offline mode.
+      > No cached version of com.android.tools.build.jetifier:jetifier-processor:1.0.0-beta10 available for offline mode.
+   > Could not resolve com.squareup:javapoet:1.10.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.squareup:javapoet:1.10.0 available for offline mode.
+      > No cached version of com.squareup:javapoet:1.10.0 available for offline mode.
+   > Could not resolve com.google.protobuf:protobuf-java:3.17.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.google.protobuf:protobuf-java:3.17.2 available for offline mode.
+      > No cached version of com.google.protobuf:protobuf-java:3.17.2 available for offline mode.
+   > Could not resolve com.google.protobuf:protobuf-java-util:3.17.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.google.protobuf:protobuf-java-util:3.17.2 available for offline mode.
+      > No cached version of com.google.protobuf:protobuf-java-util:3.17.2 available for offline mode.
+   > Could not resolve com.google.code.gson:gson:2.8.6.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:manifest-merger:30.4.0
+      > No cached version of com.google.code.gson:gson:2.8.6 available for offline mode.
+      > No cached version of com.google.code.gson:gson:2.8.6 available for offline mode.
+   > Could not resolve io.grpc:grpc-core:1.39.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of io.grpc:grpc-core:1.39.0 available for offline mode.
+      > No cached version of io.grpc:grpc-core:1.39.0 available for offline mode.
+   > Could not resolve io.grpc:grpc-netty:1.39.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of io.grpc:grpc-netty:1.39.0 available for offline mode.
+      > No cached version of io.grpc:grpc-netty:1.39.0 available for offline mode.
+   > Could not resolve io.grpc:grpc-protobuf:1.39.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of io.grpc:grpc-protobuf:1.39.0 available for offline mode.
+      > No cached version of io.grpc:grpc-protobuf:1.39.0 available for offline mode.
+   > Could not resolve io.grpc:grpc-stub:1.39.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of io.grpc:grpc-stub:1.39.0 available for offline mode.
+      > No cached version of io.grpc:grpc-stub:1.39.0 available for offline mode.
+   > Could not resolve com.google.crypto.tink:tink:1.3.0-rc2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.google.crypto.tink:tink:1.3.0-rc2 available for offline mode.
+      > No cached version of com.google.crypto.tink:tink:1.3.0-rc2 available for offline mode.
+   > Could not resolve com.google.testing.platform:core-proto:0.0.8-alpha08.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.google.testing.platform:core-proto:0.0.8-alpha08 available for offline mode.
+      > No cached version of com.google.testing.platform:core-proto:0.0.8-alpha08 available for offline mode.
+   > Could not resolve com.google.flatbuffers:flatbuffers-java:1.12.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of com.google.flatbuffers:flatbuffers-java:1.12.0 available for offline mode.
+      > No cached version of com.google.flatbuffers:flatbuffers-java:1.12.0 available for offline mode.
+   > Could not resolve org.tensorflow:tensorflow-lite-metadata:0.1.0-rc2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0
+      > No cached version of org.tensorflow:tensorflow-lite-metadata:0.1.0-rc2 available for offline mode.
+      > No cached version of org.tensorflow:tensorflow-lite-metadata:0.1.0-rc2 available for offline mode.
+   > Could not resolve com.android.tools:common:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:manifest-merger:30.4.0
+      > No cached version of com.android.tools:common:30.4.0 available for offline mode.
+      > No cached version of com.android.tools:common:30.4.0 available for offline mode.
+   > Could not resolve com.android:signflinger:7.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of com.android:signflinger:7.4.0 available for offline mode.
+      > No cached version of com.android:signflinger:7.4.0 available for offline mode.
+   > Could not resolve com.android.tools.analytics-library:protos:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of com.android.tools.analytics-library:protos:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.analytics-library:protos:30.4.0 available for offline mode.
+   > Could not resolve com.android.tools.analytics-library:tracker:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of com.android.tools.analytics-library:tracker:30.4.0 available for offline mode.
+      > No cached version of com.android.tools.analytics-library:tracker:30.4.0 available for offline mode.
+   > Could not resolve commons-codec:commons-codec:1.10.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of commons-codec:commons-codec:1.10 available for offline mode.
+      > No cached version of commons-codec:commons-codec:1.10 available for offline mode.
+   > Could not resolve org.bouncycastle:bcprov-jdk15on:1.67.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:apkzlib:7.4.0
+      > No cached version of org.bouncycastle:bcprov-jdk15on:1.67 available for offline mode.
+      > No cached version of org.bouncycastle:bcprov-jdk15on:1.67 available for offline mode.
+   > Could not resolve javax.inject:javax.inject:1.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of javax.inject:javax.inject:1 available for offline mode.
+      > No cached version of javax.inject:javax.inject:1 available for offline mode.
+   > Could not resolve com.squareup:javawriter:2.5.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0
+      > No cached version of com.squareup:javawriter:2.5.0 available for offline mode.
+      > No cached version of com.squareup:javawriter:2.5.0 available for offline mode.
+   > Could not resolve com.android.tools:annotations:30.4.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder-model:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android:zipflinger:7.4.0
+      > No cached version of com.android.tools:annotations:30.4.0 available for offline mode.
+      > No cached version of com.android.tools:annotations:30.4.0 available for offline mode.
+   > Could not resolve com.google.guava:guava:30.1-jre.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:gradle-api:7.4.0
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:apkzlib:7.4.0
+      > No cached version of com.google.guava:guava:30.1-jre available for offline mode.
+      > No cached version of com.google.guava:guava:30.1-jre available for offline mode.
+   > Could not resolve net.sf.kxml:kxml2:2.3.0.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:manifest-merger:30.4.0
+      > No cached version of net.sf.kxml:kxml2:2.3.0 available for offline mode.
+      > No cached version of net.sf.kxml:kxml2:2.3.0 available for offline mode.
+   > Could not resolve com.google.code.findbugs:jsr305:3.0.2.
+     Required by:
+         project : > com.android.tools.build:gradle:7.4.0 > com.android.tools.build:builder:7.4.0 > com.android.tools.build:apkzlib:7.4.0
+      > No cached version of com.google.code.findbugs:jsr305:3.0.2 available for offline mode.
+      > No cached version of com.google.code.findbugs:jsr305:3.0.2 available for offline mode.
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+
+* Get more help at https://help.gradle.org
+
+BUILD FAILED in 2s
+exit_code=1

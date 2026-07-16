@@ -1,0 +1,9 @@
+18589d5fd1fe0766acec4d16f88f55b698daceaabe47952e9d9f42bb41167ace  evidence/oracle/official-10.19.0/checksums/sha256sum.txt
+8714d18d388667de4310fad5c77ee22d6f6ae5c14e088e96ba388d091fd399c5  evidence/oracle/official-10.19.0/checksums/evidence-sha256sum.txt
+f11265de506f5d007238af45a6ccc04bbe1ee1b643ad4d423b29bacaf35dc434  evidence/oracle/official-10.19.0/checksums/root-sha256sum-check.txt
+2e143df4cfa2c26c95c432889322e42e9ee281c2fc9ccbf55a48b556d2c5cb07  evidence/oracle/official-10.19.0/fixture-execution/static-validation.log
+859a095b20b394fe83f31b35a88f94cc252d59d27047e4e9b779568ab08ea5e1  evidence/oracle/official-10.19.0/fixture-execution/gradle-assemble-preflight.log
+0a808f6755b90292d142285c05dbc50726a0ffcc76d892e46213ab1db98494d5  evidence/oracle/official-10.19.0/fixture-execution/android-runtime-preflight.log
+96145d36c0fe24e5d17b3a4ed22a4cc04c0499a7eaae82c889b2d65982aa15d1  evidence/oracle/official-10.19.0/fixture-execution/task-8-prerequisite-blocker.md
+4d83fecdff79b57bd80609a1309fe7348199ca9e86444f88036fa8149200c52c  evidence/oracle/official-10.19.0/fixture-execution/toolchain-lock.json
+25fc4eb1083858070ca5175bc9ca81975ec19e925b2182aa147e98ee56dba0ea  compatibility-fixtures/official-10.19.0-generator/generator-inputs-sha256.json
