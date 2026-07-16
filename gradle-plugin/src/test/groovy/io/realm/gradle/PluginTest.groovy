@@ -104,10 +104,10 @@ class PluginTest {
         assertConfigurationContains(result, 'api', 'realm-annotations')
         assertConfigurationContains(result, 'api', 'realm-android-library')
         assertConfigurationCount(result, 'api', language == 'java' ? 2 : 3)
-        assertConfigurationContains(result, 'debugCompileClasspath', 'realm-annotations')
-        assertConfigurationContains(result, 'debugCompileClasspath', 'realm-android-library')
-        assertConfigurationContains(result, 'releaseCompileClasspath', 'realm-annotations')
-        assertConfigurationContains(result, 'releaseCompileClasspath', 'realm-android-library')
+        assertResolvedConfigurationContains(result, 'debugCompileClasspath', 'realm-annotations')
+        assertResolvedConfigurationContains(result, 'debugCompileClasspath', 'realm-android-library')
+        assertResolvedConfigurationContains(result, 'releaseCompileClasspath', 'realm-annotations')
+        assertResolvedConfigurationContains(result, 'releaseCompileClasspath', 'realm-android-library')
         assertTrue('The plugin must remove owned official Realm dependencies.', result.output.contains('REALM-OFFICIAL-COUNT api=0'))
         assertTrue('debug resolution must not retain official Realm modules.', result.output.contains('REALM-OFFICIAL-RESOLVED debugCompileClasspath=0'))
         assertTrue('release resolution must not retain official Realm modules.', result.output.contains('REALM-OFFICIAL-RESOLVED releaseCompileClasspath=0'))
@@ -558,6 +558,16 @@ class PluginTest {
             'Expected ' + configuration + ' to include the forked ' + artifact + ' coordinate.\\n' + result.output,
             result.output.readLines().any { line ->
                 line.startsWith('REALM-DEPS ' + configuration + '=')
+                    && line.contains(FORK_GROUP + ':' + artifact + ':' + FORK_VERSION)
+            }
+        )
+    }
+
+    private void assertResolvedConfigurationContains(BuildResult result, String configuration, String artifact) {
+        assertTrue(
+            'Expected ' + configuration + ' to resolve the forked ' + artifact + ' coordinate.\n' + result.output,
+            result.output.readLines().any { line ->
+                line.startsWith('REALM-RESOLVED ' + configuration + '=')
                     && line.contains(FORK_GROUP + ':' + artifact + ':' + FORK_VERSION)
             }
         )
