@@ -28,6 +28,7 @@ readonly -a APPROVED_WRAPPER_PATHS=(
 readonly -a APPROVED_G003_PATHS=(
   build.gradle
   dependencies.list
+  evidence/audit/g003-stage2-configuration-review.md
   evidence/g003/F001-realm-annotations-help-after.log
   evidence/g003/F001-realm-annotations-help-before.log
   evidence/g003/F002-realm-annotations-help-after.log
@@ -92,6 +93,7 @@ readonly -a APPROVED_G003_PATHS=(
   evidence/g003/F053-realm-processor-test-after-deprecation-error-suppression.log
   evidence/g003/F054-realm-processor-test-after-nonnative-fixture.log
   evidence/g003/F055-root-installRealmJava-dry-run-post-processor.log
+  evidence/g003/G004-post-integration-matrix.log
   gradle-plugin/build.gradle
   gradle-plugin/src/test/groovy/io/realm/gradle/PluginTest.groovy
   library-build-transformer/build.gradle
