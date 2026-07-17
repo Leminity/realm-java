@@ -1,0 +1,49 @@
+# AC-07 bidirectional official/fork Realm compatibility
+
+This harness proves the contract in
+`../official-10.19.0-generator/fixture-oracle-procedure.md` without changing an
+oracle file in place.
+
+## Boundaries
+
+- **Official inputs:** an exported `official-10.19.0-oracle` directory from the
+  isolated official-only generator. It is supplied via `--official-fixtures`,
+  SHA-256 checked against its manifest, and copied read-only to a fresh ignored
+  run directory.
+- **Fork reader/writer:** `fork-consumer` compiles with AGP `9.1.1`, Gradle
+  `9.6.1` (the repository wrapper), SDK/target `37`, minSdk `21`, and JDK 17.
+  It consumes a pre-verified G008 local Maven-layout repository, never
+  `mavenLocal`, JitPack, or a remote publication endpoint.
+- **Official reverse reader:** the existing official `10.19.0` fixture project
+  remains isolated from the fork package and resolves only `io.realm:*:10.19.0`.
+
+`FixturePerson` intentionally has the original fully-qualified class name in
+both reader projects. That keeps Realm's schema identity identical while the
+fork application id/data sandbox remains distinct.
+
+## Running
+
+First obtain immutable official fixture files with the existing generator on
+its documented API-36 / 4 KiB oracle device. Do **not** use the historical hash
+log as a fixture substitute.
+
+```sh
+compatibility-fixtures/ac07-bidirectional/run-ac07.sh \
+  --official-fixtures /absolute/path/official-10.19.0-oracle \
+  --fork-repository /absolute/path/g008-local-repository \
+  --fork-serial emulator-5654 \
+  --official-serial emulator-5654
+```
+
+Each invocation creates an ignored `generated/ac07.*` directory before any
+stateful action. Every completed stage has a log; a first failure exits without
+removing the directory. The runner records device API/page-size, provenance
+checks, immutable input hashes before/after, fork instrumentation results,
+working-copy hashes, wrong-key rejection, and the isolated official reverse
+reader result. It never deletes an existing app, oracle export, or device data.
+
+In the coordinated G009 environment, `emulator-5654` and `localhost:5655` are
+two transports to the same API-37 / 16 KiB device. The runner rejects the
+second transport and holds `/tmp/realm-g009-device.lock` from the first app
+install through reverse-reader instrumentation, so it cannot collide with
+another compatibility lane.

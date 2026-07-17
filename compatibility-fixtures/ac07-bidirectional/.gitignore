@@ -1,0 +1,5 @@
+.gradle/
+generated/
+fork-m2/
+fork-consumer/app/build/
+__pycache__/

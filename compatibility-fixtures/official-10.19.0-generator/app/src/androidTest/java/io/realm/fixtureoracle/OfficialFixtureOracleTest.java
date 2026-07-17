@@ -3,6 +3,7 @@ package io.realm.fixtureoracle;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.os.Build;
@@ -16,8 +17,11 @@ import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import io.realm.Realm;
+import io.realm.DynamicRealm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmMigration;
 import org.junit.Test;
 
 public final class OfficialFixtureOracleTest {
@@ -37,6 +41,59 @@ public final class OfficialFixtureOracleTest {
         verifySemanticRead(output, "official-10.19.0-plain.realm", null);
         verifySemanticRead(output, "official-10.19.0-encrypted.realm", key);
         writeManifest(InstrumentationRegistry.getInstrumentation().getContext(), output, plain, encrypted, key);
+    }
+
+    /**
+     * AC-07 reverse direction. The host harness imports fork-mutated copies under
+     * files/ac07-fork-modified; the committed official oracle inputs are never opened
+     * for writing by this test.
+     */
+    @Test
+    public void verifyForkModifiedCopiesWithOfficialReaderWithoutMigration() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        Realm.init(context);
+        byte[] key = parseFixtureKey(BuildConfig.FIXTURE_KEY_HEX);
+        File input = new File(context.getFilesDir(), "ac07-fork-modified");
+        assertTrue("Host harness must import fork-modified files before reverse verification", input.isDirectory());
+        verifyForkModifiedRead(input, "official-10.19.0-plain.realm", null);
+        verifyForkModifiedRead(input, "official-10.19.0-encrypted.realm", key);
+    }
+
+    private static void verifyForkModifiedRead(File directory, String name, byte[] key) {
+        AtomicInteger migrationCalls = new AtomicInteger();
+        RealmConfiguration.Builder builder = new RealmConfiguration.Builder()
+            .directory(directory)
+            .name(name)
+            .schemaVersion(7)
+            .migration(new CountingMigration(migrationCalls));
+        if (key != null) builder.encryptionKey(key);
+        Realm realm = Realm.getInstance(builder.build());
+        try {
+            assertEquals("Same schema must not invoke a reverse-reader migration", 0, migrationCalls.get());
+            assertEquals(3, realm.where(FixturePerson.class).count());
+            FixturePerson grace = realm.where(FixturePerson.class).equalTo("id", 100L).findFirst();
+            FixturePerson ada = realm.where(FixturePerson.class).equalTo("id", 101L).findFirst();
+            FixturePerson katherine = realm.where(FixturePerson.class).equalTo("id", 102L).findFirst();
+            assertNotNull(grace);
+            assertNotNull(ada);
+            assertNotNull(katherine);
+            assertEquals("Ada Lovelace", ada.getName());
+            assertEquals("Katherine", katherine.getName());
+            assertEquals(true, katherine.isActive());
+            assertEquals(1700000002000L, katherine.getCreatedAt().getTime());
+            assertArrayEquals(new byte[] {42, 43, 44, 45}, katherine.getPayload());
+            assertNotNull(katherine.getParent());
+            assertEquals(100L, katherine.getParent().getId());
+        } finally {
+            realm.close();
+        }
+        assertEquals("Closing the official reverse reader must not trigger a migration", 0, migrationCalls.get());
+    }
+
+    private static final class CountingMigration implements RealmMigration {
+        private final AtomicInteger calls;
+        CountingMigration(AtomicInteger calls) { this.calls = calls; }
+        @Override public void migrate(DynamicRealm realm, long oldVersion, long newVersion) { calls.incrementAndGet(); }
     }
 
     private static File generateFixture(File directory, String name, byte[] key) {

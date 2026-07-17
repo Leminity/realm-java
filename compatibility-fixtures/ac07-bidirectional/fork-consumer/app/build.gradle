@@ -1,0 +1,31 @@
+plugins {
+    id 'com.android.application'
+}
+
+apply plugin: 'realm-android'
+
+android {
+    namespace 'io.realm.fixtureac07fork'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId 'io.realm.fixtureac07fork'
+        minSdk 21
+        targetSdk 37
+        versionCode 1
+        versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    testNamespace 'io.realm.fixtureac07fork.test'
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'junit:junit:4.13.2'
+}

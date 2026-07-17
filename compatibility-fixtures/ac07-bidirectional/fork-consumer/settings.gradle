@@ -1,0 +1,20 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        def forkRepository = providers.gradleProperty('forkRepository').orNull
+        if (forkRepository != null && !forkRepository.trim().isEmpty()) {
+            maven { url = uri(forkRepository) }
+        }
+        google()
+        mavenCentral()
+    }
+}
+rootProject.name = 'realm-ac07-fork-consumer'
+include ':app'
