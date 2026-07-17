@@ -9,13 +9,13 @@ permissions:
 
 jobs:
   provenance-and-gates:
-    name: Provenance and gates
+    name: Exact AGP9 / API37 / 16KiB gates
     runs-on: [self-hosted, linux, api37, ps16k]
     env:
       ANDROID_SDK_ROOT: /home/leminity/Android/Sdk
       EMULATOR_RUNTIME_LIB_DIR: /home/leminity/.local/realm-emulator-libs/root/usr/lib/x86_64-linux-gnu
     steps:
-      - name: Checkout
+      - name: Checkout exact recursive source
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
@@ -27,79 +27,290 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Assert JDK 17
+      - name: Create fresh run-scoped evidence paths
+        shell: bash
         run: |
-          java -version 2>&1 | grep -Eiq 'version "17(\.|")'
+          set -euo pipefail
+          run_key="${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          evidence="$RUNNER_TEMP/g011-evidence-$run_key"
+          runtime_manifest="$RUNNER_TEMP/g011-runtime-$run_key.json"
+          runtime_sha="$RUNNER_TEMP/g011-runtime-$run_key.sha256"
+          signing_home="$RUNNER_TEMP/g011-gnupg-$run_key"
+          for path in "$evidence" "$runtime_manifest" "$runtime_sha" "$signing_home"; do
+            [[ ! -e "$path" ]] || { echo "refusing stale run path: $path" >&2; exit 1; }
+          done
+          mkdir -p "$evidence" "$signing_home"
+          chmod 700 "$signing_home"
+          {
+            echo "G011_EVIDENCE_ROOT=$evidence"
+            echo "G008_STAGING=$evidence/g008/staging"
+            echo "G008_MANIFEST=$evidence/g008/publication-manifest.json"
+            echo "G008_BUNDLE=$evidence/g008/maven-central-bundle.zip"
+            echo "G011_RUNTIME_MANIFEST=$runtime_manifest"
+            echo "G011_RUNTIME_SHA=$runtime_sha"
+            echo "G011_SIGNING_HOME=$signing_home"
+          } >> "$GITHUB_ENV"
 
-      - name: Verify Android toolchain
+      - name: Assert JDK 17 and exact Android toolchain
+        shell: bash
         run: |
+          set -euo pipefail
+          java -version 2>&1 | grep -Eiq 'version "17(\.|\")'
+          mkdir -p "$G011_EVIDENCE_ROOT/toolchain"
           tools/verify-toolchain.sh \
             --sdk-root "$ANDROID_SDK_ROOT" \
-            --evidence-dir evidence/toolchain/android17-wsl2
+            --evidence-dir "$G011_EVIDENCE_ROOT/toolchain" \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/toolchain/command.log"
 
-      - name: Verify source/evidence manifest
-        run: |
-          runtime_manifest="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.json"
-          runtime_sha_tmp="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.sha256.tmp"
-          runtime_sha="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.sha256"
-          python3 tools/g011-evidence-manifest.py --output "$runtime_manifest"
-          sha256sum "$runtime_manifest" > "$runtime_sha_tmp"
-          mv "$runtime_sha_tmp" "$runtime_sha"
-          sha256sum -c "$runtime_sha"
-          python3 tools/g011-evidence-manifest.py --verify evidence/provenance/g011-source-evidence-manifest.json
-
-      - name: Manifest regression tests
+      - name: Verify committed invariant baseline
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
+          set -euo pipefail
+          python3 tools/g011-evidence-manifest.py \
+            --mode baseline \
+            --verify evidence/provenance/g011-source-evidence-manifest.json
           python3 tools/test-g011-evidence-manifest.py
 
-      - name: G003 independent-build gate
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
+      - name: Fail closed on API37 / 16KiB runner identity
+        shell: bash
         run: |
-          bash tools/verify-g003-independent-builds.sh --run --evidence-dir build/g003-independent-builds
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/device"
+          adb="$ANDROID_SDK_ROOT/platform-tools/adb"
+          serial=emulator-5654
+          "$adb" -s "$serial" wait-for-device
+          sdk="$("$adb" -s "$serial" shell getprop ro.build.version.sdk | tr -d '\r')"
+          page="$("$adb" -s "$serial" shell getconf PAGE_SIZE | tr -d '\r')"
+          avd="$("$adb" -s "$serial" shell getprop ro.boot.qemu.avd_name | tr -d '\r')"
+          linker="$("$adb" -s "$serial" shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')"
+          package_compat="$("$adb" -s "$serial" shell getprop pm.16kb.app_compat.disabled | tr -d '\r')"
+          printf 'SDK=%s\nPAGE_SIZE=%s\nAVD=%s\nlinker_compat=%s\npackage_compat_disabled=%s\n' \
+            "$sdk" "$page" "$avd" "$linker" "$package_compat" | tee "$G011_EVIDENCE_ROOT/device/preflight.txt"
+          [[ "$sdk" == 37 && "$page" == 16384 && "$avd" == realm-api37-ps16k-kvm ]]
+          [[ "$linker" == fatal && "$package_compat" == true ]]
 
-      - name: G008 publication gate
+      - name: G003 independent Gradle build gate
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          python3 tools/test-g008-publication.py
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/g003"
+          bash tools/verify-g003-independent-builds.sh \
+            --run --evidence-dir "$G011_EVIDENCE_ROOT/g003/matrix" \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g003/gate.log"
 
-      - name: G009 public API gate
+      - name: G004 public AGP transformer TestKit gate
+        run: |
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/g004"
+          bash tools/verify-g004-transformer-public-api.sh --run \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g004/gate.log"
+
+      - name: G005 realm-android plugin TestKit gate
+        run: |
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/g005"
+          ./gradle-plugin/gradlew --no-daemon --console=plain cleanTest test \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g005/gate.log"
+          cp -a gradle-plugin/build/test-results/test "$G011_EVIDENCE_ROOT/g005/test-results"
+
+      - name: Fresh G008 signed six-artifact bundle
         env:
           PYTHONDONTWRITEBYTECODE: "1"
+        shell: bash
         run: |
-          python3 tools/test-verify-g009-ac09-compatibility.py
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/g008"
+          export GNUPGHOME="$G011_SIGNING_HOME"
+          gpg --batch --pinentry-mode loopback --passphrase '' \
+            --quick-generate-key 'Realm G011 CI <realm-g011-ci@invalid.example>' rsa2048 sign 0
+          export g008SigningKey="$(gpg --batch --armor --export-secret-keys realm-g011-ci@invalid.example)"
+          export g008SigningPassword=''
+          export G008_GPG_HOMEDIR="$GNUPGHOME"
+          export g008StagingRepository="$G008_STAGING"
+          export g008ManifestFile="$G008_MANIFEST"
+          export g008BundleFile="$G008_BUNDLE"
+          tools/publish_release.sh --signed-bundle \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g008/build.log"
+          python3 tools/g008-publication.py \
+            --repository "$G008_STAGING" \
+            --require-signatures \
+            --manifest "$G008_MANIFEST" \
+            --bundle "$G008_BUNDLE" \
+            --plugin-source gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g008/publication-verify.log"
+          unset g008SigningKey g008SigningPassword
+
+      - name: G011 exact-six fresh consumer gate
+        run: |
+          set -euo pipefail
+          tools/g011-consume-six.sh \
+            --mode local \
+            --repository "$G008_STAGING" \
+            --gradle-user-home "$RUNNER_TEMP/g011-consumer-home-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --evidence-dir "$G011_EVIDENCE_ROOT/consumer"
+
+      - name: G011 exact ABI and ELF alignment gate
+        run: |
+          set -euo pipefail
+          tools/g011-verify-native-elf.sh \
+            --bundle "$G008_BUNDLE" \
+            --evidence-dir "$G011_EVIDENCE_ROOT/native" \
+            --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
+
+      - name: G011 AC08 local gate
+        run: |
+          set -euo pipefail
+          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh \
+            --mode local \
+            --repository "$G008_STAGING" \
+            --sdk-root "$ANDROID_SDK_ROOT" \
+            --serial emulator-5654 \
+            --expected-avd realm-api37-ps16k-kvm \
+            --evidence-dir "$G011_EVIDENCE_ROOT/ac08" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: G008 regression gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 tools/test-g008-publication.py
+
+      - name: G009 public API and resource gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          official_home="$RUNNER_TEMP/g011-official-home-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          official_project="$G011_EVIDENCE_ROOT/g009/official-resolver"
+          [[ ! -e "$official_home" && ! -e "$official_project" ]]
+          mkdir -p "$G011_EVIDENCE_ROOT/g009"
+          mkdir -p "$official_project"
+          cat > "$official_project/settings.gradle" <<'GRADLE'
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = 'g011-official-oracle-resolver'
+          GRADLE
+          cat > "$official_project/build.gradle" <<'GRADLE'
+          plugins { id 'java' }
+          configurations {
+              g009RealmArtifacts
+              g009OfficialProcessor
+              g009ForkProcessor
+          }
+          dependencies {
+              g009RealmArtifacts 'io.realm:realm-gradle-plugin:10.19.0'
+              g009RealmArtifacts 'io.realm:realm-transformer:10.19.0'
+              g009RealmArtifacts 'io.realm:realm-annotations:10.19.0'
+              g009RealmArtifacts 'io.realm:realm-annotations-processor:10.19.0'
+              g009RealmArtifacts 'io.realm:realm-android-library:10.19.0@aar'
+              g009RealmArtifacts 'io.realm:realm-android-kotlin-extensions:10.19.0@aar'
+              g009OfficialProcessor 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
+              g009OfficialProcessor 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21'
+              g009OfficialProcessor 'com.squareup:javawriter:2.5.1'
+              g009OfficialProcessor 'org.mongodb:bson:3.12.1'
+              g009ForkProcessor 'org.jetbrains.kotlin:kotlin-stdlib:2.2.10'
+              g009ForkProcessor 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.10'
+              g009ForkProcessor 'com.squareup:javawriter:2.5.1'
+              g009ForkProcessor 'org.mongodb:bson:3.12.1'
+          }
+          tasks.register('resolveG009Official') {
+              doLast {
+                  [configurations.g009RealmArtifacts, configurations.g009OfficialProcessor,
+                   configurations.g009ForkProcessor].each { configuration ->
+                      configuration.files.sort().each { println it.name }
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew -g "$official_home" -p "$official_project" \
+            --no-daemon --console=plain resolveG009Official \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g009/official-resolver.log"
+          python3 tools/verify-g009-ac09-compatibility.py \
+            --official-cache "$official_home/caches/modules-2/files-2.1" \
+            --fork-repository "$G008_STAGING" \
+            --output-dir "$G011_EVIDENCE_ROOT/g009/output" \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g009/gate.log"
+          cp "$G011_EVIDENCE_ROOT/g009/output/report.json" "$G011_EVIDENCE_ROOT/g009/report.json"
+          python3 tools/test-verify-g009-ac09-compatibility.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g009/unit.log"
 
       - name: G010 scope gate
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          python3 tools/test-verify-g010-scope.py
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/g010"
+          python3 tools/verify-g010-scope.py \
+            --write-report "$G011_EVIDENCE_ROOT/g010/scope-report.json" \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g010/scope.log"
+          python3 tools/test-verify-g010-scope.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g010/scope-unit.log"
 
-      - name: G010 publication/license gate
+      - name: G010 publication and license gate
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          python3 tools/test-verify-g010-license.py
+          set -euo pipefail
+          python3 tools/verify-g010-license.py \
+            --repository "$G008_STAGING" \
+            --report "$G011_EVIDENCE_ROOT/g010/license-report.json" \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g010/license.log"
+          python3 tools/test-verify-g010-license.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g010/license-unit.log"
 
-      - name: Portal provenance gate
+      - name: Portal and protected-release unit gate
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
-          python3 tools/test-central-portal.py
+          set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/portal"
+          python3 tools/test-central-portal.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/portal/unit.log"
 
-      - name: Upload provenance evidence
+      - name: Seal complete evidence and create exact runtime manifest
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        shell: bash
+        run: |
+          set -euo pipefail
+          (
+            cd "$G011_EVIDENCE_ROOT"
+            find . -type f \
+              ! -name SHA256SUMS ! -name checksum-verify.log \
+              ! -name .SHA256SUMS.tmp ! -name .checksum-verify.tmp \
+              -print0 | LC_ALL=C sort -z | xargs -0 sha256sum > .SHA256SUMS.tmp
+            mv .SHA256SUMS.tmp SHA256SUMS
+            sha256sum -c SHA256SUMS > .checksum-verify.tmp
+            mv .checksum-verify.tmp checksum-verify.log
+          )
+          python3 tools/g011-evidence-manifest.py \
+            --mode runtime \
+            --runtime-evidence-dir "$G011_EVIDENCE_ROOT" \
+            --output "$G011_RUNTIME_MANIFEST"
+          python3 tools/g011-evidence-manifest.py \
+            --mode runtime \
+            --runtime-evidence-dir "$G011_EVIDENCE_ROOT" \
+            --verify "$G011_RUNTIME_MANIFEST"
+          (
+            cd "$RUNNER_TEMP"
+            sha256sum "$(basename "$G011_RUNTIME_MANIFEST")" > .g011-runtime.sha256.tmp
+            mv .g011-runtime.sha256.tmp "$(basename "$G011_RUNTIME_SHA")"
+            sha256sum -c "$(basename "$G011_RUNTIME_SHA")"
+          )
+
+      - name: Upload complete G011 evidence
+        id: upload-evidence
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: g011-source-evidence-manifest
+          name: g011-ci-evidence-${{ github.sha }}
           path: |
-            ${{ runner.temp }}/g011-source-evidence-manifest.runtime.json
-            ${{ runner.temp }}/g011-source-evidence-manifest.runtime.sha256
+            ${{ env.G011_EVIDENCE_ROOT }}
+            ${{ env.G011_RUNTIME_MANIFEST }}
+            ${{ env.G011_RUNTIME_SHA }}
           if-no-files-found: error
           retention-days: 14
-
-      - name: API37 / 16KiB runtime gate
-        run: |
-          bash compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh

@@ -178,41 +178,51 @@
         "evidence/toolchain/android17-wsl2/sdkmanager-list.txt": "396578d2af8fb739c8c9bdd76c1b9dfcc8fbd08b7d8a761ef77437fbfbff4d6f",
         "evidence/toolchain/android17-wsl2/verification.txt": "46b9c6d3666902f6a50b98155eb4beb3830f3226286507751db259eb56f2731d"
       },
-      "tree_sha256": "d8e9218d3ee5fb03d12d8d4bc19a0ff2d55e7b048dcd4812ff23f2232393bef6"
+      "tree_sha256": "0920c5af15e9406404c9d4c987df8749081004d55a7c7e21e70f6bff557da7da"
     }
   },
   "gate_digests": {
-    ".github/workflows/ci.yml": "fbc182c9fbcf04777a635e8b17e1a46ab13a756ac5d0d5669999d02fe9adb04d",
+    ".github/workflows/ci.yml": "90b8a406f1825211eb0b442d207ec4b7e1c168f7a07fcc52709a50a33f83f7a7",
     ".github/workflows/release.yml": "33fbf343acd03026297f93a1f18d5313b401e681edff90b0669209195b36a842",
-    "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "6fd7842bff8aed3e594e7007f34c43dc7bfe4dc70d84132332b259a66bfb7bca",
+    "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "b7e9415f4fc61000738b9d1e459c7a03d0bd7d91491ab5376adec908962297ab",
+    "gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt": "61f32f738597fe8a9751e15b88092cd8601be7a136bd5d6d16f372409bbf0640",
+    "gradle-plugin/src/test/groovy/io/realm/gradle/PluginTest.groovy": "ee9f7235a3df0cfc67b831d790b342553c9a4c3a02f6d9f8411d2068ce4ef38f",
     "tools/central-portal.py": "c2bb9634ce3d026c3b61c966d3d19429a72cd4bb3e74423a16b03b3b6c42e0ad",
     "tools/g008-publication.py": "579139dfe260fd43741eebec6231b14c585216324784659608b3a1ab74b5c8a0",
-    "tools/g011-evidence-manifest.py": "41c70c47d87ec8deba47a78ddf0de501630f0bdb0af3c1bda7d8b80e349248aa",
+    "tools/g011-consume-six.sh": "a6ca4d56e1e6bd319f6dc2381760ee7fd6e930ca23597e858ab8b32e2b472721",
+    "tools/g011-evidence-manifest.py": "6dfd9c100fa2fe98a804456d4a72fd18f3946d03a18dd9e804ee14e9504388e2",
+    "tools/g011-verify-native-elf.sh": "5d8fa3f9f073bb8e443efb7473e5d2927888dcfc7c7ab48310466419f6406777",
+    "tools/publish_release.sh": "14e3dc1b96569dbab2c6873f931f5fb625083dfbb93e0e41f87892cd22109c2d",
+    "tools/test-ac08-g011-parameterization.py": "cc7cbf8a6ff35e87c72bf727505b39f6657211352b98485923fcafe4fc432453",
     "tools/test-central-portal.py": "801416f3570704f975f16b4a1f4f9b0ee4d67fb8e44f0183800066a14da3e2aa",
     "tools/test-g008-publication.py": "afca248a16a267257fdae504d43703657544c38b9aea8d57da1c3283baba0b6d",
-    "tools/test-g011-evidence-manifest.py": "c237a775fe16cf6a522f446394c7b7d12f1c146aa97984c8acb8a004b6446c52",
-    "tools/test-verify-g003-independent-builds.sh": "ebafb1dd8c2de46d27cf4cf90db9e473a3fe32384704a065466f9f71f7bcb0f1",
+    "tools/test-g011-consume-six.py": "ccddea6571e2723217a802131029a56ddeae6a848ddf5237a3ea8f6e05532556",
+    "tools/test-g011-evidence-manifest.py": "f04d29c68e820e20d1b0a7a459f19b3a220e73f39d22702c6ae5d514ca6996cb",
+    "tools/test-g011-verify-native-elf.py": "c01d1bd02c87c5461eaa30d5caa87521d66111e39b95dba983f6224e93ecaac3",
+    "tools/test-verify-g003-independent-builds.sh": "a2c32786dfe78be242b38294e2af42ad3e5a7901b3372d92519bf7f433174d39",
+    "tools/test-verify-g004-transformer-public-api.sh": "e79cc00a20590cde5eee9156d33bedfd492c06530e90910284926dd958386145",
     "tools/test-verify-g009-ac09-compatibility.py": "09a6fc47d5df4bb907209ecd1de935354a7f1d939bac2913bbf62e7b29dce9bd",
     "tools/test-verify-g010-license.py": "c0b5525556e1d49835ca947ef4476eeb252c4666fd97c93dd9b72e6b524c2c42",
     "tools/test-verify-g010-scope.py": "68e4d2127233658d37b95a997db35f9fc6e94a9749a43e35ec0d40c7939a1d45",
-    "tools/verify-g003-independent-builds.sh": "daa5db4dc66a46382fb8960392abcc35ae5930e293873c3556f3cb6cf64e7388",
+    "tools/verify-g003-independent-builds.sh": "ca94d1b841e865b817eccf503899be2195b326bca4078b21235d7eb18936e8b0",
+    "tools/verify-g004-transformer-public-api.sh": "f47e56b8ed5f4f60c74f040aff780c1ce724979e6b67e3fc5871f3c2a33dfc9f",
     "tools/verify-g009-ac09-compatibility.py": "8b8449cd30bf9ecdcc851532645fda6dd1827482e3539e514afc67fd8f25ea84",
     "tools/verify-g010-license.py": "5db2d3709bc9a7decee58e2c21b6685abbb1aaed6c0db6218fa2ec93cb506a49",
     "tools/verify-g010-scope.py": "264e955a9dd8c002dd6e60897fb9772c884697b5e91f68783917561d3753f755",
     "tools/verify-toolchain.sh": "caf88f6bfde35ae36a0b41c372180536e3b0a51ca6f606deac78750990ebe988"
   },
-  "purpose": "G011 reproducible CI and WSL/Linux source evidence manifest",
-  "schema_version": 1,
+  "manifest_kind": "baseline",
+  "purpose": "G011 reproducible source, WSL, CI and protected-release provenance",
+  "schema_version": 2,
   "source": {
-    "baseline_root_commit": "db46419888e6c63230e5563bce6862c2de674b6b",
+    "baseline_root_commit": "0de73ccbb4a8b42eabb475eca05f94b3599c38bc",
     "core_commit": "d7b52ccbada0283527db36143cfeab18692b4ed0",
     "core_gitlink": "d7b52ccbada0283527db36143cfeab18692b4ed0",
     "core_submodules": {
       "external/catch": "3f0283de7a9c43200033da996ff9093be3ac84dc",
       "src/external/sha-1": "d9ae30f34095107ece9dceb224839f0dc2f9c1c7",
       "src/external/sha-2": "0e9aebf34101c6aa89355fd76ac9cd886735dee1"
-    },
-    "current_head_commit": "0de73ccbb4a8b42eabb475eca05f94b3599c38bc"
+    }
   },
   "toolchain": {
     "agp_version": "9.1.1",
