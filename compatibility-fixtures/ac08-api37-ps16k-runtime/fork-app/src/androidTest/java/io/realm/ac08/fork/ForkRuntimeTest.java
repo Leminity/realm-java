@@ -119,31 +119,56 @@ public final class ForkRuntimeTest {
     }
 
     @Test
-    public void invalidThreadMatchesOfficialBaselineCategory() throws Exception {
-        final RealmConfiguration configuration = freshPlainConfiguration("invalid-thread.realm");
-        seedAndAssert(configuration);
-        final DynamicRealm ownerThreadRealm = DynamicRealm.getInstance(configuration);
-        final AtomicReference<Throwable> thrown = new AtomicReference<>();
-        Thread foreignThread = new Thread(new Runnable() {
-            @Override public void run() {
-                try {
-                    ownerThreadRealm.where("Parent").count();
-                } catch (Throwable error) {
-                    thrown.set(error);
+    public void realmManagedObjectAndResultsThreadConfinementMatchOfficialBaselineCategories() throws Exception {
+        Context context = targetContext();
+        Realm.init(context);
+        RealmConfiguration configuration = new RealmConfiguration.Builder()
+                .directory(testDirectory(context))
+                .name("thread-confinement.realm")
+                .modules(new ForkNPlusOneModule())
+                .allowWritesOnUiThread(true)
+                .schemaVersion(1L)
+                .build();
+        Realm.deleteRealm(configuration);
+        final Realm ownerThreadRealm = Realm.getInstance(configuration);
+        try {
+            ownerThreadRealm.executeTransaction(new Realm.Transaction() {
+                @Override public void execute(Realm transaction) {
+                    OfficialRecord record = transaction.createObject(OfficialRecord.class, 1L);
+                    record.setName("thread-owner");
+                    record.setForkMigrationNote("thread-sentinel");
                 }
-            }
-        }, "fork-ac08-foreign-realm-thread");
-        foreignThread.start();
-        foreignThread.join(10000L);
-        ownerThreadRealm.close();
-        assertNotNull("Realm access from a non-owner thread must fail", thrown.get());
-        assertEquals("Fork invalid-thread category must match the isolated official baseline",
-                requiredArgument("official_invalid_thread_category"), thrown.get().getClass().getName());
+            });
+            final OfficialRecord managed = ownerThreadRealm.where(OfficialRecord.class).equalTo("id", 1L).findFirst();
+            final RealmResults<OfficialRecord> results = ownerThreadRealm.where(OfficialRecord.class).findAll();
+            assertNotNull(managed);
+
+            assertEquals("Fork Realm category must match the isolated official baseline",
+                    requiredArgument("official_realm_thread_category"),
+                    foreignThreadFailure("realm", new Runnable() {
+                        @Override public void run() { ownerThreadRealm.where(OfficialRecord.class).count(); }
+                    }).getClass().getName());
+            assertEquals("Fork managed-object category must match the isolated official baseline",
+                    requiredArgument("official_managed_object_thread_category"),
+                    foreignThreadFailure("managed object", new Runnable() {
+                        @Override public void run() { managed.getName(); }
+                    }).getClass().getName());
+            assertEquals("Fork results category must match the isolated official baseline",
+                    requiredArgument("official_results_thread_category"),
+                    foreignThreadFailure("results", new Runnable() {
+                        @Override public void run() { results.size(); }
+                    }).getClass().getName());
+        } finally {
+            ownerThreadRealm.close();
+        }
     }
 
     @Test
     public void wrongKeyRejectsAndDoesNotMutateImmutableEncryptedSource() throws Exception {
         Context context = targetContext();
+        // The external force-stop restart proof intentionally launches this class in a fresh
+        // process, so no other test can be relied upon to have initialized Realm first.
+        Realm.init(context);
         File source = requiredInput(context, "official-encrypted.realm");
         String expectedHash = requiredArgument("encrypted_sha256");
         assertEquals(expectedHash, sha256(source));
@@ -168,6 +193,9 @@ public final class ForkRuntimeTest {
     @Test
     public void officialSchemaNToForkNPlusOneMigratesOnceReopensWithoutMigrationAndMatchesBaselineCategory() throws Exception {
         Context context = targetContext();
+        // This test can run first after the restart proof; initialize explicitly rather than
+        // depending on JUnit method order or a previous instrumentation process.
+        Realm.init(context);
         File source = requiredInput(context, "official-schema-n.realm");
         assertEquals(requiredArgument("schema_sha256"), sha256(source));
         File working = new File(testDirectory(context), "official-schema-n-fork-working.realm");
@@ -234,6 +262,7 @@ public final class ForkRuntimeTest {
     @Test
     public void packageHasNoSyncAccountServiceOrNetworkConfiguration() throws Exception {
         Context context = targetContext();
+        Realm.init(context);
         PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(),
                 PackageManager.GET_PERMISSIONS | PackageManager.GET_SERVICES | PackageManager.GET_PROVIDERS);
         String[] permissions = info.requestedPermissions == null ? new String[0] : info.requestedPermissions;
@@ -326,6 +355,23 @@ public final class ForkRuntimeTest {
         RealmConfiguration configuration = configuration(testDirectory(context), name, null, 1L, null);
         Realm.deleteRealm(configuration);
         return configuration;
+    }
+
+    private static Throwable foreignThreadFailure(final String label, final Runnable access) throws Exception {
+        final AtomicReference<Throwable> thrown = new AtomicReference<>();
+        Thread foreignThread = new Thread(new Runnable() {
+            @Override public void run() {
+                try {
+                    access.run();
+                } catch (Throwable error) {
+                    thrown.set(error);
+                }
+            }
+        }, "fork-ac08-foreign-" + label.replace(' ', '-'));
+        foreignThread.start();
+        foreignThread.join(10000L);
+        assertNotNull("Fork must reject " + label + " access from a foreign thread", thrown.get());
+        return thrown.get();
     }
 
     private static RealmConfiguration configuration(File directory, String name, byte[] encryptionKey,

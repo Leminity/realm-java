@@ -7,10 +7,9 @@ import static org.junit.Assert.fail;
 import android.content.Context;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
-import io.realm.DynamicRealm;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
-import io.realm.RealmMigration;
+import io.realm.RealmResults;
 import io.realm.ac08.model.OfficialRecord;
 import io.realm.ac08.model.SchemaNModule;
 import io.realm.ac08.model.SchemaNPlusOneModule;
@@ -62,7 +61,7 @@ public final class OfficialSchemaFixtureTest {
         }
 
         write(new File(directory, "no-migration-category.txt"), noMigrationCategory(directory));
-        write(new File(directory, "invalid-thread-category.txt"), invalidThreadCategory(schemaN));
+        write(new File(directory, "thread-categories.txt"), threadCategories(schemaN));
     }
 
     private static String noMigrationCategory(File directory) {
@@ -81,23 +80,41 @@ public final class OfficialSchemaFixtureTest {
         }
     }
 
-    private static String invalidThreadCategory(RealmConfiguration configuration) throws Exception {
-        final DynamicRealm ownerThreadRealm = DynamicRealm.getInstance(configuration);
+    private static String threadCategories(RealmConfiguration configuration) throws Exception {
+        final Realm ownerThreadRealm = Realm.getInstance(configuration);
+        try {
+            final OfficialRecord managed = ownerThreadRealm.where(OfficialRecord.class).equalTo("id", 1L).findFirst();
+            final RealmResults<OfficialRecord> results = ownerThreadRealm.where(OfficialRecord.class).findAll();
+            assertNotNull(managed);
+            return "realm=" + foreignThreadFailure("realm", new Runnable() {
+                        @Override public void run() { ownerThreadRealm.where(OfficialRecord.class).count(); }
+                    }).getClass().getName() + "\n"
+                    + "managed_object=" + foreignThreadFailure("managed object", new Runnable() {
+                        @Override public void run() { managed.getName(); }
+                    }).getClass().getName() + "\n"
+                    + "results=" + foreignThreadFailure("results", new Runnable() {
+                        @Override public void run() { results.size(); }
+                    }).getClass().getName() + "\n";
+        } finally {
+            ownerThreadRealm.close();
+        }
+    }
+
+    private static Throwable foreignThreadFailure(final String label, final Runnable access) throws Exception {
         final AtomicReference<Throwable> thrown = new AtomicReference<>();
         Thread foreignThread = new Thread(new Runnable() {
             @Override public void run() {
                 try {
-                    ownerThreadRealm.where("OfficialRecord").count();
+                    access.run();
                 } catch (Throwable error) {
                     thrown.set(error);
                 }
             }
-        }, "official-ac08-foreign-realm-thread");
+        }, "official-ac08-foreign-" + label.replace(' ', '-'));
         foreignThread.start();
         foreignThread.join(10000L);
-        ownerThreadRealm.close();
-        assertNotNull("Official baseline must reject Realm access from a foreign thread", thrown.get());
-        return thrown.get().getClass().getName();
+        assertNotNull("Official baseline must reject " + label + " access from a foreign thread", thrown.get());
+        return thrown.get();
     }
 
     private static void write(File output, String value) throws Exception {

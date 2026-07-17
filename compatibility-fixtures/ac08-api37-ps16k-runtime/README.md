@@ -17,3 +17,9 @@ N+1 model proves an upstream official schema-N file performs exactly one migrati
 persists the transformed value after reopen. Before device work, the runner rejects any
 non-successful instrumentation report; all device operations use `emulator-5654` under
 `/tmp/realm-g009-device.lock`.
+
+For the real-process restart gate, phase A instrumentation commits named/date/binary
+sentinels to separate plain and encrypted local Realm files and writes its Android PID. The
+host verifies that PID, force-stops only the fork package, proves it is gone, then runs phase B
+instrumentation. Phase B reopens and validates both sentinels and records a distinct PID; both
+phase files and the PID assertions are included in the checksummed evidence.
