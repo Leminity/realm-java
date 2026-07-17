@@ -186,6 +186,11 @@ class G008PublicationTests(unittest.TestCase):
         self.assertIn("project.providers.exec", build_script)
         self.assertIn("runG008Command([", build_script)
         self.assertNotIn("doLast {\n        exec {", build_script)
+        for property_name in ("g008StagingRepository", "g008ManifestFile", "g008BundleFile"):
+            self.assertIn(
+                f"project.findProperty('{property_name}') ?: System.getenv('{property_name}')",
+                build_script,
+            )
 
     def test_external_pom_edges_match_the_pinned_official_oracle(self) -> None:
         for artifact in G008.ARTIFACTS:

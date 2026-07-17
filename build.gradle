@@ -305,9 +305,9 @@ task manualClean {
 // G008 creates a complete, local Maven-layout staging repository. It never
 // contacts a publication service; a protected release workflow is responsible
 // for any later Central Portal upload of the verified bundle.
-def g008StagingRepository = file(project.findProperty('g008StagingRepository') ?: "$buildDir/g008-local-staging")
-def g008Manifest = file(project.findProperty('g008ManifestFile') ?: "$buildDir/g008-publication-manifest.json")
-def g008BundleFile = file(project.findProperty('g008BundleFile') ?: "$buildDir/g008-maven-central-bundle.zip")
+def g008StagingRepository = file(project.findProperty('g008StagingRepository') ?: System.getenv('g008StagingRepository') ?: "$buildDir/g008-local-staging")
+def g008Manifest = file(project.findProperty('g008ManifestFile') ?: System.getenv('g008ManifestFile') ?: "$buildDir/g008-publication-manifest.json")
+def g008BundleFile = file(project.findProperty('g008BundleFile') ?: System.getenv('g008BundleFile') ?: "$buildDir/g008-maven-central-bundle.zip")
 
 def configureG008NestedBuild = {
     startParameter.projectProperties = new LinkedHashMap(gradle.startParameter.projectProperties)
