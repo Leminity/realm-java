@@ -5,6 +5,7 @@ set -euo pipefail
 readonly EXPECTED_AGP='9.1.1'
 readonly EXPECTED_MIN_SDK='21'
 readonly EXPECTED_TARGET_SDK='37'
+readonly FORK_GROUP='io.github.leminity.realm'
 
 root="${ROOT_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 mode='static'
@@ -59,23 +60,31 @@ write_fixture() {
   local fixture=$1 kind=$2 language=$3
   mkdir -p "$fixture/app/src/main/$language/fixture"
   printf 'sdk.dir=%s\n' "$sdk_dir" > "$fixture/local.properties"
-  cat > "$fixture/settings.gradle" <<'EOF'
+  cat > "$fixture/settings.gradle" <<EOF
 pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-    repositories { google(); mavenCentral() }
+    repositories {
+        maven { url = uri('$staged_maven_repo') }
+        google()
+        mavenCentral()
+    }
 }
 rootProject.name = 'g004-transformer-fixture'
 include ':app'
 EOF
   cat > "$fixture/build.gradle" <<EOF
 buildscript {
-    repositories { google(); mavenCentral() }
+    repositories {
+        maven { url = uri('$staged_maven_repo') }
+        google()
+        mavenCentral()
+    }
     dependencies {
         classpath 'com.android.tools.build:gradle:$EXPECTED_AGP'
         classpath files('$transformer_jar')
         classpath 'org.javassist:javassist:3.25.0-GA'
-        classpath 'io.realm:realm-annotations:$transformer_version'
+        classpath '$FORK_GROUP:realm-annotations:$transformer_version'
     }
 }
 EOF
@@ -91,7 +100,7 @@ android {
 }
 
 dependencies {
-    implementation 'io.realm:realm-android-library:$transformer_version'
+    implementation '$FORK_GROUP:realm-android-library:$transformer_version'
 }
 
 io.realm.transformer.RealmTransformerKt.registerRealmTransformerTask(project)
@@ -117,7 +126,7 @@ EOF
 
 run_fixture() {
   local kind=$1 language=$2 fixture log first second
-  fixture="$(mktemp -d)"
+  fixture="$(mktemp -d "$matrix_temp_dir/fixture-$kind-$language-XXXXXX")"
   write_fixture "$fixture" "$kind" "$language"
 
   first="$fixture/first.log"
@@ -125,6 +134,8 @@ run_fixture() {
   (
     cd "$fixture"
     "$root/realm-transformer/gradlew" --no-daemon --console=plain \
+      --gradle-user-home "$gradle_user_home" \
+      "-Dmaven.repo.local=$staged_maven_repo" \
       :app:debugRealmAccessorsTransformer :app:releaseRealmAccessorsTransformer \
       --configuration-cache
   ) >"$first" 2>&1 || { cat "$first" >&2; fail "$kind/$language first configuration failed"; }
@@ -134,6 +145,8 @@ run_fixture() {
   (
     cd "$fixture"
     "$root/realm-transformer/gradlew" --no-daemon --console=plain \
+      --gradle-user-home "$gradle_user_home" \
+      "-Dmaven.repo.local=$staged_maven_repo" \
       :app:debugRealmAccessorsTransformer :app:releaseRealmAccessorsTransformer \
       --configuration-cache
   ) >"$second" 2>&1 || { cat "$second" >&2; fail "$kind/$language cache reuse failed"; }
@@ -141,6 +154,34 @@ run_fixture() {
     fail "$kind/$language did not reuse its configuration cache"
   printf 'G004 fixture %s/%s: PASS\n' "$kind" "$language"
   rm -rf "$fixture"
+}
+
+run_project_gradle() {
+  local label=$1 directory=$2
+  shift 2
+  printf 'G004 %s: %s\n' "$label" "$*"
+  (
+    cd "$root/$directory"
+    ./gradlew --no-daemon --console=plain --stacktrace \
+      --gradle-user-home "$gradle_user_home" \
+      "-Dmaven.repo.local=$staged_maven_repo" "$@"
+  )
+}
+
+stage_fixture_dependencies() {
+  # Stage only the build prerequisites and the supported base Realm AAR. A
+  # broad Realm publication would also select unsupported ObjectServer/Sync
+  # variants and is intentionally forbidden here.
+  run_project_gradle annotations-local-stage realm-annotations publishToMavenLocal
+  run_project_gradle transformer-local-stage realm-transformer publishToMavenLocal
+  run_project_gradle build-transformer-local-stage library-build-transformer publishToMavenLocal
+  run_project_gradle realm-base-local-stage realm :realm-library:publishBasePublicationToMavenLocal
+}
+
+cleanup_matrix() {
+  if [[ -n "${matrix_temp_dir:-}" && -d "$matrix_temp_dir" ]]; then
+    rm -rf "$matrix_temp_dir"
+  fi
 }
 
 select_primary_transformer_jar() {
@@ -151,10 +192,13 @@ select_primary_transformer_jar() {
 }
 
 run_matrix() {
-  (
-    cd "$root/realm-transformer"
-    ./gradlew --no-daemon --console=plain jar
-  )
+  matrix_temp_dir="$(mktemp -d)"
+  staged_maven_repo="$matrix_temp_dir/maven-repository"
+  gradle_user_home="$matrix_temp_dir/gradle-user-home"
+  mkdir -p "$staged_maven_repo" "$gradle_user_home"
+  trap cleanup_matrix EXIT
+
+  stage_fixture_dependencies
   transformer_version="$(tr -d '[:space:]' < "$root/version.txt")"
   transformer_jar="$(select_primary_transformer_jar "$root/realm-transformer/build/libs" "$transformer_version")"
   sdk_dir="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
@@ -167,6 +211,8 @@ run_matrix() {
       run_fixture "$kind" "$language"
     done
   done
+  cleanup_matrix
+  trap - EXIT
 }
 
 main() {
