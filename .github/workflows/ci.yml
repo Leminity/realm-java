@@ -114,7 +114,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$G011_EVIDENCE_ROOT/g005"
-          ./gradle-plugin/gradlew --no-daemon --console=plain cleanTest test \
+          ./gradle-plugin/gradlew --project-dir gradle-plugin --no-daemon --console=plain cleanTest test \
             2>&1 | tee "$G011_EVIDENCE_ROOT/g005/gate.log"
           cp -a gradle-plugin/build/test-results/test "$G011_EVIDENCE_ROOT/g005/test-results"
 

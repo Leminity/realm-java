@@ -160,7 +160,7 @@ class ManifestTests(unittest.TestCase):
             "tools/verify-toolchain.sh",
             "tools/verify-g003-independent-builds.sh",
             "tools/verify-g004-transformer-public-api.sh",
-            "./gradle-plugin/gradlew --no-daemon --console=plain cleanTest test",
+            "./gradle-plugin/gradlew --project-dir gradle-plugin --no-daemon --console=plain cleanTest test",
             "tools/publish_release.sh",
             "tools/g011-consume-six.sh",
             "tools/g011-verify-native-elf.sh",
@@ -176,6 +176,7 @@ class ManifestTests(unittest.TestCase):
         )
         for text in required:
             self.assertIn(text, workflow)
+        self.assertNotIn("./gradle-plugin/gradlew --no-daemon --console=plain cleanTest test", workflow)
         g003_step = workflow[
             workflow.index("tools/verify-g003-independent-builds.sh") : workflow.index("G004 public AGP transformer TestKit gate")
         ]
