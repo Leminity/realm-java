@@ -128,7 +128,10 @@ log "Official reader API=$(tr -d '\r' < "$run_dir/logs/official-reader-api-level
 # The supplied repository was already verified by the G008 lane. Never rebuild,
 # use mavenLocal, or consult a remote publication endpoint from this fixture lane.
 log "Using supplied fork repository $fork_repository"
-run_logged fork-assemble "$repo_root/gradlew" --no-daemon --console=plain -p "$fork_project" -PforkRepository="$fork_repository" -Pandroid.aapt2FromMavenOverride="$aapt2" :app:assembleDebug :app:assembleDebugAndroidTest
+# The patched Core is republished under the same G008 coordinates. Refresh the
+# consumer's file-repository metadata so a prior AC-07 run cannot reuse the
+# pre-fix AAR from Gradle's module cache.
+run_logged fork-assemble "$repo_root/gradlew" --no-daemon --console=plain --refresh-dependencies -p "$fork_project" -PforkRepository="$fork_repository" -Pandroid.aapt2FromMavenOverride="$aapt2" :app:assembleDebug :app:assembleDebugAndroidTest
 
 # G009 supplies two adb transports to one API-37 / 16 KiB AVD. Serializing the
 # whole mutable device phase prevents AC-07 from installing over another lane.
