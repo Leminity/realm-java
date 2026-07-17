@@ -18,7 +18,6 @@ from pathlib import Path
 
 
 EXPECTED_ROOT_COMMIT = "db46419888e6c63230e5563bce6862c2de674b6b"
-EXPECTED_CURRENT_HEAD_COMMIT = "0de73ccbb4a8b42eabb475eca05f94b3599c38bc"
 EXPECTED_CORE_COMMIT = "d7b52ccbada0283527db36143cfeab18692b4ed0"
 EXPECTED_CORE_PREREQUISITE = "b741862e7ca7cb1b81d276457989067b7737dc86"
 EXPECTED_GRADLE_URL = "https://services.gradle.org/distributions/gradle-9.6.1-bin.zip"
@@ -39,18 +38,6 @@ EXPECTED_ELF_MIN_ALIGNMENT = 0x4000
 EXPECTED_TOOLCHAIN_DIR = Path("evidence/toolchain/android17-wsl2")
 EXPECTED_ORACLE_DIR = Path("evidence/oracle/official-10.19.0")
 EXPECTED_CORE_PATH = Path("realm/realm-library/src/main/cpp/realm-core")
-IGNORED_DIGEST_PARTS = frozenset(
-    {
-        ".gradle",
-        "build",
-        "download",
-        "downloads",
-        "extraction",
-        "extracted",
-        "SHA256SUMS",
-        "checksum-verify.log",
-    }
-)
 
 
 class ManifestError(RuntimeError):
@@ -170,16 +157,41 @@ def parse_runtime_fingerprint(root: Path) -> dict[str, object]:
     }
 
 
+def gitlink_sha(root: Path, relative_path: Path) -> str:
+    entry = run_git(root, "ls-tree", "HEAD", relative_path.as_posix())
+    return entry.split()[2]
+
+
+def tracked_files(root: Path, relative_dir: Path) -> frozenset[str]:
+    tracked = {
+        line.strip()
+        for line in run_git(root, "ls-files", "--", relative_dir.as_posix()).splitlines()
+        if line.strip()
+    }
+    return frozenset(tracked)
+
+
 def tree_digest(root: Path, relative_dir: Path) -> dict[str, object]:
     directory = root / relative_dir
     if not directory.is_dir():
         raise ManifestError(f"missing evidence directory: {relative_dir}")
+    expected_files = tracked_files(root, relative_dir)
     files: dict[str, str] = {}
-    for path in sorted(p for p in directory.rglob("*") if p.is_file()):
-        rel = path.relative_to(root).as_posix()
-        if any(part in IGNORED_DIGEST_PARTS for part in path.relative_to(root).parts):
-            continue
-        files[rel] = sha256_file(path)
+    actual_files = {
+        path.relative_to(root).as_posix()
+        for path in sorted(p for p in directory.rglob("*") if p.is_file())
+    }
+    if actual_files != expected_files:
+        missing = sorted(expected_files - actual_files)
+        extra = sorted(actual_files - expected_files)
+        parts = []
+        if missing:
+            parts.append(f"missing tracked evidence files: {missing}")
+        if extra:
+            parts.append(f"unexpected untracked evidence files: {extra}")
+        raise ManifestError("; ".join(parts))
+    for rel in sorted(expected_files):
+        files[rel] = sha256_file(root / rel)
     tree_hash = sha256_bytes(
         "\n".join(f"{path}\0{digest}" for path, digest in files.items()).encode("utf-8")
     )
@@ -191,12 +203,7 @@ def tree_digest(root: Path, relative_dir: Path) -> dict[str, object]:
     }
 
 
-def gitlink_sha(root: Path, relative_path: Path) -> str:
-    entry = run_git(root, "ls-tree", "HEAD", relative_path.as_posix())
-    return entry.split()[2]
-
-
-def build_manifest(root: Path) -> dict[str, object]:
+def build_manifest(root: Path, mode: str = "runtime") -> dict[str, object]:
     dependencies = parse_assignments(root / "dependencies.list")
     wrappers = parse_wrappers(root)
     build_gradle = parse_build_gradle(root)
@@ -210,10 +217,6 @@ def build_manifest(root: Path) -> dict[str, object]:
     core_sha1 = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD:src/external/sha-1")
     core_sha2 = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD:src/external/sha-2")
 
-    if runtime_head_commit != EXPECTED_CURRENT_HEAD_COMMIT:
-        raise ManifestError(
-            f"unexpected current worktree HEAD {runtime_head_commit}; expected {EXPECTED_CURRENT_HEAD_COMMIT}"
-        )
     if core_commit != EXPECTED_CORE_COMMIT or core_gitlink != EXPECTED_CORE_COMMIT:
         raise ManifestError(
             f"unexpected core commit {core_commit} / gitlink {core_gitlink}; expected {EXPECTED_CORE_COMMIT}"
@@ -242,10 +245,11 @@ def build_manifest(root: Path) -> dict[str, object]:
 
     return {
         "schema_version": 1,
+        "manifest_kind": mode,
         "purpose": "G011 reproducible CI and WSL/Linux source evidence manifest",
         "source": {
             "baseline_root_commit": EXPECTED_ROOT_COMMIT,
-            "current_head_commit": runtime_head_commit,
+            **({"current_head_commit": runtime_head_commit} if mode == "runtime" else {}),
             "core_commit": core_commit,
             "core_gitlink": core_gitlink,
             "core_submodules": {
@@ -281,6 +285,7 @@ def build_manifest(root: Path) -> dict[str, object]:
         "gate_digests": {
             ".github/workflows/ci.yml": sha256_file(root / ".github/workflows/ci.yml"),
             ".github/workflows/release.yml": sha256_file(root / ".github/workflows/release.yml"),
+            "tools/publish_release.sh": sha256_file(root / "tools/publish_release.sh"),
             "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": sha256_file(
                 root / "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh"
             ),
@@ -317,6 +322,7 @@ def canonical_json(payload: dict[str, object]) -> str:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument("--mode", choices=("baseline", "runtime"), default="runtime")
     parser.add_argument("--output", type=Path, help="write the generated manifest JSON")
     parser.add_argument("--verify", type=Path, help="compare the generated manifest with an existing JSON file")
     return parser.parse_args()
@@ -326,7 +332,7 @@ def main() -> int:
     args = parse_args()
     root = args.root.resolve()
     try:
-        manifest = build_manifest(root)
+        manifest = build_manifest(root, args.mode)
     except ManifestError as error:
         print(f"G011 manifest failed: {error}", file=sys.stderr)
         return 1

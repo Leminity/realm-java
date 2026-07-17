@@ -6,6 +6,7 @@ from __future__ import annotations
 import importlib.util
 import tempfile
 import unittest
+import subprocess
 from pathlib import Path
 
 
@@ -22,8 +23,11 @@ class ManifestTests(unittest.TestCase):
         manifest = MODULE.build_manifest(root)
 
         self.assertEqual(manifest["schema_version"], 1)
+        self.assertEqual(manifest["manifest_kind"], "runtime")
         self.assertEqual(manifest["source"]["baseline_root_commit"], MODULE.EXPECTED_ROOT_COMMIT)
-        self.assertEqual(manifest["source"]["current_head_commit"], MODULE.EXPECTED_CURRENT_HEAD_COMMIT)
+        self.assertEqual(manifest["source"]["current_head_commit"], subprocess.check_output(
+            ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+        ).strip())
         self.assertEqual(manifest["source"]["core_commit"], MODULE.EXPECTED_CORE_COMMIT)
         self.assertEqual(manifest["toolchain"]["gradle_version"], MODULE.EXPECTED_GRADLE)
         self.assertEqual(manifest["toolchain"]["agp_version"], MODULE.EXPECTED_AGP)
@@ -41,8 +45,10 @@ class ManifestTests(unittest.TestCase):
         self.assertIn("tools/test-central-portal.py", manifest["gate_digests"])
         self.assertIn("compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh", manifest["gate_digests"])
         self.assertIn("tools/verify-g003-independent-builds.sh", manifest["gate_digests"])
+        self.assertIn("tools/publish_release.sh", manifest["gate_digests"])
         self.assertIn("tools/verify-g010-scope.py", manifest["gate_digests"])
         self.assertIn("evidence/toolchain/android17-wsl2/environment-diagnostics.txt", manifest["evidence"]["toolchain_android17_wsl2"]["files"])
+        self.assertFalse(hasattr(MODULE, "EXPECTED_CURRENT_HEAD_COMMIT"))
 
     def test_canonical_json_is_stable(self) -> None:
         payload = {"b": 2, "a": 1}
@@ -53,28 +59,40 @@ class ManifestTests(unittest.TestCase):
             root = Path(temporary)
             evidence = root / "evidence/toolchain/android17-wsl2"
             evidence.mkdir(parents=True)
-            (evidence / "keep.txt").write_text("keep", encoding="utf-8")
+            tracked = evidence / "keep.txt"
+            tracked.write_text("keep", encoding="utf-8")
+            original_tracked_files = MODULE.tracked_files
+            MODULE.tracked_files = lambda _root, _dir: frozenset({"evidence/toolchain/android17-wsl2/keep.txt"})
+            try:
+                before = MODULE.tree_digest(root, Path("evidence/toolchain/android17-wsl2"))
 
-            before = MODULE.tree_digest(root, Path("evidence/toolchain/android17-wsl2"))
+                for relative in (
+                    "evidence/toolchain/android17-wsl2/build/generated.bin",
+                    "evidence/toolchain/android17-wsl2/.gradle/cache.bin",
+                    "evidence/toolchain/android17-wsl2/downloads/archive.zip",
+                    "evidence/toolchain/android17-wsl2/extraction/unpacked.txt",
+                    "evidence/toolchain/android17-wsl2/SHA256SUMS",
+                    "evidence/toolchain/android17-wsl2/checksum-verify.log",
+                ):
+                    path = root / relative
+                    path.parent.mkdir(parents=True, exist_ok=True)
+                    path.write_text("ignored", encoding="utf-8")
 
-            for relative in (
-                "evidence/toolchain/android17-wsl2/build/generated.bin",
-                "evidence/toolchain/android17-wsl2/.gradle/cache.bin",
-                "evidence/toolchain/android17-wsl2/downloads/archive.zip",
-                "evidence/toolchain/android17-wsl2/extraction/unpacked.txt",
-                "evidence/toolchain/android17-wsl2/SHA256SUMS",
-                "evidence/toolchain/android17-wsl2/checksum-verify.log",
-            ):
-                path = root / relative
-                path.parent.mkdir(parents=True, exist_ok=True)
-                path.write_text("ignored", encoding="utf-8")
+                self.assertEqual(before["file_count"], 1)
+                with self.assertRaisesRegex(MODULE.ManifestError, "unexpected untracked evidence files"):
+                    MODULE.tree_digest(root, Path("evidence/toolchain/android17-wsl2"))
+            finally:
+                MODULE.tracked_files = original_tracked_files
 
-            after = MODULE.tree_digest(root, Path("evidence/toolchain/android17-wsl2"))
-
-            self.assertEqual(before["file_count"], 1)
-            self.assertEqual(before["tree_sha256"], after["tree_sha256"])
-            self.assertEqual(after["file_count"], 1)
-            self.assertEqual(sorted(after["files"].keys()), ["evidence/toolchain/android17-wsl2/keep.txt"])
+    def test_runtime_manifest_mode_omits_hardcoded_head_constant(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        runtime = MODULE.build_manifest(root, "runtime")
+        baseline = MODULE.build_manifest(root, "baseline")
+        self.assertIn("current_head_commit", runtime["source"])
+        self.assertNotIn("current_head_commit", baseline["source"])
+        self.assertEqual(runtime["source"]["current_head_commit"], subprocess.check_output(
+            ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+        ).strip())
 
     def test_verify_mode_rejects_changed_manifest(self) -> None:
         root = Path(__file__).resolve().parents[1]
@@ -96,7 +114,19 @@ class ManifestTests(unittest.TestCase):
         self.assertNotIn("workflow_dispatch", workflow)
         self.assertIn("tools/verify-toolchain.sh", workflow)
         self.assertIn("tools/test-g011-evidence-manifest.py", workflow)
+        self.assertIn("./tools/publish_release.sh --signed-bundle", workflow)
+        self.assertIn("python3 tools/g008-publication.py", workflow)
+        self.assertIn("--require-signatures", workflow)
+        self.assertIn("build/g008-local-staging", workflow)
+        self.assertIn("build/g008-maven-central-bundle.zip", workflow)
         self.assertIn("tools/verify-g003-independent-builds.sh --run --evidence-dir build/g003-independent-builds", workflow)
+        self.assertIn("tools/g011-consume-six.sh --mode local", workflow)
+        self.assertIn("tools/g011-verify-native-elf.sh", workflow)
+        self.assertIn("compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh --mode local", workflow)
+        self.assertIn("Fresh G008 build and signed bundle verification", workflow)
+        self.assertIn("G011 exact-six consumer gate", workflow)
+        self.assertIn("G011 native ELF gate", workflow)
+        self.assertIn("G011 AC08 local gate", workflow)
         self.assertIn("runtime_sha_tmp", workflow)
         self.assertIn('mv "$runtime_sha_tmp" "$runtime_sha"', workflow)
         self.assertIn("tools/test-g008-publication.py", workflow)
