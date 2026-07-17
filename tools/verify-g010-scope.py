@@ -83,7 +83,7 @@ RETIRED_PROCESSOR_PATHS = {
 
 SUPPORTED_GRAPH_FILES = tuple(BUILD_APPROVALS) + ("dependencies.list",)
 FORBIDDEN_EXECUTION = re.compile(
-    r"(?:ossrh|oss\.sonatype|s3\.amazonaws|static\.realm\.io|"
+    r"(?:ossrh|oss\.sonatype|s3cfg|s3\.amazonaws|static\.realm\.io|"
     r"org\.gradle\.internal|com\.android\.build\.gradle\.internal|"
     r"AndroidArtifacts|BaseExtension)",
     re.IGNORECASE,

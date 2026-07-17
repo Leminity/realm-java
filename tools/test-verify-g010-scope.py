@@ -44,6 +44,7 @@ with tempfile.TemporaryDirectory() as temporary:
     assert MODULE.code_lines(source) == [(2, "plugins { id 'java' }")]
 
 assert MODULE.FORBIDDEN_EXECUTION.search("project.hasProperty('ossrhUsername')")
+assert MODULE.FORBIDDEN_EXECUTION.search("project.hasProperty('s3cfg')")
 assert not MODULE.FORBIDDEN_RUNTIME.search("Realm Sync/ObjectServer is unsupported by this fork")
 assert MODULE.FORBIDDEN_RUNTIME.search("https://static.realm.io/update")
 assert MODULE.numstat_paths.__defaults__ == (False, ())
