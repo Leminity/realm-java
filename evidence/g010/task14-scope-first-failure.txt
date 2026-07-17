@@ -1,0 +1,4 @@
+ledger token RealmVersionChecker missing for realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt
+ledger token RealmVersionChecker missing for realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmVersionChecker.kt
+unledgered Core paths: ['src/external/s2/base/macros.h']
+forbidden supported-graph execution reference: build.gradle:44:if (project.hasProperty('ossrhUsername')) { | build.gradle:45:startParameter.projectProperties += [ossrhUsername: project.getProperty('ossrhUsername')] | build.gradle:47:if (project.hasProperty('ossrhPassword')) { | build.gradle:48:startParameter.projectProperties += [ossrhPassword: project.getProperty('ossrhPassword')]

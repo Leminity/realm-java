@@ -1,0 +1,11 @@
+command=python3 tools/verify-g010-scope.py --write-report evidence/g010/task14-scope-report.json
+root=0e8bddf0a46827a7336a6a13406df8e35834db25
+core=d7b52ccbada0283527db36143cfeab18692b4ed0
+result=FAIL
+first_failure=
+ledger token RealmVersionChecker missing for realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt
+all_failures=
+ledger token RealmVersionChecker missing for realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt
+ledger token RealmVersionChecker missing for realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmVersionChecker.kt
+unledgered Core paths: ['src/external/s2/base/macros.h']
+forbidden supported-graph execution reference: build.gradle:44:if (project.hasProperty('ossrhUsername')) { | build.gradle:45:startParameter.projectProperties += [ossrhUsername: project.getProperty('ossrhUsername')] | build.gradle:47:if (project.hasProperty('ossrhPassword')) { | build.gradle:48:startParameter.projectProperties += [ossrhPassword: project.getProperty('ossrhPassword')]
