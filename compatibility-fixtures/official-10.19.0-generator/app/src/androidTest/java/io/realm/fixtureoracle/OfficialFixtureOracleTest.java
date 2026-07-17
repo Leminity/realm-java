@@ -59,6 +59,38 @@ public final class OfficialFixtureOracleTest {
         verifyForkModifiedRead(input, "official-10.19.0-encrypted.realm", key);
     }
 
+    /**
+     * AC-07 failure isolation: establishes whether the immutable encrypted
+     * official fixture can be opened by the official runtime on the current
+     * device before attributing a failure to the fork.
+     */
+    @Test
+    public void verifyImportedEncryptedCopyWithOfficialReaderWithoutMigration() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        Realm.init(context);
+        byte[] key = parseFixtureKey(BuildConfig.FIXTURE_KEY_HEX);
+        File input = new File(context.getFilesDir(), "ac07-official-input");
+        File encrypted = new File(input, "official-10.19.0-encrypted.realm");
+        assertTrue("Host harness must import the immutable encrypted fixture", encrypted.isFile());
+
+        AtomicInteger migrationCalls = new AtomicInteger();
+        RealmConfiguration configuration = new RealmConfiguration.Builder()
+            .directory(input)
+            .name(encrypted.getName())
+            .schemaVersion(7)
+            .encryptionKey(key)
+            .migration(new CountingMigration(migrationCalls))
+            .build();
+        Realm realm = Realm.getInstance(configuration);
+        try {
+            assertEquals("Same-schema official input must not invoke migration", 0, migrationCalls.get());
+            verifyOriginalGolden(realm);
+        } finally {
+            realm.close();
+        }
+        assertEquals("Closing the official input must not invoke migration", 0, migrationCalls.get());
+    }
+
     private static void verifyForkModifiedRead(File directory, String name, byte[] key) {
         AtomicInteger migrationCalls = new AtomicInteger();
         RealmConfiguration.Builder builder = new RealmConfiguration.Builder()
@@ -127,24 +159,28 @@ public final class OfficialFixtureOracleTest {
         if (key != null) builder.encryptionKey(key);
         Realm realm = Realm.getInstance(builder.build());
         try {
-            assertEquals(2, realm.where(FixturePerson.class).count());
-            FixturePerson grace = realm.where(FixturePerson.class).equalTo("id", 100L).findFirst();
-            FixturePerson ada = realm.where(FixturePerson.class).equalTo("id", 101L).findFirst();
-            assertNotNull(grace);
-            assertNotNull(ada);
-            assertEquals("Grace", grace.getName());
-            assertEquals(true, grace.isActive());
-            assertEquals(1700000000000L, grace.getCreatedAt().getTime());
-            assertArrayEquals(new byte[] {1, 2, 3, 4}, grace.getPayload());
-            assertEquals("Ada", ada.getName());
-            assertEquals(false, ada.isActive());
-            assertEquals(1700000001000L, ada.getCreatedAt().getTime());
-            assertArrayEquals(new byte[] {10, 11, 12, 13}, ada.getPayload());
-            assertNotNull(ada.getParent());
-            assertEquals(100L, ada.getParent().getId());
+            verifyOriginalGolden(realm);
         } finally {
             realm.close();
         }
+    }
+
+    private static void verifyOriginalGolden(Realm realm) {
+        assertEquals(2, realm.where(FixturePerson.class).count());
+        FixturePerson grace = realm.where(FixturePerson.class).equalTo("id", 100L).findFirst();
+        FixturePerson ada = realm.where(FixturePerson.class).equalTo("id", 101L).findFirst();
+        assertNotNull(grace);
+        assertNotNull(ada);
+        assertEquals("Grace", grace.getName());
+        assertEquals(true, grace.isActive());
+        assertEquals(1700000000000L, grace.getCreatedAt().getTime());
+        assertArrayEquals(new byte[] {1, 2, 3, 4}, grace.getPayload());
+        assertEquals("Ada", ada.getName());
+        assertEquals(false, ada.isActive());
+        assertEquals(1700000001000L, ada.getCreatedAt().getTime());
+        assertArrayEquals(new byte[] {10, 11, 12, 13}, ada.getPayload());
+        assertNotNull(ada.getParent());
+        assertEquals(100L, ada.getParent().getId());
     }
 
     private static byte[] parseFixtureKey(String hex) {

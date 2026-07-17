@@ -48,6 +48,49 @@ public final class ForkFixtureCompatibilityTest {
         writeReport(context, plainSourceHash, encryptedSourceHash, plain, encrypted);
     }
 
+    /**
+     * AC-07 failure isolation: verifies current fork encryption independently
+     * of the historical official fixture format.
+     */
+    @Test
+    public void createAndReopenFreshEncryptedRealm() throws Exception {
+        Context context = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        Realm.init(context);
+        byte[] key = readFixtureKey(context);
+        File directory = new File(context.getFilesDir(), "ac07-fresh-encrypted");
+        if (!directory.exists() && !directory.mkdirs()) throw new IOException("Cannot create " + directory);
+        RealmConfiguration configuration = new RealmConfiguration.Builder()
+            .directory(directory)
+            .name("fork-fresh-encrypted.realm")
+            .schemaVersion(7)
+            .encryptionKey(key)
+            .build();
+        Realm.deleteRealm(configuration);
+        Realm realm = Realm.getInstance(configuration);
+        try {
+            realm.executeTransaction(transaction -> {
+                FixturePerson person = transaction.createObject(FixturePerson.class, 200L);
+                person.setName("Fork fresh encrypted");
+                person.setActive(true);
+                person.setCreatedAt(new Date(1700000003000L));
+                person.setPayload(new byte[] {99, 98, 97, 96});
+            });
+        } finally {
+            realm.close();
+        }
+        Realm reopened = Realm.getInstance(configuration);
+        try {
+            FixturePerson person = reopened.where(FixturePerson.class).equalTo("id", 200L).findFirst();
+            assertNotNull(person);
+            assertEquals("Fork fresh encrypted", person.getName());
+            assertTrue(person.isActive());
+            assertEquals(1700000003000L, person.getCreatedAt().getTime());
+            assertArrayEquals(new byte[] {99, 98, 97, 96}, person.getPayload());
+        } finally {
+            reopened.close();
+        }
+    }
+
     private static CaseResult exerciseFixture(Context context, File input, String name, byte[] key) throws Exception {
         File workingDirectory = new File(context.getFilesDir(), WORKING_DIRECTORY);
         if (!workingDirectory.exists() && !workingDirectory.mkdirs()) throw new IOException("Cannot create " + workingDirectory);
