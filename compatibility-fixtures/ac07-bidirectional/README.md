@@ -68,3 +68,25 @@ it is part of the backport and must pass before the device matrix is accepted.
 No oracle, encryption key, public API, file format, API level, or toolchain is
 changed. Roll back this recovery by reverting the parent gitlink commit and
 the `d7b52ccb` Core commit together.
+
+### Verified recovery evidence
+
+The clean API-37 / 16 KiB rerun at
+`generated/ac07-c970-full-rerun-20260717T010733Z` passed all gates after the
+backport. The fork opened the immutable plain and encrypted inputs with zero
+migration callbacks, completed CRUD plus reopen, and rejected the wrong key;
+the isolated official reader then opened the fork-modified copies without
+migration. The copied inputs and the authoritative source still match:
+
+- plain: `46ccf472ba5ae55edb22ae640075df006b377be738ce651abe7507641347b734`
+- encrypted: `792abb7cc4ef3aafe99fd091e0dcd4f1cb713800f60304cc9a4ca6c1d37a23df`
+- key: `5ec612cfb7275948c77e50b42aec317ba735523923823b11192fe6eb3826bb58`
+
+The fresh local six-coordinate stage used for that rerun has manifest SHA-256
+`63c145a3f032a19f58df03d71f2f83837e14a5945be48be1b524a56d3d026fae` and
+`realm-android-library` AAR SHA-256
+`ab058cd6cc942a18bb8bf86d63ed5fd87788cbcf3ee252e8b59b229afb0ee3bd`.
+`g008VerifyLocalStaging` and the isolated `g008-clean-consumer.sh` both pass.
+The unsuccessful pre-rerun launch at `ac07-c970-full-20260717T010621Z` ended
+during fork assembly before device mutation and remains preserved separately
+in ignored raw evidence; it is not used as recovery proof.
