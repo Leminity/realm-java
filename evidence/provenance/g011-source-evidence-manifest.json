@@ -182,10 +182,21 @@
     }
   },
   "gate_digests": {
+    ".github/workflows/ci.yml": "fbc182c9fbcf04777a635e8b17e1a46ab13a756ac5d0d5669999d02fe9adb04d",
+    ".github/workflows/release.yml": "33fbf343acd03026297f93a1f18d5313b401e681edff90b0669209195b36a842",
+    "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "6fd7842bff8aed3e594e7007f34c43dc7bfe4dc70d84132332b259a66bfb7bca",
+    "tools/central-portal.py": "c2bb9634ce3d026c3b61c966d3d19429a72cd4bb3e74423a16b03b3b6c42e0ad",
     "tools/g008-publication.py": "579139dfe260fd43741eebec6231b14c585216324784659608b3a1ab74b5c8a0",
+    "tools/g011-evidence-manifest.py": "41c70c47d87ec8deba47a78ddf0de501630f0bdb0af3c1bda7d8b80e349248aa",
+    "tools/test-central-portal.py": "801416f3570704f975f16b4a1f4f9b0ee4d67fb8e44f0183800066a14da3e2aa",
     "tools/test-g008-publication.py": "afca248a16a267257fdae504d43703657544c38b9aea8d57da1c3283baba0b6d",
+    "tools/test-g011-evidence-manifest.py": "c237a775fe16cf6a522f446394c7b7d12f1c146aa97984c8acb8a004b6446c52",
+    "tools/test-verify-g003-independent-builds.sh": "ebafb1dd8c2de46d27cf4cf90db9e473a3fe32384704a065466f9f71f7bcb0f1",
+    "tools/test-verify-g009-ac09-compatibility.py": "09a6fc47d5df4bb907209ecd1de935354a7f1d939bac2913bbf62e7b29dce9bd",
     "tools/test-verify-g010-license.py": "c0b5525556e1d49835ca947ef4476eeb252c4666fd97c93dd9b72e6b524c2c42",
     "tools/test-verify-g010-scope.py": "68e4d2127233658d37b95a997db35f9fc6e94a9749a43e35ec0d40c7939a1d45",
+    "tools/verify-g003-independent-builds.sh": "daa5db4dc66a46382fb8960392abcc35ae5930e293873c3556f3cb6cf64e7388",
+    "tools/verify-g009-ac09-compatibility.py": "8b8449cd30bf9ecdcc851532645fda6dd1827482e3539e514afc67fd8f25ea84",
     "tools/verify-g010-license.py": "5db2d3709bc9a7decee58e2c21b6685abbb1aaed6c0db6218fa2ec93cb506a49",
     "tools/verify-g010-scope.py": "264e955a9dd8c002dd6e60897fb9772c884697b5e91f68783917561d3753f755",
     "tools/verify-toolchain.sh": "caf88f6bfde35ae36a0b41c372180536e3b0a51ca6f606deac78750990ebe988"
@@ -200,7 +211,8 @@
       "external/catch": "3f0283de7a9c43200033da996ff9093be3ac84dc",
       "src/external/sha-1": "d9ae30f34095107ece9dceb224839f0dc2f9c1c7",
       "src/external/sha-2": "0e9aebf34101c6aa89355fd76ac9cd886735dee1"
-    }
+    },
+    "current_head_commit": "0de73ccbb4a8b42eabb475eca05f94b3599c38bc"
   },
   "toolchain": {
     "agp_version": "9.1.1",

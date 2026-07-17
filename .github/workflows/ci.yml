@@ -10,20 +10,42 @@ permissions:
 jobs:
   provenance-and-gates:
     name: Provenance and gates
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, api37, ps16k]
+    env:
+      ANDROID_SDK_ROOT: /home/leminity/Android/Sdk
+      EMULATOR_RUNTIME_LIB_DIR: /home/leminity/.local/realm-emulator-libs/root/usr/lib/x86_64-linux-gnu
     steps:
       - name: Checkout
-        uses: actions/checkout@8230315d06ad95c617244d2f265d237a1682d445
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           fetch-depth: 0
           submodules: recursive
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95
+        with:
+          distribution: temurin
+          java-version: "17"
 
       - name: Assert JDK 17
         run: |
           java -version 2>&1 | grep -Eiq 'version "17(\.|")'
 
+      - name: Verify Android toolchain
+        run: |
+          tools/verify-toolchain.sh \
+            --sdk-root "$ANDROID_SDK_ROOT" \
+            --evidence-dir evidence/toolchain/android17-wsl2
+
       - name: Verify source/evidence manifest
         run: |
+          runtime_manifest="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.json"
+          runtime_sha_tmp="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.sha256.tmp"
+          runtime_sha="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.sha256"
+          python3 tools/g011-evidence-manifest.py --output "$runtime_manifest"
+          sha256sum "$runtime_manifest" > "$runtime_sha_tmp"
+          mv "$runtime_sha_tmp" "$runtime_sha"
+          sha256sum -c "$runtime_sha"
           python3 tools/g011-evidence-manifest.py --verify evidence/provenance/g011-source-evidence-manifest.json
 
       - name: Manifest regression tests
@@ -31,6 +53,18 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
           python3 tools/test-g011-evidence-manifest.py
+
+      - name: G003 independent-build gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          bash tools/verify-g003-independent-builds.sh --run --evidence-dir build/g003-independent-builds
+
+      - name: G008 publication gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 tools/test-g008-publication.py
 
       - name: G009 public API gate
         env:
@@ -49,3 +83,23 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
           python3 tools/test-verify-g010-license.py
+
+      - name: Portal provenance gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 tools/test-central-portal.py
+
+      - name: Upload provenance evidence
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: g011-source-evidence-manifest
+          path: |
+            ${{ runner.temp }}/g011-source-evidence-manifest.runtime.json
+            ${{ runner.temp }}/g011-source-evidence-manifest.runtime.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: API37 / 16KiB runtime gate
+        run: |
+          bash compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh

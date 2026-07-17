@@ -18,6 +18,7 @@ from pathlib import Path
 
 
 EXPECTED_ROOT_COMMIT = "db46419888e6c63230e5563bce6862c2de674b6b"
+EXPECTED_CURRENT_HEAD_COMMIT = "0de73ccbb4a8b42eabb475eca05f94b3599c38bc"
 EXPECTED_CORE_COMMIT = "d7b52ccbada0283527db36143cfeab18692b4ed0"
 EXPECTED_CORE_PREREQUISITE = "b741862e7ca7cb1b81d276457989067b7737dc86"
 EXPECTED_GRADLE_URL = "https://services.gradle.org/distributions/gradle-9.6.1-bin.zip"
@@ -38,6 +39,18 @@ EXPECTED_ELF_MIN_ALIGNMENT = 0x4000
 EXPECTED_TOOLCHAIN_DIR = Path("evidence/toolchain/android17-wsl2")
 EXPECTED_ORACLE_DIR = Path("evidence/oracle/official-10.19.0")
 EXPECTED_CORE_PATH = Path("realm/realm-library/src/main/cpp/realm-core")
+IGNORED_DIGEST_PARTS = frozenset(
+    {
+        ".gradle",
+        "build",
+        "download",
+        "downloads",
+        "extraction",
+        "extracted",
+        "SHA256SUMS",
+        "checksum-verify.log",
+    }
+)
 
 
 class ManifestError(RuntimeError):
@@ -164,6 +177,8 @@ def tree_digest(root: Path, relative_dir: Path) -> dict[str, object]:
     files: dict[str, str] = {}
     for path in sorted(p for p in directory.rglob("*") if p.is_file()):
         rel = path.relative_to(root).as_posix()
+        if any(part in IGNORED_DIGEST_PARTS for part in path.relative_to(root).parts):
+            continue
         files[rel] = sha256_file(path)
     tree_hash = sha256_bytes(
         "\n".join(f"{path}\0{digest}" for path, digest in files.items()).encode("utf-8")
@@ -188,15 +203,17 @@ def build_manifest(root: Path) -> dict[str, object]:
     runtime = parse_runtime_fingerprint(root)
     toolchain_root = tree_digest(root, EXPECTED_TOOLCHAIN_DIR)
     oracle_root = tree_digest(root, EXPECTED_ORACLE_DIR)
-    root_commit = EXPECTED_ROOT_COMMIT
+    runtime_head_commit = run_git(root, "rev-parse", "HEAD")
     core_commit = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD")
     core_gitlink = gitlink_sha(root, EXPECTED_CORE_PATH)
     core_catch = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD:external/catch")
     core_sha1 = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD:src/external/sha-1")
     core_sha2 = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD:src/external/sha-2")
 
-    if not git_succeeds(root, "merge-base", "--is-ancestor", EXPECTED_ROOT_COMMIT, "HEAD"):
-        raise ManifestError(f"{EXPECTED_ROOT_COMMIT} is not an ancestor of the current worktree HEAD")
+    if runtime_head_commit != EXPECTED_CURRENT_HEAD_COMMIT:
+        raise ManifestError(
+            f"unexpected current worktree HEAD {runtime_head_commit}; expected {EXPECTED_CURRENT_HEAD_COMMIT}"
+        )
     if core_commit != EXPECTED_CORE_COMMIT or core_gitlink != EXPECTED_CORE_COMMIT:
         raise ManifestError(
             f"unexpected core commit {core_commit} / gitlink {core_gitlink}; expected {EXPECTED_CORE_COMMIT}"
@@ -227,7 +244,8 @@ def build_manifest(root: Path) -> dict[str, object]:
         "schema_version": 1,
         "purpose": "G011 reproducible CI and WSL/Linux source evidence manifest",
         "source": {
-            "baseline_root_commit": root_commit,
+            "baseline_root_commit": EXPECTED_ROOT_COMMIT,
+            "current_head_commit": runtime_head_commit,
             "core_commit": core_commit,
             "core_gitlink": core_gitlink,
             "core_submodules": {
@@ -261,6 +279,15 @@ def build_manifest(root: Path) -> dict[str, object]:
             "oracle_official_10_19_0": oracle_root,
         },
         "gate_digests": {
+            ".github/workflows/ci.yml": sha256_file(root / ".github/workflows/ci.yml"),
+            ".github/workflows/release.yml": sha256_file(root / ".github/workflows/release.yml"),
+            "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": sha256_file(
+                root / "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh"
+            ),
+            "tools/central-portal.py": sha256_file(root / "tools/central-portal.py"),
+            "tools/test-central-portal.py": sha256_file(root / "tools/test-central-portal.py"),
+            "tools/verify-g003-independent-builds.sh": sha256_file(root / "tools/verify-g003-independent-builds.sh"),
+            "tools/test-verify-g003-independent-builds.sh": sha256_file(root / "tools/test-verify-g003-independent-builds.sh"),
             "tools/verify-g010-license.py": sha256_file(root / "tools/verify-g010-license.py"),
             "tools/verify-g010-scope.py": sha256_file(root / "tools/verify-g010-scope.py"),
             "tools/test-verify-g010-license.py": sha256_file(root / "tools/test-verify-g010-license.py"),
@@ -268,6 +295,10 @@ def build_manifest(root: Path) -> dict[str, object]:
             "tools/verify-toolchain.sh": sha256_file(root / "tools/verify-toolchain.sh"),
             "tools/g008-publication.py": sha256_file(root / "tools/g008-publication.py"),
             "tools/test-g008-publication.py": sha256_file(root / "tools/test-g008-publication.py"),
+            "tools/verify-g009-ac09-compatibility.py": sha256_file(root / "tools/verify-g009-ac09-compatibility.py"),
+            "tools/test-verify-g009-ac09-compatibility.py": sha256_file(root / "tools/test-verify-g009-ac09-compatibility.py"),
+            "tools/g011-evidence-manifest.py": sha256_file(root / "tools/g011-evidence-manifest.py"),
+            "tools/test-g011-evidence-manifest.py": sha256_file(root / "tools/test-g011-evidence-manifest.py"),
         },
         "assertions": {
             "supported_release_graph": True,
