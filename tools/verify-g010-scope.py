@@ -26,8 +26,8 @@ SOURCE_APPROVALS = {
     "library-build-transformer/src/main/kotlin/io/realm/buildtransformer/RealmBuildTransformer.kt": "G004-F001",
     "realm-transformer/src/main/kotlin/io/realm/transformer/RealmTransformer.kt": "G004-F001",
     "realm-transformer/src/main/kotlin/io/realm/transformer/ext/ProjectExt.kt": "G004-F001",
-    "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt": "RealmVersionChecker",
-    "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmVersionChecker.kt": "RealmVersionChecker",
+    "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt": "G010-AC09-001",
+    "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmVersionChecker.kt": "G010-AC09-001",
     "realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/CamelCaseConverter.kt": "F053",
     "realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/LowerCaseWithSeparatorConverter.kt": "F053",
     "realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/PascalCaseConverter.kt": "F053",
@@ -57,6 +57,8 @@ BUILD_APPROVALS = {
     "realm-transformer/gradle/wrapper/gradle-wrapper.properties": "F017",
     "realm/gradle/wrapper/gradle-wrapper.properties": "F017",
 }
+EXTRA_LEDGER_APPROVALS = {"build.gradle": ("G010-AC15-001",)}
+CORE_LEDGER_APPROVALS = ("G010-CORE-001", "G010-CORE-002")
 
 CORE_APPROVED_PATHS = {
     "src/realm/alloc.hpp",
@@ -220,6 +222,8 @@ def verify(root: Path, base: str, head: str) -> dict:
     retirement_approved = retired_processor_approval(root)
     for path, token in {**SOURCE_APPROVALS, **BUILD_APPROVALS}.items():
         if path in RETIRED_PROCESSOR_PATHS:
+            if token not in ledger:
+                failures.append(f"ledger token {token} missing for {path}")
             if not retirement_approved:
                 failures.append(f"retired processor evidence missing for {path}")
             if path in whitespace_only:
@@ -229,6 +233,10 @@ def verify(root: Path, base: str, head: str) -> dict:
             failures.append(f"ledger token {token} missing for {path}")
         if path in whitespace_only:
             failures.append(f"formatting-only cleanup is forbidden: {path}")
+    for path, tokens in EXTRA_LEDGER_APPROVALS.items():
+        for token in tokens:
+            if token not in ledger:
+                failures.append(f"ledger token {token} missing for {path}")
 
     base_core = run(root, "ls-tree", base, CORE_PATH).split()[2]
     core_head, actual_core_paths = core_paths(root, base_core)
@@ -255,6 +263,9 @@ def verify(root: Path, base: str, head: str) -> dict:
         )
     if set(actual_core_paths) != CORE_EXPECTED_PATHS:
         failures.append(f"unledgered Core paths: {sorted(set(actual_core_paths) ^ CORE_EXPECTED_PATHS)}")
+    for token in CORE_LEDGER_APPROVALS:
+        if token not in ledger:
+            failures.append(f"ledger token {token} missing for Core scope")
 
     forbidden_hits: list[str] = []
     for relative in SUPPORTED_GRAPH_FILES:
@@ -308,6 +319,12 @@ def verify(root: Path, base: str, head: str) -> dict:
         "changed": {"all_count": len(paths), "product_sources": sources, "build_publication": builds},
         "archival_sync_boundary": archival_markers,
         "retired_processor_evidence": retirement_approved,
+        "ledger_approvals": {
+            "retired_processor": "G010-AC09-001" in ledger,
+            "core_prerequisite": "G010-CORE-001" in ledger,
+            "core_backport": "G010-CORE-002" in ledger,
+            "retired_root_s3_ossrh": "G010-AC15-001" in ledger,
+        },
         "forbidden_supported_graph_hits": forbidden_hits,
         "forbidden_runtime_hits": runtime_hits,
         "status": "PASS" if not failures else "FAIL",

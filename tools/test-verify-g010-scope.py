@@ -37,6 +37,8 @@ assert MODULE.CORE_EXPECTED_PATHS == MODULE.CORE_APPROVED_PATHS | {
 }
 assert MODULE.RETIRED_PROCESSOR_PATHS <= set(MODULE.SOURCE_APPROVALS)
 assert MODULE.CORE_TOOLCHAIN_PREREQUISITE == "b741862e7ca7cb1b81d276457989067b7737dc86"
+assert MODULE.EXTRA_LEDGER_APPROVALS["build.gradle"] == ("G010-AC15-001",)
+assert MODULE.CORE_LEDGER_APPROVALS == ("G010-CORE-001", "G010-CORE-002")
 
 with tempfile.TemporaryDirectory() as temporary:
     source = Path(temporary) / "fixture.gradle"
