@@ -60,6 +60,30 @@ class G011ConsumeSixTests(unittest.TestCase):
             )
             self.assertNotEqual(invalid.returncode, 0)
 
+    def test_local_empty_cache_allows_only_external_dependencies_from_public_repositories(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            repository = root / "fork-repository"
+            repository.mkdir()
+            evidence = root / "evidence"
+            result = self.run_script(
+                "--mode", "local",
+                "--repository", str(repository),
+                "--gradle-user-home", str(root / "empty-home"),
+                "--evidence-dir", str(evidence),
+                "--dry-run",
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            command = (evidence / "command.redacted.txt").read_text()
+            settings = (evidence / "settings.gradle.redacted").read_text()
+            self.assertNotIn("--offline", command)
+            self.assertIn("includeGroup('io.github.leminity.realm')", settings)
+            self.assertEqual(settings.count("google { content { excludeGroup('io.github.leminity.realm') } }"), 2)
+            self.assertEqual(settings.count("mavenCentral { content { excludeGroup('io.github.leminity.realm') } }"), 2)
+            self.assertIn("gradlePluginPortal { content { excludeGroup('io.github.leminity.realm') } }", settings)
+            self.assertNotIn("mavenLocal", settings)
+            self.assertNotIn("jitpack", settings.lower())
+
     def test_central_rejects_custom_url_and_has_no_credentials(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)

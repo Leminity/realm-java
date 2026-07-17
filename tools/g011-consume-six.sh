@@ -186,7 +186,6 @@ cp "$consumer/build.gradle" "$evidence/build.gradle"
 } > "$evidence/routing-proof.txt"
 
 command=("$root/gradlew" -g "$gradle_user_home" -p "$consumer" --no-daemon --console=plain verifyG011ExactSix)
-[[ $mode == local ]] && command+=(--offline)
 {
   printf 'env G011_REPOSITORY_MODE=%q ' "$mode"
   [[ $mode != central ]] && printf 'G011_FORK_REPOSITORY_URL=%q ' "$fork_url"
