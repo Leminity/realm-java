@@ -1,0 +1,12 @@
+Realm Java Fork Notice
+
+This distribution is a fork of Realm Java 10.19.0. It includes changes
+maintained by Leminity for the local-only Android build and publication
+configuration. Files changed by this fork are changed from the upstream work.
+
+The bundled Realm Core source is retained at commit
+d7b52ccbada0283527db36143cfeab18692b4ed0 with its own LICENSE and bundled
+third-party license files. This NOTICE is informational and does not modify the License.
+
+"Realm", "Realm Java", and "MongoDB" are used only to describe the origin
+of the upstream work; no trademark rights are claimed.

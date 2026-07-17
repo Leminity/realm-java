@@ -1,3 +1,8 @@
+/*
+ * Modified by Leminity for the Realm Java 10.19.0 fork. This file configures
+ * the local-only publication metadata and embeds the preserved Apache-2.0
+ * LICENSE and fork NOTICE in every released primary, source, and docs archive.
+ */
 // Common local-only Maven Central bundle convention for the six G008 artifacts.
 // The Sonatype Nexus publishing plugin and every remote repository endpoint are
 // intentionally absent. A separate protected release workflow may upload the
@@ -12,6 +17,32 @@ def stagingProperty = rootProject.ext["g008StagingRepository"].toString()
 def stagingDirectory = stagingProperty.trim()
         ? project.file(stagingProperty)
         : layout.buildDirectory.dir("g008-local-staging").get().asFile
+def publicationRoot = new File(buildscript.sourceFile.getParent())
+def publicationLicense = new File(publicationRoot, "LICENSE")
+def publicationNotice = new File(publicationRoot, "NOTICE")
+
+if (!publicationLicense.isFile() || !publicationNotice.isFile()) {
+    throw new GradleException("G010 publication LICENSE and NOTICE must exist at ${publicationRoot}")
+}
+
+def addG010LegalFiles = { archive ->
+    archive.from(publicationLicense) {
+        into "META-INF"
+        rename { "LICENSE" }
+    }
+    archive.from(publicationNotice) {
+        into "META-INF"
+        rename { "NOTICE" }
+    }
+}
+
+// Every published Java source/docs archive is an AbstractArchiveTask. Android
+// AARs use their named BundleAar task, so configure those two publication
+// tasks explicitly as well instead of relying on an AGP internal task type.
+tasks.withType(org.gradle.api.tasks.bundling.AbstractArchiveTask).configureEach(addG010LegalFiles)
+tasks.matching {
+    it.name == "bundleBaseReleaseAar" && !(it instanceof org.gradle.api.tasks.bundling.AbstractArchiveTask)
+}.configureEach(addG010LegalFiles)
 
 if (project.group.toString() != publicationGroup || project.version.toString() != publicationVersion) {
     throw new GradleException("G008 publication coordinates must be ${publicationGroup}:${publicationVersion}")
