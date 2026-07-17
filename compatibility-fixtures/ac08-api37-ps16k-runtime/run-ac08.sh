@@ -16,7 +16,9 @@ usage: run-ac08.sh [--mode local|validated|validated-mirror|central] [--reposito
   [--repository-url <https://.../deployment/<id>/download> --bearer-env <ENV>]
   [--sdk-root <path> --serial <serial> --expected-avd <name>]
   [--official-gradle <path> --immutable-encrypted <path>]
+  [--official-gradle-home-archive <path> --official-gradle-home-archive-sha256 <sha256>]
   [--gradle-user-home <empty-dir> --evidence-dir <dir> --run-id <id>]
+  [--official-inputs-preflight-only]
   [--dry-run --dry-run-identity <sdk,page,avd,linker,package>]
 
 No arguments retain the original local, offline acceptance runner behavior.
@@ -38,6 +40,8 @@ SDK=$DEFAULT_SDK
 SERIAL=emulator-5654
 EXPECTED_AVD=realm-api37-ps16k-kvm
 OFFICIAL_GRADLE="${AC08_OFFICIAL_GRADLE:-}"
+OFFICIAL_GRADLE_HOME_ARCHIVE=''
+OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256=''
 IMMUTABLE_ENCRYPTED="$LEADER_ROOT/compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/official-10.19.0-encrypted.realm"
 EVIDENCE_ROOT="${AC08_EVIDENCE_DIR:-$ROOT/evidence/ac08-api37-ps16k}"
 EVIDENCE_EXPLICIT=false
@@ -46,6 +50,7 @@ RUN_ID="${AC08_RUN_ID:-$(date -u +%Y%m%dT%H%M%SZ)}"
 GRADLE_USER_HOME=''
 DRY_RUN=false
 DRY_RUN_IDENTITY=''
+OFFICIAL_INPUTS_PREFLIGHT_ONLY=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --mode) require_value "$@"; MODE=$2; shift 2 ;;
@@ -56,18 +61,22 @@ while [[ $# -gt 0 ]]; do
     --serial) require_value "$@"; SERIAL=$2; shift 2 ;;
     --expected-avd) require_value "$@"; EXPECTED_AVD=$2; shift 2 ;;
     --official-gradle) require_value "$@"; OFFICIAL_GRADLE=$2; shift 2 ;;
+    --official-gradle-home-archive) require_value "$@"; OFFICIAL_GRADLE_HOME_ARCHIVE=$2; shift 2 ;;
+    --official-gradle-home-archive-sha256) require_value "$@"; OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256=$2; shift 2 ;;
     --immutable-encrypted) require_value "$@"; IMMUTABLE_ENCRYPTED=$2; shift 2 ;;
     --gradle-user-home) require_value "$@"; GRADLE_USER_HOME=$2; shift 2 ;;
     --evidence-dir) require_value "$@"; EVIDENCE_ROOT=$2; EVIDENCE_EXPLICIT=true; shift 2 ;;
     --run-id) require_value "$@"; RUN_ID=$2; shift 2 ;;
     --dry-run) DRY_RUN=true; shift ;;
     --dry-run-identity) require_value "$@"; DRY_RUN_IDENTITY=$2; shift 2 ;;
+    --official-inputs-preflight-only) OFFICIAL_INPUTS_PREFLIGHT_ONLY=true; shift ;;
     -h|--help) usage ;;
     *) usage ;;
   esac
 done
 
 [[ $MODE == local || $MODE == validated || $MODE == validated-mirror || $MODE == central ]] || usage
+if [[ $OFFICIAL_INPUTS_PREFLIGHT_ONLY == false ]]; then
 case "$MODE" in
   local)
     [[ -z $REPOSITORY_URL && -z $BEARER_ENV ]] || usage
@@ -98,6 +107,11 @@ case "$MODE" in
     FORK_REPOSITORY_URL='mavenCentral()'
     ;;
 esac
+fi
+if [[ $MODE != local || $OFFICIAL_INPUTS_PREFLIGHT_ONLY == true ]]; then
+  [[ -n $OFFICIAL_GRADLE_HOME_ARCHIVE && $OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 =~ ^[0-9a-f]{64}$ ]] ||
+    fail 'remote mode requires a checksum-bound prewarmed official Gradle home archive'
+fi
 
 ADB="$SDK/platform-tools/adb"
 AAPT2="$SDK/build-tools/36.0.0/aapt2"
@@ -113,6 +127,30 @@ if [[ $MODE != local ]]; then
   if find "$GRADLE_USER_HOME" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
     fail "remote Gradle user home must be empty: $GRADLE_USER_HOME"
   fi
+fi
+OFFICIAL_GRADLE_HOME="$HOME/.gradle"
+if [[ ( $MODE != local || $OFFICIAL_INPUTS_PREFLIGHT_ONLY == true ) && $DRY_RUN != true ]]; then
+  [[ -f $OFFICIAL_GRADLE_HOME_ARCHIVE ]] || fail 'missing prewarmed official Gradle home archive'
+  [[ "$(sha256sum "$OFFICIAL_GRADLE_HOME_ARCHIVE" | awk '{print $1}')" == "$OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" ]] ||
+    fail 'prewarmed official Gradle home archive SHA-256 mismatch'
+  OFFICIAL_GRADLE_HOME="$WORK/official-gradle-home"
+  mkdir -p "$OFFICIAL_GRADLE_HOME"
+  python3 - "$OFFICIAL_GRADLE_HOME_ARCHIVE" "$OFFICIAL_GRADLE_HOME" <<'PY'
+import pathlib, sys, tarfile
+archive = pathlib.Path(sys.argv[1])
+destination = pathlib.Path(sys.argv[2]).resolve()
+with tarfile.open(archive, 'r:*') as source:
+    members = source.getmembers()
+    if not members:
+        raise SystemExit('official Gradle home archive is empty')
+    for member in members:
+        relative = pathlib.PurePosixPath(member.name)
+        if relative.is_absolute() or '..' in relative.parts or not (member.isdir() or member.isfile()):
+            raise SystemExit('official Gradle home archive contains an unsafe entry')
+    source.extractall(destination, members=members, filter='data')
+PY
+  find "$OFFICIAL_GRADLE_HOME" -mindepth 1 -print -quit | grep -q . ||
+    fail 'prewarmed official Gradle home archive extracted no content'
 fi
 
 print_command() {
@@ -173,6 +211,19 @@ validate_device_identity_values() {
   local sdk=$1 page=$2 avd=$3 linker=$4 compatibility=$5
   [[ "$sdk" == 37 && "$page" == 16384 && "$avd" == "$EXPECTED_AVD" && "$linker" == fatal && "$compatibility" == true ]]
 }
+verify_official_inputs() {
+  local fixture_manifest expected_encrypted_hash actual_encrypted_hash gradle_version
+  fixture_manifest="$ROOT/compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/fixture-manifest.json"
+  [[ -x "$AAPT2" ]] || fail "expected aapt2 at $AAPT2"
+  [[ -x "$OFFICIAL_GRADLE" ]] || fail 'missing Gradle 7.5 required by the immutable official 10.19.0 plugin'
+  gradle_version="$("$OFFICIAL_GRADLE" -g "$OFFICIAL_GRADLE_HOME" --version --no-daemon | sed -n 's/^Gradle //p' | head -1)"
+  [[ $gradle_version == 7.5 ]] || fail "official baseline requires exact Gradle 7.5, found: ${gradle_version:-unknown}"
+  [[ -f "$IMMUTABLE_ENCRYPTED" ]] || fail 'missing immutable encrypted official input'
+  expected_encrypted_hash="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1], encoding="utf-8"))["encrypted_fixture_sha256"])' "$fixture_manifest")"
+  [[ $expected_encrypted_hash =~ ^[0-9a-f]{64}$ ]] || fail 'official fixture manifest lacks encrypted fixture SHA-256'
+  actual_encrypted_hash="$(sha256sum "$IMMUTABLE_ENCRYPTED" | awk '{print $1}')"
+  [[ $actual_encrypted_hash == "$expected_encrypted_hash" ]] || fail 'immutable encrypted official input SHA-256 mismatch'
+}
 require_instrumentation_pass() {
   local name="$1"
   local log="$EVIDENCE/${name}.log"
@@ -210,10 +261,24 @@ device_identity() {
   printf 'SDK=%s PAGE_SIZE=%s AVD=%s linker_compat=%s package_compat_disabled=%s\n' "$sdk" "$page" "$avd" "$linker" "$compatibility"
 }
 
+if [[ $OFFICIAL_INPUTS_PREFLIGHT_ONLY == true ]]; then
+  [[ $DRY_RUN == false ]] || fail 'official input preflight cannot be a dry run'
+  verify_official_inputs
+  env ANDROID_HOME="$SDK" ANDROID_SDK_ROOT="$SDK" \
+    "$OFFICIAL_GRADLE" -g "$OFFICIAL_GRADLE_HOME" -p "$OFFICIAL_PROJECT" \
+    --project-cache-dir "$WORK/official-project-cache" \
+    --offline --no-daemon --console=plain \
+    -Pandroid.aapt2FromMavenOverride="$AAPT2" \
+    clean :official-app:assembleDebug :official-app:assembleDebugAndroidTest
+  printf 'AC08_OFFICIAL_INPUTS_PREFLIGHT=PASS\n'
+  exit 0
+fi
+
 prepare_fresh_evidence "$EVIDENCE"
 {
   printf 'run_id=%s\nmode=%s\nrepository=%s\nserial=%s\nexpected_avd=%s\n' "$RUN_ID" "$MODE" "$FORK_REPOSITORY_URL" "$SERIAL" "$EXPECTED_AVD"
   [[ $MODE != local ]] && printf 'gradle_user_home=%s\n' "$GRADLE_USER_HOME"
+  [[ $MODE != local ]] && printf 'official_gradle_home_archive_sha256=%s\n' "$OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256"
   printf 'bearer=redacted\n'
 } > "$EVIDENCE/run-metadata.txt"
 if [[ $DRY_RUN == true ]]; then
@@ -226,6 +291,11 @@ if [[ $DRY_RUN == true ]]; then
     printf 'fork_repository_mode=%s\n' "$MODE"
     printf 'fork_repository=%s\n' "$FORK_REPOSITORY_URL"
     printf 'exclusive_buildscript_routing=PASS\nexclusive_dependency_routing=PASS\n'
+    if [[ $MODE != local ]]; then
+      printf 'official_build_command=%q -g %q -p %q --offline --no-daemon --console=plain\n' \
+        "$OFFICIAL_GRADLE" '<extracted-checksum-bound-official-home>' "$OFFICIAL_PROJECT"
+      printf 'official_and_fork_gradle_homes=SEPARATE\n'
+    fi
     printf 'fork_build_command='
     if [[ $MODE == local ]]; then
       printf 'env G011_REPOSITORY_MODE=local G008_STAGING_REPOSITORY=%q ' "$FORK_REPOSITORY_URL"
@@ -255,9 +325,11 @@ if [[ -z "$OFFICIAL_GRADLE" ]]; then
   OFFICIAL_GRADLE="$(find "$HOME/.gradle/wrapper/dists/gradle-7.5-all" -type f -path '*/bin/gradle' -print -quit 2>/dev/null || true)"
 fi
 [[ -x "$OFFICIAL_GRADLE" ]] || fail 'missing cached Gradle 7.5 required by the immutable official 10.19.0 plugin'
+verify_official_inputs
 
 run official-build-offline \
-  "$OFFICIAL_GRADLE" -p "$OFFICIAL_PROJECT" --offline --no-daemon --console=plain \
+  env ANDROID_HOME="$SDK" ANDROID_SDK_ROOT="$SDK" \
+  "$OFFICIAL_GRADLE" -g "$OFFICIAL_GRADLE_HOME" -p "$OFFICIAL_PROJECT" --offline --no-daemon --console=plain \
   -Pandroid.aapt2FromMavenOverride="$AAPT2" \
   :official-app:assembleDebug :official-app:assembleDebugAndroidTest
 fork_env=(env "G011_REPOSITORY_MODE=$MODE")

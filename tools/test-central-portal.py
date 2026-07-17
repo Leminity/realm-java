@@ -202,19 +202,19 @@ class CentralPortalTests(unittest.TestCase):
                 archive.writestr(path, data)
         return bundle, source_manifest
 
-    def _stage(
+    def _prepare_stage(
         self,
         transport: MockTransport,
         *,
         allow_network: bool = True,
-        consumer_runner: object | None = None,
-    ) -> tuple[dict[str, object], Path]:
+    ) -> tuple[dict[str, object], Path, Path]:
         stage_manifest = self.root / "stage-manifest.json"
+        stage_prepared = self.root / "stage-prepared.json"
         client = CP.PortalClient(SECRET, transport=transport, sleep=lambda _: None)
         if not transport.downloads:
             with zipfile.ZipFile(self.bundle) as archive:
                 transport.downloads = {name: archive.read(name) for name in archive.namelist()}
-        result = CP.stage(
+        prepared_result = CP.stage(
             bundle=self.bundle,
             source_manifest=self.source_manifest,
             tag="v10.19.0-agp9.1",
@@ -226,17 +226,36 @@ class CentralPortalTests(unittest.TestCase):
             ci_run_id=CI_RUN_ID,
             ci_artifact_id=CI_ARTIFACT_ID,
             environment_policy_audit=self.policy_audit,
-            validated_consumer_command=self.consumer_command,
-            validated_consumer_gradle_home=self.root / "validated-home",
-            validated_consumer_evidence=self.root / "validated-evidence",
+            validated_mirror_evidence=self.root / "validated-evidence",
+            stage_prepared=stage_prepared,
             stage_manifest=stage_manifest,
             token_env="UNUSED",
             allow_network=allow_network,
             attempts=3,
             delay_seconds=0,
             client=client,
-            consumer_runner=consumer_runner or self._consumer_runner,
             drop_failed_deployment=True,
+        )
+        return dict(prepared_result), stage_prepared, stage_manifest
+
+    def _stage(
+        self,
+        transport: MockTransport,
+        *,
+        allow_network: bool = True,
+        consumer_runner: object | None = None,
+    ) -> tuple[dict[str, object], Path]:
+        prepared_result, stage_prepared, stage_manifest = self._prepare_stage(
+            transport, allow_network=allow_network
+        )
+        result = CP.finalize_stage(
+            stage_prepared=stage_prepared,
+            stage_prepared_sha256=str(prepared_result["stage_prepared_sha256"]),
+            validated_consumer_command=self.consumer_command,
+            validated_consumer_gradle_home=self.root / "validated-home",
+            validated_consumer_evidence=self.root / "validated-evidence",
+            stage_manifest=stage_manifest,
+            consumer_runner=consumer_runner or self._consumer_runner,
         )
         return dict(result), stage_manifest
 
@@ -331,9 +350,8 @@ class CentralPortalTests(unittest.TestCase):
                 ci_run_id=CI_RUN_ID,
                 ci_artifact_id=CI_ARTIFACT_ID,
                 environment_policy_audit=self.policy_audit,
-                validated_consumer_command=self.consumer_command,
-                validated_consumer_gradle_home=self.root / "blocked-home",
-                validated_consumer_evidence=self.root / "blocked-evidence",
+                validated_mirror_evidence=self.root / "blocked-evidence",
+                stage_prepared=self.root / "blocked-stage-prepared.json",
                 stage_manifest=stage_manifest,
                 token_env="UNUSED",
                 allow_network=False,
@@ -406,6 +424,99 @@ class CentralPortalTests(unittest.TestCase):
         self.assertNotIn("MAVEN_SIGNING_KEY", captured)
         self.assertNotIn("GITHUB_TOKEN", captured)
 
+    def test_stage_portal_process_exits_before_tokenless_consumer_process(self) -> None:
+        transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        prepared, prepared_path, stage_manifest = self._prepare_stage(transport)
+        old = os.environ.get("CENTRAL_PORTAL_BEARER_TOKEN")
+        os.environ["CENTRAL_PORTAL_BEARER_TOKEN"] = SECRET
+        try:
+            with self.assertRaisesRegex(CP.PortalError, "tokenless consumer process"):
+                CP.finalize_stage(
+                    stage_prepared=prepared_path,
+                    stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
+                    validated_consumer_command=self.consumer_command,
+                    validated_consumer_gradle_home=self.root / "split-home",
+                    validated_consumer_evidence=self.root / "validated-evidence",
+                    stage_manifest=stage_manifest,
+                    consumer_runner=self._consumer_runner,
+                )
+        finally:
+            if old is None:
+                os.environ.pop("CENTRAL_PORTAL_BEARER_TOKEN", None)
+            else:
+                os.environ["CENTRAL_PORTAL_BEARER_TOKEN"] = old
+        result = CP.finalize_stage(
+            stage_prepared=prepared_path,
+            stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
+            validated_consumer_command=self.consumer_command,
+            validated_consumer_gradle_home=self.root / "split-home",
+            validated_consumer_evidence=self.root / "validated-evidence",
+            stage_manifest=stage_manifest,
+            consumer_runner=self._consumer_runner,
+        )
+        self.assertEqual(result["deployment_id"], "deployment-123")
+
+    def test_tokenless_process_rejects_every_protected_alias_in_a_parent(self) -> None:
+        inner = f"""
+import importlib.util, pathlib, sys
+path = pathlib.Path({str(ROOT / 'tools' / 'central-portal.py')!r})
+spec = importlib.util.spec_from_file_location('central_portal_probe', path)
+module = importlib.util.module_from_spec(spec)
+sys.modules[spec.name] = module
+spec.loader.exec_module(module)
+try:
+    module._assert_tokenless_process()
+except module.PortalError:
+    raise SystemExit(23)
+raise SystemExit(0)
+"""
+        outer = """
+import os, subprocess, sys
+child = os.environ.copy()
+child.pop(sys.argv[2], None)
+raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).returncode)
+"""
+        environment = os.environ.copy()
+        for name in CP._PROTECTED_PROCESS_ENV_NAMES:
+            environment.pop(name, None)
+        for name in sorted(CP._PROTECTED_PROCESS_ENV_NAMES):
+            with self.subTest(name=name):
+                environment[name] = "ancestor-probe-not-a-real-token"
+                completed = subprocess.run(
+                    [sys.executable, "-c", outer, inner, name],
+                    env=environment,
+                    check=False,
+                )
+                self.assertEqual(completed.returncode, 23)
+                environment.pop(name)
+
+    def test_stage_finalizer_rejects_mutation_against_portal_origin_digest(self) -> None:
+        transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        result, prepared_path, stage_manifest = self._prepare_stage(transport)
+        mutated = json.loads(prepared_path.read_text(encoding="utf-8"))
+        mutated["post_portal_mutation"] = True
+        prepared_path.write_text(json.dumps(mutated), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "prepared stage SHA-256 mismatch"):
+            CP.finalize_stage(
+                stage_prepared=prepared_path,
+                stage_prepared_sha256=str(result["stage_prepared_sha256"]),
+                validated_consumer_command=self.consumer_command,
+                validated_consumer_gradle_home=self.root / "mutated-stage-home",
+                validated_consumer_evidence=self.root / "validated-evidence",
+                stage_manifest=stage_manifest,
+                consumer_runner=self._consumer_runner,
+            )
+
     def test_release_requires_immutable_manifest_hash_and_exact_deployment(self) -> None:
         stage_transport = MockTransport(
             [
@@ -432,7 +543,8 @@ class CentralPortalTests(unittest.TestCase):
             consumer_env.update(env)
             self._consumer_runner(args, env)
 
-        result = CP.release(
+        release_prepared = self.root / "central-release-prepared.json"
+        portal_result = CP.release(
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
             token_env="UNUSED",
@@ -440,6 +552,14 @@ class CentralPortalTests(unittest.TestCase):
             attempts=3,
             delay_seconds=0,
             client=release_client,
+            release_prepared=release_prepared,
+            release_evidence=self.root / "central-release-outcome.json",
+        )
+        result = CP.finalize_release(
+            stage_manifest=stage_manifest,
+            stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
+            release_prepared=release_prepared,
+            release_prepared_sha256=str(portal_result["release_prepared_sha256"]),
             published_consumer_command=self.consumer_command,
             published_consumer_gradle_home=self.root / "central-home",
             published_consumer_evidence=self.root / "central-evidence",
@@ -474,12 +594,99 @@ class CentralPortalTests(unittest.TestCase):
                 attempts=1,
                 delay_seconds=0,
                 client=CP.PortalClient(SECRET, transport=rejected_transport, sleep=lambda _: None),
-                published_consumer_command=self.consumer_command,
-                published_consumer_gradle_home=self.root / "central-home-rejected",
-                published_consumer_evidence=self.root / "central-evidence-rejected",
-                consumer_runner=self._consumer_runner,
+                release_prepared=self.root / "central-release-rejected.json",
             )
         self.assertEqual(rejected_transport.calls, [])
+
+    def test_release_finalizer_rejects_mutation_against_portal_origin_digest(self) -> None:
+        stage_transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        stage_result, stage_manifest = self._stage(stage_transport)
+        release_prepared = self.root / "mutated-release-prepared.json"
+        portal_result = CP.release(
+            stage_manifest=stage_manifest,
+            stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
+            token_env="UNUSED",
+            allow_network=True,
+            attempts=2,
+            delay_seconds=0,
+            client=CP.PortalClient(
+                SECRET,
+                transport=MockTransport(
+                    [
+                        CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+                        CP.HttpResponse(204, b""),
+                        CP.HttpResponse(200, b'{"deploymentState":"PUBLISHED"}'),
+                    ]
+                ),
+                sleep=lambda _: None,
+            ),
+            release_prepared=release_prepared,
+        )
+        mutated = json.loads(release_prepared.read_text(encoding="utf-8"))
+        mutated["post_portal_mutation"] = True
+        release_prepared.write_text(json.dumps(mutated), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "prepared release SHA-256 mismatch"):
+            CP.finalize_release(
+                stage_manifest=stage_manifest,
+                stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
+                release_prepared=release_prepared,
+                release_prepared_sha256=str(portal_result["release_prepared_sha256"]),
+                published_consumer_command=self.consumer_command,
+                published_consumer_gradle_home=self.root / "mutated-release-home",
+                published_consumer_evidence=self.root / "mutated-release-evidence",
+                consumer_runner=self._consumer_runner,
+                release_evidence=self.root / "mutated-release-outcome.json",
+            )
+
+    def test_release_finalizer_rejects_a_self_hashed_wrong_final_deployment_trace(self) -> None:
+        stage_transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        stage_result, stage_manifest = self._stage(stage_transport)
+        release_prepared = self.root / "wrong-trace-release-prepared.json"
+        CP.release(
+            stage_manifest=stage_manifest,
+            stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
+            token_env="UNUSED",
+            allow_network=True,
+            attempts=2,
+            delay_seconds=0,
+            client=CP.PortalClient(
+                SECRET,
+                transport=MockTransport(
+                    [
+                        CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+                        CP.HttpResponse(204, b""),
+                        CP.HttpResponse(200, b'{"deploymentState":"PUBLISHED"}'),
+                    ]
+                ),
+                sleep=lambda _: None,
+            ),
+            release_prepared=release_prepared,
+        )
+        mutated = json.loads(release_prepared.read_text(encoding="utf-8"))
+        mutated["publication_state_trace"][-1]["deployment_id"] = "deployment-456"
+        release_prepared.write_text(json.dumps(mutated), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "exact final PUBLISHED deployment trace"):
+            CP.finalize_release(
+                stage_manifest=stage_manifest,
+                stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
+                release_prepared=release_prepared,
+                release_prepared_sha256=CP.sha256_file(release_prepared),
+                published_consumer_command=self.consumer_command,
+                published_consumer_gradle_home=self.root / "wrong-trace-home",
+                published_consumer_evidence=self.root / "wrong-trace-evidence",
+                consumer_runner=self._consumer_runner,
+                release_evidence=self.root / "wrong-trace-outcome.json",
+            )
 
     def test_release_rejects_out_of_band_published_state(self) -> None:
         stage_transport = MockTransport(
@@ -499,10 +706,7 @@ class CentralPortalTests(unittest.TestCase):
                 attempts=2,
                 delay_seconds=0,
                 client=CP.PortalClient(SECRET, transport=release_transport, sleep=lambda _: None),
-                published_consumer_command=self.consumer_command,
-                published_consumer_gradle_home=self.root / "resume-home",
-                published_consumer_evidence=self.root / "resume-evidence",
-                consumer_runner=self._consumer_runner,
+                release_prepared=self.root / "resume-release-prepared.json",
             )
         self.assertEqual(len(release_transport.calls), 1)
         self.assertIn("/status?id=deployment-123", release_transport.calls[0][1])
@@ -524,6 +728,7 @@ class CentralPortalTests(unittest.TestCase):
                 CP.HttpResponse(200, b'{"deploymentState":"PUBLISHED"}'),
             ]
         )
+        release_prepared = self.root / "async-release-prepared.json"
         result = CP.release(
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
@@ -532,10 +737,7 @@ class CentralPortalTests(unittest.TestCase):
             attempts=3,
             delay_seconds=0,
             client=CP.PortalClient(SECRET, transport=release_transport, sleep=lambda _: None),
-            published_consumer_command=self.consumer_command,
-            published_consumer_gradle_home=self.root / "async-home",
-            published_consumer_evidence=self.root / "async-evidence",
-            consumer_runner=self._consumer_runner,
+            release_prepared=release_prepared,
         )
         self.assertEqual(result["state"], "PUBLISHED")
         self.assertEqual([item["state"] for item in result["publication_state_trace"][-3:]], ["VALIDATED", "PUBLISHING", "PUBLISHED"])
@@ -565,10 +767,7 @@ class CentralPortalTests(unittest.TestCase):
                 attempts=2,
                 delay_seconds=0,
                 client=CP.PortalClient(SECRET, transport=release_transport, sleep=lambda _: None),
-                published_consumer_command=self.consumer_command,
-                published_consumer_gradle_home=self.root / "failed-home",
-                published_consumer_evidence=self.root / "failed-evidence",
-                consumer_runner=self._consumer_runner,
+                release_prepared=self.root / "failed-release-prepared.json",
                 release_evidence=evidence,
             )
         outcome = json.loads(evidence.read_text(encoding="utf-8"))
@@ -620,12 +819,10 @@ class CentralPortalTests(unittest.TestCase):
                 CI_ARTIFACT_ID,
                 "--environment-policy-audit",
                 str(self.policy_audit),
-                "--validated-consumer-command",
-                str(self.consumer_command),
-                "--validated-consumer-gradle-home",
-                str(self.root / "cli-stage-home"),
-                "--validated-consumer-evidence",
+                "--validated-mirror-evidence",
                 str(self.root / "cli-stage-evidence"),
+                "--stage-prepared",
+                str(self.root / "cli-stage-prepared.json"),
                 "--stage-manifest",
                 str(self.root / "cli-stage-manifest.json"),
                 "--drop-failed-deployment",
@@ -640,7 +837,7 @@ class CentralPortalTests(unittest.TestCase):
         self.assertIn("network access requires --allow-network", completed.stderr)
         self.assertNotIn("AttributeError", completed.stderr)
 
-    def test_release_cli_parses_and_wires_required_published_consumer_arguments(self) -> None:
+    def test_release_cli_parses_portal_only_arguments_and_fails_closed_without_network(self) -> None:
         stage_transport = MockTransport(
             [
                 CP.HttpResponse(201, b"deployment-123"),
@@ -657,12 +854,8 @@ class CentralPortalTests(unittest.TestCase):
                 str(stage_manifest),
                 "--stage-manifest-sha256",
                 str(stage_result["stage_manifest_sha256"]),
-                "--published-consumer-command",
-                str(self.consumer_command),
-                "--published-consumer-gradle-home",
-                str(self.root / "cli-release-home"),
-                "--published-consumer-evidence",
-                str(self.root / "cli-release-evidence"),
+                "--release-prepared",
+                str(self.root / "cli-release-prepared.json"),
                 "--release-evidence",
                 str(self.root / "cli-release-outcome.json"),
             ],
@@ -756,8 +949,8 @@ class CentralPortalTests(unittest.TestCase):
         evidence = json.loads(failure_path.read_text(encoding="utf-8"))
         self.assertEqual(evidence["deployment_id"], "deployment-123")
         self.assertEqual(evidence["expected_state"], "CONSUMER_PASS")
-        self.assertEqual(transport.calls[-1][0], "DELETE")
-        self.assertTrue(transport.calls[-1][1].endswith("/deployment/deployment-123"))
+        self.assertEqual(evidence["drop_policy"], "retain-for-support-or-manual-recovery")
+        self.assertFalse(any(call[0] == "DELETE" for call in transport.calls))
         retry = MockTransport([])
         with self.assertRaisesRegex(CP.PortalError, "already has an upload outcome"):
             self._stage(retry)
@@ -1004,6 +1197,35 @@ class CentralPortalTests(unittest.TestCase):
         self.assertIn("validated mirror consumer rejects credentials", workflow)
         self.assertNotIn('args+=(--bearer-env', workflow)
         self.assertIn("--published-consumer-command", workflow)
+        self.assertIn("Upload exactly one USER_MANAGED deployment and prepare a verified mirror", workflow)
+        self.assertIn("Consume the validated mirror in a separate tokenless process", workflow)
+        self.assertIn("Publish the exact staged deployment in a Portal-only process", workflow)
+        self.assertIn("Consume Maven Central in a separate tokenless process", workflow)
+        self.assertIn("tools/central-portal.py finalize-stage", workflow)
+        self.assertIn("tools/central-portal.py finalize-release", workflow)
+        self.assertIn("stage_prepared_sha256=%s", workflow)
+        self.assertIn("release_prepared_sha256=%s", workflow)
+        self.assertIn("${{ steps.portal_stage.outputs.stage_prepared_sha256 }}", workflow)
+        self.assertIn("${{ steps.portal_release.outputs.release_prepared_sha256 }}", workflow)
+        self.assertNotIn('prepared_sha="$(sha256sum "$prepared"', workflow)
+        self.assertLess(workflow.index("tools/central-portal.py stage"), workflow.index("tools/central-portal.py finalize-stage"))
+        self.assertLess(release_job.index("tools/central-portal.py release"), release_job.index("tools/central-portal.py finalize-release"))
+        self.assertEqual(workflow.count("CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}"), 2)
+        self.assertGreaterEqual(workflow.count("protected credential variable reached tokenless"), 2)
+        self.assertGreaterEqual(workflow.count("mktemp -d \"$RUNNER_TEMP/maven-central-"), 2)
+        self.assertGreaterEqual(workflow.count("trap 'rm -rf \"$policy_dir\"' EXIT"), 2)
+        self.assertGreaterEqual(workflow.count("chmod 600 \"$policy_dir/admin-bypass-attestation.json\""), 2)
+        self.assertIn("G011_OFFICIAL_GRADLE_HOME_ARCHIVE", workflow)
+        self.assertIn("G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256", workflow)
+        self.assertEqual(workflow.count("--official-inputs-preflight-only"), 2)
+        self.assertLess(
+            workflow.index("Preflight persistent official inputs before Portal upload"),
+            workflow.index("tools/central-portal.py stage"),
+        )
+        self.assertLess(
+            release_job.index("Preflight persistent official inputs before Central publication"),
+            release_job.index("tools/central-portal.py release"),
+        )
         self.assertLess(release_job.index("actions/checkout@"), release_job.index("tools/central-portal.py release"))
         self.assertIn("g011-consume-six.sh", workflow)
         self.assertIn("compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh", workflow)

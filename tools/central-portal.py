@@ -26,7 +26,7 @@ import sys
 import time
 from typing import Callable, Mapping, Sequence
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, unquote, urlencode, urlparse
 from urllib.request import Request, urlopen
 import uuid
 import zipfile
@@ -38,6 +38,8 @@ SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DEPLOYMENT_ID_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 STAGE_MANIFEST_FORMAT = "realm-maven-central-stage-v3"
+STAGE_PREPARED_FORMAT = "realm-maven-central-stage-prepared-v1"
+RELEASE_PREPARED_FORMAT = "realm-maven-central-release-prepared-v1"
 POLICY_AUDIT_FORMAT = "realm-maven-central-environment-policy-audit-v1"
 ADMIN_BYPASS_ATTESTATION_FORMAT = "realm-github-environment-admin-bypass-attestation-v1"
 CONSUMER_EVIDENCE_FORMAT = "realm-maven-central-consumer-evidence-v1"
@@ -635,6 +637,8 @@ _CONSUMER_ENV_ALLOWLIST = frozenset(
         "EMULATOR_RUNTIME_LIB_DIR",
         "G011_OFFICIAL_ENCRYPTED_REALM",
         "G011_OFFICIAL_GRADLE_75",
+        "G011_OFFICIAL_GRADLE_HOME_ARCHIVE",
+        "G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256",
         "GITHUB_ACTIONS",
         "GITHUB_REF",
         "GITHUB_REPOSITORY",
@@ -655,6 +659,27 @@ _CONSUMER_ENV_ALLOWLIST = frozenset(
 )
 
 
+_PROTECTED_PROCESS_ENV_NAMES = frozenset(
+    {
+        "CENTRAL_PORTAL_BEARER_TOKEN",
+        "CENTRAL_PORTAL_TOKEN",
+        "PORTAL_TOKEN",
+        "G011_ENVIRONMENT_POLICY_TOKEN",
+        "G011_ENVIRONMENT_BYPASS_ATTESTATION",
+        "POLICY_TOKEN",
+        "BYPASS_ATTESTATION",
+        "GITHUB_TOKEN",
+        "GH_TOKEN",
+        "MAVEN_SIGNING_KEY",
+        "MAVEN_SIGNING_PASSWORD",
+        "SIGNING_KEY",
+        "SIGNING_PASSWORD",
+        "g008SigningKey",
+        "g008SigningPassword",
+    }
+)
+
+
 def _consumer_environment(gradle_user_home: Path, token_env: str) -> dict[str, str]:
     child = {name: os.environ[name] for name in _CONSUMER_ENV_ALLOWLIST if name in os.environ}
     isolated_home = gradle_user_home / "process-home"
@@ -663,17 +688,7 @@ def _consumer_environment(gradle_user_home: Path, token_env: str) -> dict[str, s
     child["GRADLE_USER_HOME"] = str(gradle_user_home)
     # These names are intentionally checked even though the allowlist already
     # excludes them.  The assertions make future allowlist edits fail closed.
-    forbidden_names = {
-        token_env,
-        "CENTRAL_PORTAL_BEARER_TOKEN",
-        "CENTRAL_PORTAL_TOKEN",
-        "G011_ENVIRONMENT_POLICY_TOKEN",
-        "G011_ENVIRONMENT_BYPASS_ATTESTATION",
-        "MAVEN_SIGNING_KEY",
-        "MAVEN_SIGNING_PASSWORD",
-        "g008SigningKey",
-        "g008SigningPassword",
-    }
+    forbidden_names = set(_PROTECTED_PROCESS_ENV_NAMES) | {token_env}
     for name in forbidden_names:
         child.pop(name, None)
     if forbidden_names & set(child):
@@ -1016,6 +1031,53 @@ def _write_json(path: Path, value: Mapping[str, object]) -> None:
     path.write_text(json.dumps(value, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8")
 
 
+def _assert_tokenless_process() -> None:
+    """Fail closed unless this process and readable ancestors lack release secrets.
+
+    Scrubbing only a subprocess environment is insufficient on Linux because a
+    same-UID child can read its token-bearing parent's ``/proc/<pid>/environ``.
+    Consumer commands therefore run only in a separate workflow step/process
+    after the Portal-only process has exited.
+    """
+
+    if _PROTECTED_PROCESS_ENV_NAMES & set(os.environ):
+        raise PortalError("tokenless consumer process contains protected credential variables")
+    proc = Path("/proc")
+    pid = os.getppid()
+    visited: set[int] = set()
+    while proc.is_dir() and pid > 1 and pid not in visited:
+        visited.add(pid)
+        try:
+            status_lines = (proc / str(pid) / "status").read_text(encoding="utf-8").splitlines()
+            uid_line = next(line for line in status_lines if line.startswith("Uid:"))
+            ancestor_uid = int(uid_line.split()[1])
+            if ancestor_uid != os.getuid():
+                break
+            names = {
+                entry.split(b"=", 1)[0].decode("utf-8", "ignore")
+                for entry in (proc / str(pid) / "environ").read_bytes().split(b"\0")
+                if b"=" in entry
+            }
+        except (OSError, StopIteration, ValueError, IndexError) as error:
+            raise PortalError("cannot verify tokenless consumer process ancestry") from error
+        if _PROTECTED_PROCESS_ENV_NAMES & names:
+            raise PortalError("tokenless consumer ancestor contains protected credential variables")
+        try:
+            stat = (proc / str(pid) / "stat").read_text(encoding="utf-8")
+            fields = stat.rsplit(")", 1)[1].split()
+            pid = int(fields[1])
+        except (OSError, ValueError, IndexError) as error:
+            raise PortalError("cannot verify tokenless consumer process ancestry") from error
+
+
+def _read_hashed_json(path: Path, expected_sha256: str, *, label: str) -> dict[str, object]:
+    _require_sha256(expected_sha256, f"{label} SHA-256")
+    if not path.is_file() or sha256_file(path) != expected_sha256:
+        raise PortalError(f"{label} SHA-256 mismatch")
+    value = _read_json_object(path, label)
+    return dict(value)
+
+
 def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, object]:
     _require_sha256(expected_sha256, "stage manifest SHA-256")
     if not path.is_file():
@@ -1147,6 +1209,112 @@ def _write_first_failure(
         pass
 
 
+def _validate_prepared_stage(value: Mapping[str, object]) -> dict[str, object]:
+    if value.get("format") != STAGE_PREPARED_FORMAT:
+        raise PortalError("invalid prepared stage format")
+    required = (
+        "tag", "version", "commit", "core_commit", "bundle_sha256",
+        "source_manifest_sha256", "realm_android_library_aar_sha256",
+        "deployment_id", "deployment_repository", "publishing_type",
+        "validation_state_trace", "runtime_provenance", "ci_artifact_sha256",
+        "ci_run_id", "ci_artifact_id", "environment_policy_audit_sha256",
+        "validated_deployment_mirror_evidence_sha256", "validated_mirror_url",
+    )
+    if any(key not in value for key in required):
+        raise PortalError("prepared stage is incomplete")
+    validate_release_binding(
+        str(value["tag"]), str(value["version"]),
+        str(value["commit"]), str(value["core_commit"]),
+    )
+    for field, label in (
+        ("bundle_sha256", "bundle SHA-256"),
+        ("source_manifest_sha256", "source manifest SHA-256"),
+        ("realm_android_library_aar_sha256", "realm-android-library AAR SHA-256"),
+        ("ci_artifact_sha256", "CI artifact SHA-256"),
+        ("environment_policy_audit_sha256", "environment policy audit SHA-256"),
+        ("validated_deployment_mirror_evidence_sha256", "validated mirror evidence SHA-256"),
+    ):
+        _require_sha256(value[field], label)
+    _require_positive_decimal(value["ci_run_id"], "CI run ID")
+    _require_positive_decimal(value["ci_artifact_id"], "CI artifact ID")
+    deployment_id = str(value["deployment_id"])
+    PortalClient._validate_deployment_id(deployment_id)
+    if value["publishing_type"] != "USER_MANAGED":
+        raise PortalError("prepared stage is not USER_MANAGED")
+    expected_endpoint = (
+        f"{PORTAL_URL}/api/v1/publisher/deployment/{deployment_id}/download/{{relative_path}}"
+    )
+    if value["deployment_repository"] != expected_endpoint:
+        raise PortalError("invalid exact deployment repository")
+    mirror_url = str(value["validated_mirror_url"])
+    parsed = urlparse(mirror_url)
+    if parsed.scheme != "file" or parsed.netloc not in ("", "localhost") or parsed.query or parsed.fragment:
+        raise PortalError("prepared stage has an invalid validated mirror URL")
+    trace = value["validation_state_trace"]
+    if (
+        not isinstance(trace, list) or not trace or not isinstance(trace[-1], dict)
+        or trace[-1].get("deployment_id") != deployment_id
+        or trace[-1].get("state") != "VALIDATED"
+    ):
+        raise PortalError("prepared stage lacks a validated exact-deployment trace")
+    provenance = value["runtime_provenance"]
+    if not isinstance(provenance, dict):
+        raise PortalError("prepared stage lacks runtime provenance")
+    if provenance.get("head") != value["commit"] or provenance.get("core_commit") != value["core_commit"]:
+        raise PortalError("prepared stage runtime provenance differs from source binding")
+    return dict(value)
+
+
+def _read_stage_prepared(path: Path, expected_sha256: str) -> dict[str, object]:
+    return _validate_prepared_stage(
+        _read_hashed_json(path, expected_sha256, label="prepared stage")
+    )
+
+
+def _verify_materialized_mirror(
+    prepared: Mapping[str, object], evidence_root: Path
+) -> None:
+    evidence_path = evidence_root / "validated-deployment-mirror-evidence.json"
+    if (
+        not evidence_path.is_file()
+        or sha256_file(evidence_path)
+        != prepared["validated_deployment_mirror_evidence_sha256"]
+    ):
+        raise PortalError("validated mirror evidence SHA-256 mismatch")
+    evidence = _read_json_object(evidence_path, "validated mirror evidence")
+    if (
+        evidence.get("format") != MIRROR_EVIDENCE_FORMAT
+        or evidence.get("deployment_id") != prepared["deployment_id"]
+        or evidence.get("deployment_repository") != prepared["deployment_repository"]
+        or evidence.get("source_manifest_sha256") != prepared["source_manifest_sha256"]
+    ):
+        raise PortalError("validated mirror evidence differs from prepared stage")
+    parsed = urlparse(str(prepared["validated_mirror_url"]))
+    mirror = Path(unquote(parsed.path)).resolve()
+    expected_mirror = (evidence_root / "validated-deployment-mirror").resolve()
+    if mirror != expected_mirror or not mirror.is_dir():
+        raise PortalError("validated mirror path differs from prepared stage evidence")
+    files = evidence.get("files")
+    if not isinstance(files, list) or not files:
+        raise PortalError("validated mirror evidence has no files")
+    expected_paths: set[str] = set()
+    for item in files:
+        if not isinstance(item, dict):
+            raise PortalError("validated mirror file evidence is invalid")
+        relative = str(item.get("path", ""))
+        if not relative or any(part in {"", ".", ".."} for part in relative.split("/")):
+            raise PortalError("validated mirror file path is invalid")
+        expected_paths.add(relative)
+        artifact = mirror.joinpath(*relative.split("/"))
+        if not artifact.is_file() or sha256_file(artifact) != item.get("sha256"):
+            raise PortalError("validated mirror artifact differs from evidence")
+    actual_paths = {
+        path.relative_to(mirror).as_posix() for path in mirror.rglob("*") if path.is_file()
+    }
+    if actual_paths != expected_paths:
+        raise PortalError("validated mirror contains unexpected or missing artifacts")
+
+
 def stage(
     *,
     bundle: Path,
@@ -1160,9 +1328,8 @@ def stage(
     ci_run_id: str,
     ci_artifact_id: str,
     environment_policy_audit: Path,
-    validated_consumer_command: Path,
-    validated_consumer_gradle_home: Path,
-    validated_consumer_evidence: Path,
+    validated_mirror_evidence: Path,
+    stage_prepared: Path,
     stage_manifest: Path,
     token_env: str,
     allow_network: bool,
@@ -1172,12 +1339,13 @@ def stage(
     max_delay_seconds: float = 60.0,
     deadline_seconds: float = 900.0,
     client: PortalClient | None = None,
-    consumer_runner: ConsumerRunner | None = None,
     drop_failed_deployment: bool = False,
 ) -> Mapping[str, object]:
+    """Upload/validate/download only; this token-bearing process never runs consumers."""
+
     validate_release_binding(tag, version, commit, core_commit)
     failure_path = stage_manifest.with_name(stage_manifest.name + ".failed.json")
-    if stage_manifest.exists() or failure_path.exists():
+    if stage_prepared.exists() or stage_manifest.exists() or failure_path.exists():
         raise PortalError("stage manifest already has an upload outcome")
     bundle_sha256, source_manifest_sha256 = verify_bundle_binding(bundle, source_manifest)
     realm_android_library_aar_sha256_value = realm_android_library_aar_sha256(bundle, version)
@@ -1192,44 +1360,33 @@ def stage(
     try:
         deployment_id = client.upload_user_managed(bundle, tag)
     except PortalError:
-        # A transport failure after sending the bundle has an ambiguous remote
-        # outcome. Persist that fact so automation never guesses and uploads a
-        # replacement deployment.
         _write_first_failure(
-            stage_manifest,
-            deployment_id="UNKNOWN",
-            expected="UPLOAD_201",
-            state="AMBIGUOUS",
-            bundle_sha256=bundle_sha256,
-            source_manifest_sha256=source_manifest_sha256,
+            stage_manifest, deployment_id="UNKNOWN", expected="UPLOAD_201", state="AMBIGUOUS",
+            bundle_sha256=bundle_sha256, source_manifest_sha256=source_manifest_sha256,
             drop_failed_deployment=drop_failed_deployment,
         )
         raise
     try:
         client.poll(
-            deployment_id,
-            "VALIDATED",
-            attempts=attempts,
-            delay_seconds=delay_seconds,
-            backoff_factor=backoff_factor,
-            max_delay_seconds=max_delay_seconds,
-            deadline_seconds=deadline_seconds,
+            deployment_id, "VALIDATED", attempts=attempts,
+            delay_seconds=delay_seconds, backoff_factor=backoff_factor,
+            max_delay_seconds=max_delay_seconds, deadline_seconds=deadline_seconds,
+        )
+        repository_template = client.deployment_repository(deployment_id)
+        repository_url, mirror_evidence_sha256 = _materialize_verified_deployment_mirror(
+            client, deployment_id=deployment_id, source_manifest=source_manifest,
+            evidence_root=validated_mirror_evidence,
         )
     except PortalError as error:
         state = (
-            error.state
-            if isinstance(error, DeploymentFailed)
+            error.state if isinstance(error, DeploymentFailed)
             else str(client.last_poll_trace[-1]["state"])
-            if client.last_poll_trace
-            else "UNKNOWN"
+            if client.last_poll_trace else "UNKNOWN"
         )
         _write_first_failure(
-            stage_manifest,
-            deployment_id=deployment_id,
-            expected="VALIDATED",
-            state=state,
-            bundle_sha256=bundle_sha256,
-            source_manifest_sha256=source_manifest_sha256,
+            stage_manifest, deployment_id=deployment_id,
+            expected="VALIDATED_AND_VERIFIED_MIRROR", state=state,
+            bundle_sha256=bundle_sha256, source_manifest_sha256=source_manifest_sha256,
             state_trace=client.last_poll_trace,
             drop_failed_deployment=drop_failed_deployment,
         )
@@ -1237,50 +1394,10 @@ def stage(
             try:
                 client.drop(deployment_id)
             except PortalError as drop_error:
-                raise PortalError(
-                    "stage failure evidence was preserved but deployment drop failed"
-                ) from drop_error
+                raise PortalError("stage failure evidence was preserved but deployment drop failed") from drop_error
         raise
-    repository_template = client.deployment_repository(deployment_id)
-    try:
-        repository_url, mirror_evidence_sha256 = _materialize_verified_deployment_mirror(
-            client,
-            deployment_id=deployment_id,
-            source_manifest=source_manifest,
-            evidence_root=validated_consumer_evidence,
-        )
-        validated_consumer_evidence_sha256 = _run_consumer(
-            validated_consumer_command,
-            repository_url=repository_url,
-            mode="validated-mirror",
-            token_env=token_env,
-            gradle_user_home=validated_consumer_gradle_home,
-            evidence=validated_consumer_evidence,
-            runner=consumer_runner,
-        )
-    except PortalError:
-        # A successful upload followed by a failed consumer must be durable
-        # evidence too; otherwise a rerun could silently create deployment #2.
-        _write_first_failure(
-            stage_manifest,
-            deployment_id=deployment_id,
-            expected="CONSUMER_PASS",
-            state="VALIDATED",
-            bundle_sha256=bundle_sha256,
-            source_manifest_sha256=source_manifest_sha256,
-            state_trace=client.last_poll_trace,
-            drop_failed_deployment=drop_failed_deployment,
-        )
-        if drop_failed_deployment:
-            try:
-                client.drop(deployment_id)
-            except PortalError as drop_error:
-                raise PortalError(
-                    "validated consumer failure was preserved but deployment drop failed"
-                ) from drop_error
-        raise
-    manifest: dict[str, object] = {
-        "format": STAGE_MANIFEST_FORMAT,
+    prepared: dict[str, object] = {
+        "format": STAGE_PREPARED_FORMAT,
         "tag": tag,
         "version": version,
         "commit": commit,
@@ -1294,17 +1411,68 @@ def stage(
         "ci_artifact_id": ci_artifact_id,
         "environment_policy_audit_sha256": policy_audit_sha256,
         "validated_deployment_mirror_evidence_sha256": mirror_evidence_sha256,
-        "validated_consumer_evidence_sha256": validated_consumer_evidence_sha256,
+        "validated_mirror_url": repository_url,
         "deployment_id": deployment_id,
         "publishing_type": "USER_MANAGED",
         "deployment_repository": repository_template,
         "validation_state_trace": client.last_poll_trace,
     }
-    _write_json(stage_manifest, manifest)
+    _validate_prepared_stage(prepared)
+    _write_json(stage_prepared, prepared)
     return {
         "deployment_id": deployment_id,
-        "deployment_repository": manifest["deployment_repository"],
-        "stage_manifest_sha256": sha256_file(stage_manifest),
+        "stage_prepared_sha256": sha256_file(stage_prepared),
+    }
+
+
+def finalize_stage(
+    *,
+    stage_prepared: Path,
+    stage_prepared_sha256: str,
+    validated_consumer_command: Path,
+    validated_consumer_gradle_home: Path,
+    validated_consumer_evidence: Path,
+    stage_manifest: Path,
+    consumer_runner: ConsumerRunner | None = None,
+) -> Mapping[str, object]:
+    """Run the validated consumer only from a tokenless process and seal the stage manifest."""
+
+    _assert_tokenless_process()
+    failure_path = stage_manifest.with_name(stage_manifest.name + ".failed.json")
+    if stage_manifest.exists() or failure_path.exists():
+        raise PortalError("stage manifest already has a consumer outcome")
+    prepared = _read_stage_prepared(stage_prepared, stage_prepared_sha256)
+    _verify_materialized_mirror(prepared, validated_consumer_evidence)
+    try:
+        consumer_sha256 = _run_consumer(
+            validated_consumer_command,
+            repository_url=str(prepared["validated_mirror_url"]),
+            mode="validated-mirror",
+            token_env="CENTRAL_PORTAL_BEARER_TOKEN",
+            gradle_user_home=validated_consumer_gradle_home,
+            evidence=validated_consumer_evidence,
+            runner=consumer_runner,
+        )
+    except PortalError:
+        _write_first_failure(
+            stage_manifest, deployment_id=str(prepared["deployment_id"]),
+            expected="CONSUMER_PASS", state="VALIDATED",
+            bundle_sha256=str(prepared["bundle_sha256"]),
+            source_manifest_sha256=str(prepared["source_manifest_sha256"]),
+            state_trace=prepared["validation_state_trace"],
+            drop_failed_deployment=False,
+        )
+        raise
+    manifest = dict(prepared)
+    manifest["format"] = STAGE_MANIFEST_FORMAT
+    manifest.pop("validated_mirror_url", None)
+    manifest["validated_consumer_evidence_sha256"] = consumer_sha256
+    _write_json(stage_manifest, manifest)
+    stage_sha256 = sha256_file(stage_manifest)
+    _read_stage_manifest(stage_manifest, stage_sha256)
+    return {
+        "deployment_id": manifest["deployment_id"],
+        "stage_manifest_sha256": stage_sha256,
     }
 
 
@@ -1320,12 +1488,13 @@ def release(
     max_delay_seconds: float = 60.0,
     deadline_seconds: float = 900.0,
     client: PortalClient | None = None,
-    published_consumer_command: Path | None = None,
-    published_consumer_gradle_home: Path | None = None,
-    published_consumer_evidence: Path | None = None,
-    consumer_runner: ConsumerRunner | None = None,
+    release_prepared: Path,
     release_evidence: Path | None = None,
 ) -> Mapping[str, object]:
+    """Publish/poll only; the token-bearing process exits before public consumption."""
+
+    if release_prepared.exists() or (release_evidence is not None and release_evidence.exists()):
+        raise PortalError("release transaction already has an outcome")
     manifest = _read_stage_manifest(stage_manifest, stage_manifest_sha256)
     if not allow_network:
         raise PortalError("network access requires --allow-network")
@@ -1340,33 +1509,11 @@ def release(
         client.publish(deployment_id)
         publication_trace.append({"step": "publish-request", "state": "PUBLISHING"})
         client.poll(
-            deployment_id,
-            "PUBLISHED",
-            attempts=attempts,
-            delay_seconds=delay_seconds,
-            backoff_factor=backoff_factor,
-            max_delay_seconds=max_delay_seconds,
-            deadline_seconds=deadline_seconds,
+            deployment_id, "PUBLISHED", attempts=attempts,
+            delay_seconds=delay_seconds, backoff_factor=backoff_factor,
+            max_delay_seconds=max_delay_seconds, deadline_seconds=deadline_seconds,
         )
         publication_trace.extend(client.last_poll_trace)
-        if not (
-            published_consumer_command
-            and published_consumer_gradle_home
-            and published_consumer_evidence
-        ):
-            raise PortalError("published consumer gate is required")
-        consumer_sha256 = _run_consumer(
-            published_consumer_command,
-            repository_url="https://repo.maven.apache.org/maven2",
-            mode="central",
-            token_env=token_env,
-            gradle_user_home=published_consumer_gradle_home,
-            evidence=published_consumer_evidence,
-            expected_realm_android_library_aar_sha256=str(
-                manifest["realm_android_library_aar_sha256"]
-            ),
-            runner=consumer_runner,
-        )
     except PortalError:
         if release_evidence is not None:
             _write_json(
@@ -1380,27 +1527,118 @@ def release(
                 },
             )
         raise
-    result = {
+    prepared = {
+        "format": RELEASE_PREPARED_FORMAT,
+        "deployment_id": deployment_id,
+        "stage_manifest_sha256": stage_manifest_sha256,
+        "realm_android_library_aar_sha256": manifest["realm_android_library_aar_sha256"],
+        "publication_state_trace": publication_trace,
+        "state": "PUBLISHED",
+    }
+    _write_json(release_prepared, prepared)
+    return {
         "deployment_id": deployment_id,
         "state": "PUBLISHED",
-        "published_consumer_evidence_sha256": consumer_sha256,
+        "release_prepared_sha256": sha256_file(release_prepared),
         "publication_state_trace": publication_trace,
     }
-    if release_evidence is not None:
+
+
+def finalize_release(
+    *,
+    stage_manifest: Path,
+    stage_manifest_sha256: str,
+    release_prepared: Path,
+    release_prepared_sha256: str,
+    published_consumer_command: Path,
+    published_consumer_gradle_home: Path,
+    published_consumer_evidence: Path,
+    consumer_runner: ConsumerRunner | None = None,
+    release_evidence: Path,
+) -> Mapping[str, object]:
+    """Consume Maven Central in a separate tokenless process and seal release evidence."""
+
+    _assert_tokenless_process()
+    if release_evidence.exists():
+        raise PortalError("release evidence already exists")
+    manifest = _read_stage_manifest(stage_manifest, stage_manifest_sha256)
+    prepared = _read_hashed_json(
+        release_prepared, release_prepared_sha256, label="prepared release"
+    )
+    if (
+        prepared.get("format") != RELEASE_PREPARED_FORMAT
+        or prepared.get("deployment_id") != manifest["deployment_id"]
+        or prepared.get("stage_manifest_sha256") != stage_manifest_sha256
+        or prepared.get("realm_android_library_aar_sha256")
+        != manifest["realm_android_library_aar_sha256"]
+        or prepared.get("state") != "PUBLISHED"
+    ):
+        raise PortalError("prepared release differs from exact staged deployment")
+    publication_trace = prepared.get("publication_state_trace")
+    deployment_id = str(manifest["deployment_id"])
+    if (
+        not isinstance(publication_trace, list)
+        or len(publication_trace) < 3
+        or publication_trace[0] != {"step": "initial-status", "state": "VALIDATED"}
+        or publication_trace[1] != {"step": "publish-request", "state": "PUBLISHING"}
+    ):
+        raise PortalError("prepared release lacks the ordered publication trace")
+    poll_trace = publication_trace[2:]
+    if (
+        any(
+            not isinstance(item, dict)
+            or item.get("deployment_id") != deployment_id
+            or item.get("state") not in {"VALIDATED", "PUBLISHING", "PUBLISHED"}
+            for item in poll_trace
+        )
+        or poll_trace[-1].get("state") != "PUBLISHED"
+        or any(item.get("state") == "PUBLISHED" for item in poll_trace[:-1])
+    ):
+        raise PortalError("prepared release lacks an exact final PUBLISHED deployment trace")
+    try:
+        consumer_sha256 = _run_consumer(
+            published_consumer_command,
+            repository_url="https://repo.maven.apache.org/maven2",
+            mode="central",
+            token_env="CENTRAL_PORTAL_BEARER_TOKEN",
+            gradle_user_home=published_consumer_gradle_home,
+            evidence=published_consumer_evidence,
+            expected_realm_android_library_aar_sha256=str(
+                manifest["realm_android_library_aar_sha256"]
+            ),
+            runner=consumer_runner,
+        )
+    except PortalError:
         _write_json(
             release_evidence,
             {
                 "format": "realm-maven-central-release-evidence-v1",
-                "deployment_id": deployment_id,
+                "deployment_id": manifest["deployment_id"],
                 "stage_manifest_sha256": stage_manifest_sha256,
-                "result": "PASS",
-                "published_consumer_evidence_sha256": consumer_sha256,
+                "result": "FAILED",
                 "publication_state_trace": publication_trace,
             },
         )
-        result["release_evidence_sha256"] = sha256_file(release_evidence)
+        raise
+    result = {
+        "deployment_id": manifest["deployment_id"],
+        "state": "PUBLISHED",
+        "published_consumer_evidence_sha256": consumer_sha256,
+        "publication_state_trace": publication_trace,
+    }
+    _write_json(
+        release_evidence,
+        {
+            "format": "realm-maven-central-release-evidence-v1",
+            "deployment_id": manifest["deployment_id"],
+            "stage_manifest_sha256": stage_manifest_sha256,
+            "result": "PASS",
+            "published_consumer_evidence_sha256": consumer_sha256,
+            "publication_state_trace": publication_trace,
+        },
+    )
+    result["release_evidence_sha256"] = sha256_file(release_evidence)
     return result
-
 
 def _positive_int(value: str) -> int:
     parsed = int(value)
@@ -1446,9 +1684,8 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     stage_parser.add_argument("--ci-run-id", required=True)
     stage_parser.add_argument("--ci-artifact-id", required=True)
     stage_parser.add_argument("--environment-policy-audit", required=True, type=Path)
-    stage_parser.add_argument("--validated-consumer-command", required=True, type=Path)
-    stage_parser.add_argument("--validated-consumer-gradle-home", required=True, type=Path)
-    stage_parser.add_argument("--validated-consumer-evidence", required=True, type=Path)
+    stage_parser.add_argument("--validated-mirror-evidence", required=True, type=Path)
+    stage_parser.add_argument("--stage-prepared", required=True, type=Path)
     stage_parser.add_argument("--stage-manifest", required=True, type=Path)
     stage_parser.add_argument("--token-env", default="CENTRAL_PORTAL_TOKEN")
     stage_parser.add_argument("--poll-attempts", default=12, type=_positive_int)
@@ -1466,9 +1703,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     release_parser = commands.add_parser("release", help="publish the exact deployment in a staged manifest")
     release_parser.add_argument("--stage-manifest", required=True, type=Path)
     release_parser.add_argument("--stage-manifest-sha256", required=True)
-    release_parser.add_argument("--published-consumer-command", required=True, type=Path)
-    release_parser.add_argument("--published-consumer-gradle-home", required=True, type=Path)
-    release_parser.add_argument("--published-consumer-evidence", required=True, type=Path)
+    release_parser.add_argument("--release-prepared", required=True, type=Path)
     release_parser.add_argument("--release-evidence", required=True, type=Path)
     release_parser.add_argument("--token-env", default="CENTRAL_PORTAL_TOKEN")
     release_parser.add_argument("--poll-attempts", default=12, type=_positive_int)
@@ -1477,6 +1712,28 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     release_parser.add_argument("--poll-max-delay-seconds", default=60.0, type=float)
     release_parser.add_argument("--poll-deadline-seconds", default=900.0, type=float)
     release_parser.add_argument("--allow-network", action="store_true")
+
+    finalize_stage_parser = commands.add_parser(
+        "finalize-stage", help="run the validated consumer from a separate tokenless process"
+    )
+    finalize_stage_parser.add_argument("--stage-prepared", required=True, type=Path)
+    finalize_stage_parser.add_argument("--stage-prepared-sha256", required=True)
+    finalize_stage_parser.add_argument("--validated-consumer-command", required=True, type=Path)
+    finalize_stage_parser.add_argument("--validated-consumer-gradle-home", required=True, type=Path)
+    finalize_stage_parser.add_argument("--validated-consumer-evidence", required=True, type=Path)
+    finalize_stage_parser.add_argument("--stage-manifest", required=True, type=Path)
+
+    finalize_release_parser = commands.add_parser(
+        "finalize-release", help="run the public consumer from a separate tokenless process"
+    )
+    finalize_release_parser.add_argument("--stage-manifest", required=True, type=Path)
+    finalize_release_parser.add_argument("--stage-manifest-sha256", required=True)
+    finalize_release_parser.add_argument("--release-prepared", required=True, type=Path)
+    finalize_release_parser.add_argument("--release-prepared-sha256", required=True)
+    finalize_release_parser.add_argument("--published-consumer-command", required=True, type=Path)
+    finalize_release_parser.add_argument("--published-consumer-gradle-home", required=True, type=Path)
+    finalize_release_parser.add_argument("--published-consumer-evidence", required=True, type=Path)
+    finalize_release_parser.add_argument("--release-evidence", required=True, type=Path)
     return parser.parse_args(argv)
 
 
@@ -1525,9 +1782,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 ci_run_id=args.ci_run_id,
                 ci_artifact_id=args.ci_artifact_id,
                 environment_policy_audit=args.environment_policy_audit,
-                validated_consumer_command=args.validated_consumer_command,
-                validated_consumer_gradle_home=args.validated_consumer_gradle_home,
-                validated_consumer_evidence=args.validated_consumer_evidence,
+                validated_mirror_evidence=args.validated_mirror_evidence,
+                stage_prepared=args.stage_prepared,
                 stage_manifest=args.stage_manifest,
                 token_env=args.token_env,
                 allow_network=args.allow_network,
@@ -1538,7 +1794,16 @@ def main(argv: Sequence[str] | None = None) -> int:
                 deadline_seconds=args.poll_deadline_seconds,
                 drop_failed_deployment=args.drop_failed_deployment,
             )
-        else:
+        elif args.command == "finalize-stage":
+            result = finalize_stage(
+                stage_prepared=args.stage_prepared,
+                stage_prepared_sha256=args.stage_prepared_sha256,
+                validated_consumer_command=args.validated_consumer_command,
+                validated_consumer_gradle_home=args.validated_consumer_gradle_home,
+                validated_consumer_evidence=args.validated_consumer_evidence,
+                stage_manifest=args.stage_manifest,
+            )
+        elif args.command == "release":
             result = release(
                 stage_manifest=args.stage_manifest,
                 stage_manifest_sha256=args.stage_manifest_sha256,
@@ -1549,6 +1814,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                 backoff_factor=args.poll_backoff_factor,
                 max_delay_seconds=args.poll_max_delay_seconds,
                 deadline_seconds=args.poll_deadline_seconds,
+                release_prepared=args.release_prepared,
+                release_evidence=args.release_evidence,
+            )
+        else:
+            result = finalize_release(
+                stage_manifest=args.stage_manifest,
+                stage_manifest_sha256=args.stage_manifest_sha256,
+                release_prepared=args.release_prepared,
+                release_prepared_sha256=args.release_prepared_sha256,
                 published_consumer_command=args.published_consumer_command,
                 published_consumer_gradle_home=args.published_consumer_gradle_home,
                 published_consumer_evidence=args.published_consumer_evidence,

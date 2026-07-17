@@ -34,6 +34,8 @@ changing the apps or their runtime assertions:
   environment variable containing the Bearer token. It requires a caller-supplied empty
   Gradle user home and evidence root. The token is passed to Gradle as a header only and
   is redacted from command/evidence files.
+- `validated-mirror` accepts only a credential-free `file://` mirror that a trusted
+  Portal-only process already verified against the signed publication manifest.
 - `central` accepts no repository URL or credential and obtains the fork group from
   Maven Central only. It also requires an empty supplied Gradle home and evidence root.
 
@@ -41,7 +43,11 @@ In all modes `io.github.leminity.realm` is routed to exactly one fork repository
 buildscript/plugin and dependency resolution. Google, the external Maven Central entry,
 and the plugin portal explicitly exclude the fork group. JitPack and Maven Local are never
 configured. Remote modes remove the fork build's offline flag only inside the isolated
-home; the immutable official lane remains its established offline Gradle 7.5 lane.
+home. The immutable official lane remains offline on Gradle 7.5, but remote modes require
+its prewarmed Gradle home as a separate tar archive plus the archive's exact SHA-256
+(`--official-gradle-home-archive` and `--official-gradle-home-archive-sha256`). The archive
+is verified and safely extracted into a temporary official-only home; it is never reused
+as the fresh fork consumer home.
 
 For a no-device command/routing check, use `--dry-run` with an explicit identity tuple;
 it rejects any SDK below 37, page size other than 16384, AVD substitution, or incompatible
