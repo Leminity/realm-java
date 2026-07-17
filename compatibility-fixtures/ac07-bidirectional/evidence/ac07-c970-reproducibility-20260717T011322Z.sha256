@@ -1,0 +1,16 @@
+# AC-07 c970 reproducibility pass (API 37 / 16 KiB), 2026-07-17T01:13:22Z.
+# Command: run-ac07.sh with immutable official fixtures, the fresh c970 stage,
+# emulator-5654 for fork and official reader, and --refresh-dependencies.
+# RESULT=PASS; fork migration callbacks=0, wrong-key rejection=true, and the
+# isolated official reverse reader passed. Raw evidence is intentionally ignored
+# under generated/ac07-c970-repro-20260717T011322Z/.
+be161180036c95445244716a5579089f43447a3b8dd66c5b02b9a2915ded22bc  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/RESULT.txt
+46ccf472ba5ae55edb22ae640075df006b377be738ce651abe7507641347b734  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/original/official-10.19.0-plain.realm
+792abb7cc4ef3aafe99fd091e0dcd4f1cb713800f60304cc9a4ca6c1d37a23df  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/original/official-10.19.0-encrypted.realm
+5ec612cfb7275948c77e50b42aec317ba735523923823b11192fe6eb3826bb58  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/original/fixture-key.hex
+3aa08c68d046ebb96079f12aa3a6985ef2cffff3827d6c9e18557565875d7344  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/original/fixture-manifest.json
+2acee9dd5942cf2b5728bf6f8e40da98965894409d5432858f385b1cf3bd145f  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/fork-modified/official-10.19.0-plain.realm
+83bafb1bb1c6fdaceb3bf755db426ed63eb401719a966fc281700fece67b78ad  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/fork-modified/official-10.19.0-encrypted.realm
+a0f112c617df6c7b49ccb0310ee123ff101085e5a3765eaec5b9a8987692fbf5  compatibility-fixtures/ac07-bidirectional/generated/ac07-c970-repro-20260717T011322Z/fork-modified/fork-report.json
+63c145a3f032a19f58df03d71f2f83837e14a5945be48be1b524a56d3d026fae  build/ac07-c970-publication-manifest.json
+ab058cd6cc942a18bb8bf86d63ed5fd87788cbcf3ee252e8b59b229afb0ee3bd  build/ac07-c970-local-staging/io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar
