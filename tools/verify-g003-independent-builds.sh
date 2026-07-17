@@ -256,10 +256,11 @@ run_matrix() {
   mkdir -p "$evidence_dir" "$staged_maven_repo"
   export GRADLE_USER_HOME="$matrix_temp_dir/gradle-user-home"
 
-  # The ordering is the G003 release-critical contract.  Only the first three
-  # prerequisite builds publish to the temporary local repository; the Realm
-  # build never uses broad publish/assemble tasks because they historically
-  # include unsupported ObjectServer/Sync work.
+  # The ordering is the G003 release-critical contract. The three independent
+  # build prerequisites and the targeted base-only Realm publication stage to
+  # the temporary local repository. The Realm build never uses broad
+  # publish/assemble tasks because they historically include unsupported
+  # ObjectServer/Sync work.
   run_gradle annotations-help realm-annotations help
   run_gradle annotations-test-metadata realm-annotations test generatePomFileForRealmPublication publishToMavenLocal
   run_gradle transformer-help realm-transformer help
@@ -267,6 +268,7 @@ run_matrix() {
   run_gradle build-transformer-help library-build-transformer help
   run_gradle build-transformer-test-metadata library-build-transformer test generatePomFileForRealmPublication publishToMavenLocal
   run_gradle realm-help realm help
+  run_gradle realm-base-local-stage realm :realm-library:publishBasePublicationToMavenLocal
   run_gradle realm-processor-metadata realm :realm-annotations-processor:test :realm-annotations-processor:generatePomFileForRealmPublication
   run_gradle realm-base-metadata realm :realm-library:generatePomFileForBasePublication :kotlin-extensions:generatePomFileForRealmPublication
   run_gradle gradle-plugin-help gradle-plugin help

@@ -133,7 +133,8 @@ G003_TEST_COMMAND_TRACE="$temp_dir/matrix-commands.log" \
   "$matrix_root/tools/verify-g003-independent-builds.sh" \
   --run --evidence-dir "$matrix_evidence" > "$temp_dir/matrix.log"
 grep -Fqx "G003 independent-build matrix: PASS (evidence: $matrix_evidence)" "$temp_dir/matrix.log"
-[[ "$(find "$matrix_evidence" -maxdepth 1 -name '*.log' -type f | wc -l)" -eq 12 ]]
+[[ "$(find "$matrix_evidence" -maxdepth 1 -name '*.log' -type f | wc -l)" -eq 13 ]]
+grep -Fq ':realm-library:publishBasePublicationToMavenLocal' "$temp_dir/matrix-commands.log"
 grep -Fq ':realm-library:generatePomFileForBasePublication :kotlin-extensions:generatePomFileForRealmPublication' "$temp_dir/matrix-commands.log"
 if grep -Fq ':realm-library:generatePomFileForRealmPublication' "$temp_dir/matrix-commands.log"; then
   printf 'stale realm-library RealmPublication task was requested\n' >&2
