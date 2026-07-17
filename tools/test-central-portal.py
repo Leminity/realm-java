@@ -6,6 +6,7 @@ from __future__ import annotations
 import hashlib
 import importlib.util
 import json
+import subprocess
 import sys
 from pathlib import Path
 import tempfile
@@ -43,6 +44,46 @@ class CentralPortalTests(unittest.TestCase):
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)
         self.bundle, self.source_manifest = self._write_bound_bundle()
+        self.runtime_provenance = self.root / "runtime-provenance.json"
+        self.runtime_provenance.write_text(
+            json.dumps(
+                {
+                    "source": {"head": COMMIT, "core_gitlink": CORE_COMMIT},
+                    "wsl": {"runtime_sha256": "c" * 64},
+                    "ci": {"evidence_sha256": "d" * 64},
+                }
+            ),
+            encoding="utf-8",
+        )
+        self.stage_policy = self.root / "stage-policy.json"
+        self.release_policy = self.root / "release-policy.json"
+        for path, reviewer in ((self.stage_policy, "stage-reviewer"), (self.release_policy, "release-reviewer")):
+            path.write_text(
+                json.dumps(
+                {
+                    "deployment_branch_policy": {"protected_branches": True},
+                    # This is the nested shape returned by GitHub's GET
+                    # environment REST endpoint, not a made-up top-level
+                    # prevent_self_review field.
+                    "protection_rules": [
+                        {
+                            "id": 1,
+                            "node_id": "MDQ6UmVxdWlyZWRSZXZpZXdlcnMx",
+                            "type": "required_reviewers",
+                            "prevent_self_review": True,
+                            "reviewers": [
+                                {"type": "User", "reviewer": {"id": reviewer, "login": reviewer}}
+                            ],
+                        }
+                    ],
+                    }
+                ),
+                encoding="utf-8",
+            )
+        self.policy_audit = self.root / "policy-audit.json"
+        CP.write_environment_policy_audit(self.stage_policy, self.release_policy, self.policy_audit)
+        self.consumer_command = self.root / "g011-deployment-consumer.sh"
+        self.consumer_command.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
 
     def tearDown(self) -> None:
         self.tempdir.cleanup()
@@ -51,6 +92,7 @@ class CentralPortalTests(unittest.TestCase):
         files = {
             "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar": b"jar",
             "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom": b"pom",
+            "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar": b"public-aar",
         }
         source_manifest = self.root / "source-manifest.json"
         source_manifest.write_text(
@@ -72,7 +114,13 @@ class CentralPortalTests(unittest.TestCase):
                 archive.writestr(path, data)
         return bundle, source_manifest
 
-    def _stage(self, transport: MockTransport, *, allow_network: bool = True) -> tuple[dict[str, object], Path]:
+    def _stage(
+        self,
+        transport: MockTransport,
+        *,
+        allow_network: bool = True,
+        consumer_runner: object | None = None,
+    ) -> tuple[dict[str, object], Path]:
         stage_manifest = self.root / "stage-manifest.json"
         client = CP.PortalClient(SECRET, transport=transport, sleep=lambda _: None)
         result = CP.stage(
@@ -82,14 +130,43 @@ class CentralPortalTests(unittest.TestCase):
             version="10.19.0-agp9.1",
             commit=COMMIT,
             core_commit=CORE_COMMIT,
+            runtime_provenance=self.runtime_provenance,
+            environment_policy_audit=self.policy_audit,
+            validated_consumer_command=self.consumer_command,
+            validated_consumer_gradle_home=self.root / "validated-home",
+            validated_consumer_evidence=self.root / "validated-evidence",
             stage_manifest=stage_manifest,
             token_env="UNUSED",
             allow_network=allow_network,
             attempts=3,
             delay_seconds=0,
             client=client,
+            consumer_runner=consumer_runner or self._consumer_runner,
         )
         return dict(result), stage_manifest
+
+    @staticmethod
+    def _consumer_runner(args: list[str]) -> None:
+        evidence = Path(args[args.index("--evidence-dir") + 1])
+        repository = args[args.index("--repository-url") + 1]
+        mode = args[args.index("--mode") + 1]
+        evidence.mkdir(parents=True, exist_ok=True)
+        checksums = evidence / "SHA256SUMS"
+        checksums.write_text("consumer PASS\n", encoding="utf-8")
+        (evidence / "consumer-evidence.json").write_text(
+            json.dumps(
+                {
+                    "format": CP.CONSUMER_EVIDENCE_FORMAT,
+                    "mode": mode,
+                    "repository_url": repository,
+                    "exact_six": "PASS",
+                    "ac08": "PASS",
+                    "native_elf": "PASS",
+                    "sha256sums_sha256": hashlib.sha256(checksums.read_bytes()).hexdigest(),
+                }
+            ),
+            encoding="utf-8",
+        )
 
     def test_stage_is_one_user_managed_upload_and_never_publishes(self) -> None:
         transport = MockTransport(
@@ -114,6 +191,9 @@ class CentralPortalTests(unittest.TestCase):
         self.assertEqual(manifest["publishing_type"], "USER_MANAGED")
         self.assertEqual(manifest["validation_state_trace"][-1]["state"], "VALIDATED")
         self.assertEqual(
+            manifest["realm_android_library_aar_sha256"], hashlib.sha256(b"public-aar").hexdigest()
+        )
+        self.assertEqual(
             manifest["deployment_repository"],
             "https://central.sonatype.com/api/v1/publisher/deployment/deployment-123/download/{relative_path}",
         )
@@ -130,6 +210,11 @@ class CentralPortalTests(unittest.TestCase):
                 version="10.19.0-agp9.1",
                 commit=COMMIT,
                 core_commit=CORE_COMMIT,
+                runtime_provenance=self.runtime_provenance,
+                environment_policy_audit=self.policy_audit,
+                validated_consumer_command=self.consumer_command,
+                validated_consumer_gradle_home=self.root / "blocked-home",
+                validated_consumer_evidence=self.root / "blocked-evidence",
                 stage_manifest=stage_manifest,
                 token_env="UNUSED",
                 allow_network=False,
@@ -157,6 +242,12 @@ class CentralPortalTests(unittest.TestCase):
             ]
         )
         release_client = CP.PortalClient(SECRET, transport=release_transport, sleep=lambda _: None)
+        consumer_args: list[str] = []
+
+        def capture_consumer(args: list[str]) -> None:
+            consumer_args[:] = args
+            self._consumer_runner(args)
+
         result = CP.release(
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
@@ -165,11 +256,20 @@ class CentralPortalTests(unittest.TestCase):
             attempts=3,
             delay_seconds=0,
             client=release_client,
+            published_consumer_command=self.consumer_command,
+            published_consumer_gradle_home=self.root / "central-home",
+            published_consumer_evidence=self.root / "central-evidence",
+            consumer_runner=capture_consumer,
         )
-        self.assertEqual(result, {"deployment_id": "deployment-123", "state": "PUBLISHED"})
+        self.assertEqual(result["deployment_id"], "deployment-123")
+        self.assertEqual(result["state"], "PUBLISHED")
         self.assertEqual(release_transport.calls[0][1], "https://central.sonatype.com/api/v1/publisher/status?id=deployment-123")
         self.assertEqual(release_transport.calls[1][1], "https://central.sonatype.com/api/v1/publisher/deployment/deployment-123")
         self.assertTrue(all("deployment-123" in call[1] for call in release_transport.calls))
+        self.assertEqual(
+            consumer_args[consumer_args.index("--expected-realm-android-library-sha256") + 1],
+            hashlib.sha256(b"public-aar").hexdigest(),
+        )
 
         rejected_transport = MockTransport([])
         with self.assertRaisesRegex(CP.PortalError, "SHA-256 mismatch"):
@@ -181,8 +281,87 @@ class CentralPortalTests(unittest.TestCase):
                 attempts=1,
                 delay_seconds=0,
                 client=CP.PortalClient(SECRET, transport=rejected_transport, sleep=lambda _: None),
+                published_consumer_command=self.consumer_command,
+                published_consumer_gradle_home=self.root / "central-home-rejected",
+                published_consumer_evidence=self.root / "central-evidence-rejected",
+                consumer_runner=self._consumer_runner,
             )
         self.assertEqual(rejected_transport.calls, [])
+
+    def test_stage_cli_parses_only_stage_arguments_and_fails_closed_without_network(self) -> None:
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "central-portal.py"),
+                "stage",
+                "--bundle",
+                str(self.bundle),
+                "--source-manifest",
+                str(self.source_manifest),
+                "--tag",
+                "v10.19.0-agp9.1",
+                "--version",
+                "10.19.0-agp9.1",
+                "--commit",
+                COMMIT,
+                "--core-commit",
+                CORE_COMMIT,
+                "--runtime-provenance",
+                str(self.runtime_provenance),
+                "--environment-policy-audit",
+                str(self.policy_audit),
+                "--validated-consumer-command",
+                str(self.consumer_command),
+                "--validated-consumer-gradle-home",
+                str(self.root / "cli-stage-home"),
+                "--validated-consumer-evidence",
+                str(self.root / "cli-stage-evidence"),
+                "--stage-manifest",
+                str(self.root / "cli-stage-manifest.json"),
+            ],
+            check=False,
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        self.assertEqual(completed.returncode, 1, completed.stderr)
+        self.assertIn("network access requires --allow-network", completed.stderr)
+        self.assertNotIn("AttributeError", completed.stderr)
+
+    def test_release_cli_parses_and_wires_required_published_consumer_arguments(self) -> None:
+        stage_transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        stage_result, stage_manifest = self._stage(stage_transport)
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "central-portal.py"),
+                "release",
+                "--stage-manifest",
+                str(stage_manifest),
+                "--stage-manifest-sha256",
+                str(stage_result["stage_manifest_sha256"]),
+                "--published-consumer-command",
+                str(self.consumer_command),
+                "--published-consumer-gradle-home",
+                str(self.root / "cli-release-home"),
+                "--published-consumer-evidence",
+                str(self.root / "cli-release-evidence"),
+            ],
+            check=False,
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        self.assertEqual(completed.returncode, 1, completed.stderr)
+        self.assertIn("network access requires --allow-network", completed.stderr)
+        self.assertNotIn("TypeError", completed.stderr)
 
     def test_poll_is_bounded_and_preserves_first_terminal_failure(self) -> None:
         transport = MockTransport(
@@ -240,6 +419,28 @@ class CentralPortalTests(unittest.TestCase):
         self.assertTrue(stage_manifest.is_file())
         self.assertEqual(retry_transport.calls, [])
 
+    def test_consumer_failure_is_a_first_upload_outcome_and_blocks_retry(self) -> None:
+        transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+
+        def fail_consumer(_: list[str]) -> None:
+            raise CP.PortalError("consumer gate failed")
+
+        with self.assertRaisesRegex(CP.PortalError, "consumer gate failed"):
+            self._stage(transport, consumer_runner=fail_consumer)
+        failure_path = self.root / "stage-manifest.json.failed.json"
+        evidence = json.loads(failure_path.read_text(encoding="utf-8"))
+        self.assertEqual(evidence["deployment_id"], "deployment-123")
+        self.assertEqual(evidence["expected_state"], "CONSUMER_PASS")
+        retry = MockTransport([])
+        with self.assertRaisesRegex(CP.PortalError, "already has an upload outcome"):
+            self._stage(retry)
+        self.assertEqual(retry.calls, [])
+
     def test_client_rejects_non_base64_username_password_credential(self) -> None:
         with self.assertRaisesRegex(CP.PortalError, "credential is invalid"):
             CP.PortalClient("not-base64", transport=MockTransport([]))
@@ -280,6 +481,23 @@ class CentralPortalTests(unittest.TestCase):
         with self.assertRaisesRegex(CP.PortalError, "paths differ"):
             CP.verify_bundle_binding(self.bundle, self.source_manifest)
 
+    def test_policy_audit_is_redacted_hashed_and_requires_independent_reviewers(self) -> None:
+        audit_sha = CP.verify_environment_policy_audit(self.policy_audit)
+        self.assertEqual(audit_sha, CP.sha256_file(self.policy_audit))
+        audit = self.policy_audit.read_text(encoding="utf-8")
+        self.assertNotIn("stage-reviewer", audit)
+        self.assertNotIn("release-reviewer", audit)
+        duplicate = self.root / "duplicate-release-policy.json"
+        duplicate.write_text(self.stage_policy.read_text(encoding="utf-8"), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "not distinct"):
+            CP.write_environment_policy_audit(self.stage_policy, duplicate, self.root / "duplicate-audit.json")
+        policy = json.loads(self.stage_policy.read_text(encoding="utf-8"))
+        policy["protection_rules"][0]["prevent_self_review"] = False
+        missing_self_review = self.root / "missing-self-review.json"
+        missing_self_review.write_text(json.dumps(policy), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "prevent-self-review"):
+            CP.write_environment_policy_audit(missing_self_review, self.release_policy, self.root / "missing-self-review-audit.json")
+
     def test_workflow_has_only_release_published_trigger_and_protected_split(self) -> None:
         workflow = (ROOT / ".github" / "workflows" / "release.yml").read_text(encoding="utf-8")
         self.assertIn("release:\n    types: [published]", workflow)
@@ -291,6 +509,32 @@ class CentralPortalTests(unittest.TestCase):
         self.assertIn("github.event.release.prerelease == false", workflow)
         self.assertIn('test "$GITHUB_REF" = "refs/tags/$TAG"', workflow)
         self.assertNotIn("tools/release.sh", workflow)
+        self.assertIn("G011_ENVIRONMENT_POLICY_TOKEN", workflow)
+        self.assertIn("audit-environment-policy", workflow)
+        self.assertIn("build/g011-runtime-provenance.json", workflow)
+        self.assertIn("--validated-consumer-command", workflow)
+        self.assertIn("--published-consumer-command", workflow)
+        release_job = workflow[workflow.index("\n  release:\n    name:") :]
+        self.assertLess(release_job.index("actions/checkout@"), release_job.index("tools/central-portal.py release"))
+        self.assertIn("g011-consume-six.sh", workflow)
+        self.assertIn("compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh", workflow)
+        self.assertIn("g011-verify-native-elf.sh", workflow)
+        self.assertEqual(workflow.count("runs-on: [self-hosted, linux, api37, ps16k]"), 2)
+        self.assertGreaterEqual(workflow.count("Preflight the trusted API37/ps16k runner contract"), 2)
+        self.assertIn("adb -s emulator-5554 wait-for-device", workflow)
+        self.assertIn("getconf PAGE_SIZE", workflow)
+        self.assertIn("--expected-realm-android-library-sha256", workflow)
+        self.assertIn("realm-android-library-$version.aar", release_job)
+        self.assertIn("sha256sum -c -", release_job)
+        self.assertIn("g011-verify-native-elf.sh --aar \"$aar\"", release_job)
+        self.assertNotIn("build/g008-maven-central-bundle.zip", release_job)
+        self.assertNotIn("find . -type f -printf '%P\\0' | sort -z | xargs -0 sha256sum > SHA256SUMS", workflow)
+        self.assertGreaterEqual(workflow.count("! -name SHA256SUMS ! -name checksum-verify.log"), 2)
+        self.assertGreaterEqual(workflow.count("rm -f SHA256SUMS checksum-verify.log"), 2)
+        self.assertGreaterEqual(workflow.count("sha256sum -c SHA256SUMS > checksum-verify.log"), 2)
+        legacy = (ROOT / "tools" / "release.sh").read_text(encoding="utf-8")
+        self.assertIn("Protected Maven Central release GitHub workflow", legacy)
+        self.assertNotIn("mavenCentralUpload", legacy)
 
 
 if __name__ == "__main__":

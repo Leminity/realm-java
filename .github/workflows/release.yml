@@ -12,10 +12,8 @@ jobs:
   stage:
     name: Stage one USER_MANAGED Central deployment
     if: ${{ github.event.release.prerelease == false && github.event.release.draft == false }}
-    # This environment owns the Portal token and any signing material. Its
-    # protection rules are the approval gate before a release can stage.
     environment: maven-central-stage
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, linux, api37, ps16k]
     outputs:
       stage_manifest_b64: ${{ steps.stage_manifest.outputs.stage_manifest_b64 }}
       stage_manifest_sha256: ${{ steps.stage_manifest.outputs.stage_manifest_sha256 }}
@@ -25,33 +23,43 @@ jobs:
           ref: ${{ github.event.release.tag_name }}
           submodules: recursive
           fetch-depth: 0
-      - name: Audit server-side required-reviewer and tag-policy configuration
+      - name: Preflight the trusted API37/ps16k runner contract
+        run: |
+          set -euo pipefail
+          # The runner labels are a scheduling contract; verify the booted
+          # device too, and never substitute an API/4KiB image.
+          command -v adb >/dev/null
+          test -d "$ANDROID_SDK_ROOT/platforms/android-37"
+          adb -s emulator-5554 wait-for-device
+          test "$(adb -s emulator-5554 shell getprop ro.build.version.sdk | tr -d '\r')" = 37
+          test "$(adb -s emulator-5554 shell getconf PAGE_SIZE | tr -d '\r')" = 16384
+          test "$(adb -s emulator-5554 shell getprop ro.boot.qemu.avd_name | tr -d '\r')" = realm-api37-ps16k-kvm
+          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')" = fatal
+          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.package_enabled | tr -d '\r')" = true
+      - name: Audit server-side environment reviewer and tag policy
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          G011_ENVIRONMENT_POLICY_TOKEN: ${{ secrets.G011_ENVIRONMENT_POLICY_TOKEN }}
         run: |
           set -euo pipefail
           policy_dir="$RUNNER_TEMP/maven-central-environment-policy"
           mkdir -p "$policy_dir"
-          for environment in maven-central-stage maven-central-release; do
-            curl --fail --silent --show-error \
-              --header "Authorization: Bearer $GITHUB_TOKEN" \
-              --header 'Accept: application/vnd.github+json' \
-              "https://api.github.com/repos/$GITHUB_REPOSITORY/environments/$environment" \
-              > "$policy_dir/$environment.json"
-          done
-          python3 - "$policy_dir/maven-central-stage.json" "$policy_dir/maven-central-release.json" <<'PY'
-          import json
-          import sys
-
-          for path, environment in zip(sys.argv[1:], ("maven-central-stage", "maven-central-release")):
-              policy = json.load(open(path, encoding="utf-8"))
-              reviewers = [rule for rule in policy.get("protection_rules", []) if rule.get("type") == "required_reviewers"]
-              branch_policy = policy.get("deployment_branch_policy") or {}
-              if not reviewers:
-                  raise SystemExit(f"{environment}: required reviewers are not configured")
-              if not (branch_policy.get("protected_branches") or branch_policy.get("custom_branch_policies")):
-                  raise SystemExit(f"{environment}: protected/custom tag policy is not configured")
-          PY
+          fetch_policy() {
+            local environment="$1" destination="$2"
+            local endpoint="https://api.github.com/repos/$GITHUB_REPOSITORY/environments/$environment"
+            if curl --fail --silent --show-error --header "Authorization: Bearer $GITHUB_TOKEN" --header 'Accept: application/vnd.github+json' "$endpoint" > "$destination"; then return; fi
+            # github.token may be unable to read environment protection data.
+            # The fallback is an explicitly protected preflight credential,
+            # never an assumed/default-pass policy.
+            test -n "$G011_ENVIRONMENT_POLICY_TOKEN" || { echo 'environment policy preflight credential is required' >&2; exit 1; }
+            curl --fail --silent --show-error --header "Authorization: Bearer $G011_ENVIRONMENT_POLICY_TOKEN" --header 'Accept: application/vnd.github+json' "$endpoint" > "$destination"
+          }
+          fetch_policy maven-central-stage "$policy_dir/maven-central-stage.json"
+          fetch_policy maven-central-release "$policy_dir/maven-central-release.json"
+          python3 tools/central-portal.py audit-environment-policy \
+            --stage-policy "$policy_dir/maven-central-stage.json" \
+            --release-policy "$policy_dir/maven-central-release.json" \
+            --audit-file build/maven-central-environment-policy-audit.json
       - name: Bind approved tag to the checked-out source tree
         id: source
         env:
@@ -65,7 +73,6 @@ jobs:
           test "$commit" = "$(git rev-list -n1 "$TAG")"
           test "$(git rev-parse "${TAG}^{commit}")" = "$commit"
           test -z "$(git status --porcelain --untracked-files=all)"
-          test -z "$(git diff --name-only)"
           core_path=realm/realm-library/src/main/cpp/realm-core
           core_commit="$(git ls-tree "$commit" "$core_path" | awk '{print $3}')"
           test -n "$core_commit"
@@ -73,10 +80,36 @@ jobs:
           printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
           printf 'core_commit=%s\n' "$core_commit" >> "$GITHUB_OUTPUT"
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+      - name: Generate and independently verify exact G011 runtime provenance
+        env:
+          COMMIT: ${{ steps.source.outputs.commit }}
+          CORE_COMMIT: ${{ steps.source.outputs.core_commit }}
+        run: |
+          set -euo pipefail
+          python3 tools/g011-evidence-manifest.py --root . --verify evidence/provenance/g011-source-evidence-manifest.json
+          python3 - <<'PY'
+          import hashlib, json, os
+          from pathlib import Path
+          def digest(path):
+              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+          ci_inputs = [
+              '.github/workflows/ci.yml', '.github/workflows/release.yml',
+              'tools/central-portal.py', 'tools/test-central-portal.py',
+              'evidence/provenance/g011-source-evidence-manifest.json',
+          ]
+          ci = hashlib.sha256(json.dumps({p: digest(p) for p in ci_inputs}, sort_keys=True).encode()).hexdigest()
+          value = {
+              'format': 'realm-g011-runtime-provenance-v1',
+              'source': {'head': os.environ['COMMIT'], 'core_gitlink': os.environ['CORE_COMMIT']},
+              'wsl': {'runtime_sha256': digest('evidence/toolchain/android17-wsl2/emulator-final-runtime.txt')},
+              'ci': {'evidence_sha256': ci},
+          }
+          Path('build').mkdir(exist_ok=True)
+          Path('build/g011-runtime-provenance.json').write_text(json.dumps(value, sort_keys=True) + '\n')
+          PY
+          sha256sum build/g011-runtime-provenance.json
       - name: Freshly build and locally reverify the exact Central bundle
         env:
-          # These protected-environment values are intentionally passed only
-          # to Gradle. The Portal client never reads or writes signing secrets.
           ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
         run: |
@@ -84,57 +117,158 @@ jobs:
           ./tools/publish_release.sh --signed-bundle
           test "$(git rev-parse HEAD)" = "${{ steps.source.outputs.commit }}"
           test -z "$(git diff --name-only)"
-          python3 tools/central-portal.py verify-bundle \
-            --bundle build/g008-maven-central-bundle.zip \
-            --source-manifest build/g008-publication-manifest.json
-      - name: Upload exactly one USER_MANAGED deployment and wait for validation
+          python3 tools/central-portal.py verify-bundle --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json
+      - name: Create an ephemeral exact-consumer runner
+        run: |
+          set -euo pipefail
+          cat > build/run-g011-consumer.sh <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          url=''; mode=''; home=''; evidence=''; bearer=''
+          while [[ $# -gt 0 ]]; do case "$1" in
+            --repository-url) url="$2"; shift 2;; --mode) mode="$2"; shift 2;;
+            --gradle-user-home) home="$2"; shift 2;; --evidence-dir) evidence="$2"; shift 2;;
+            --bearer-env) bearer="$2"; shift 2;; *) exit 2;; esac; done
+          args=(--repository-url "$url" --mode "$mode" --gradle-user-home "$home/six" --evidence-dir "$evidence/six")
+          [[ -n "$bearer" ]] && args+=(--bearer-env "$bearer")
+          tools/g011-consume-six.sh "${args[@]}"
+          # Task32 parameterizes the existing AC08 semantic harness; it
+          # rejects API/4KiB/AVD/property substitutions rather than falling
+          # back to the historical local/offline runner.
+          ac08=(--mode validated --repository-url "$url" --bearer-env "$bearer" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5554 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
+          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh "${ac08[@]}"
+          tools/g011-verify-native-elf.sh --bundle build/g008-maven-central-bundle.zip --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
+          (
+            cd "$evidence"
+            rm -f SHA256SUMS checksum-verify.log
+            find . -type f ! -name SHA256SUMS ! -name checksum-verify.log -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.tmp
+            mv SHA256SUMS.tmp SHA256SUMS
+            sha256sum -c SHA256SUMS > checksum-verify.log
+          )
+          python3 - "$evidence/consumer-evidence.json" "$mode" "$url" "$evidence/SHA256SUMS" <<'PY'
+          import hashlib, json, pathlib, sys
+          output = pathlib.Path(sys.argv[1]); sums = pathlib.Path(sys.argv[4])
+          output.write_text(json.dumps({'format':'realm-maven-central-consumer-evidence-v1','mode':sys.argv[2],'repository_url':sys.argv[3],'exact_six':'PASS','ac08':'PASS','native_elf':'PASS','sha256sums_sha256':hashlib.sha256(sums.read_bytes()).hexdigest()}, sort_keys=True)+'\n')
+          PY
+          SH
+          chmod 700 build/run-g011-consumer.sh
+      - name: Upload exactly one USER_MANAGED deployment, validate, and consume it once
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
+          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
         run: |
           set -euo pipefail
           python3 tools/central-portal.py stage \
-            --bundle build/g008-maven-central-bundle.zip \
-            --source-manifest build/g008-publication-manifest.json \
-            --tag '${{ github.event.release.tag_name }}' \
-            --version '${{ steps.source.outputs.version }}' \
-            --commit '${{ steps.source.outputs.commit }}' \
-            --core-commit '${{ steps.source.outputs.core_commit }}' \
-            --stage-manifest build/maven-central-stage-manifest.json \
-            --token-env CENTRAL_PORTAL_BEARER_TOKEN \
-            --allow-network
-      - name: Expose immutable stage manifest to the reviewer-gated release job
+            --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json \
+            --tag '${{ github.event.release.tag_name }}' --version '${{ steps.source.outputs.version }}' \
+            --commit '${{ steps.source.outputs.commit }}' --core-commit '${{ steps.source.outputs.core_commit }}' \
+            --runtime-provenance build/g011-runtime-provenance.json \
+            --environment-policy-audit build/maven-central-environment-policy-audit.json \
+            --validated-consumer-command build/run-g011-consumer.sh \
+            --validated-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-validated" \
+            --validated-consumer-evidence "$RUNNER_TEMP/g011-consumer-validated" \
+            --stage-manifest build/maven-central-stage-manifest.json --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network
+      - name: Expose immutable stage manifest to reviewer-gated release
         id: stage_manifest
         run: |
           set -euo pipefail
           manifest=build/maven-central-stage-manifest.json
-          sha256sum "$manifest" | awk '{print $1}' | tee /tmp/stage-manifest.sha256
-          printf 'stage_manifest_sha256=%s\n' "$(cat /tmp/stage-manifest.sha256)" >> "$GITHUB_OUTPUT"
+          printf 'stage_manifest_sha256=%s\n' "$(sha256sum "$manifest" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
           printf 'stage_manifest_b64=%s\n' "$(base64 -w0 "$manifest")" >> "$GITHUB_OUTPUT"
 
   release:
     name: Reviewer-gated Central publication
     needs: stage
-    # A distinct protected environment must be configured with required
-    # reviewers. It owns the credential that can call the publish endpoint.
     environment: maven-central-release
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, linux, api37, ps16k]
     steps:
-      - name: Verify immutable staged deployment handoff
+      # Checkout must precede every repo-local tool call in this job.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          submodules: recursive
+          fetch-depth: 0
+      - name: Preflight the trusted API37/ps16k runner contract
+        run: |
+          set -euo pipefail
+          command -v adb >/dev/null
+          test -d "$ANDROID_SDK_ROOT/platforms/android-37"
+          adb -s emulator-5554 wait-for-device
+          test "$(adb -s emulator-5554 shell getprop ro.build.version.sdk | tr -d '\r')" = 37
+          test "$(adb -s emulator-5554 shell getconf PAGE_SIZE | tr -d '\r')" = 16384
+          test "$(adb -s emulator-5554 shell getprop ro.boot.qemu.avd_name | tr -d '\r')" = realm-api37-ps16k-kvm
+          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')" = fatal
+          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.package_enabled | tr -d '\r')" = true
+      - name: Reconstruct immutable handoff and reverify checked-out source
         env:
           STAGE_MANIFEST_B64: ${{ needs.stage.outputs.stage_manifest_b64 }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+          TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
           printf '%s' "$STAGE_MANIFEST_B64" | base64 --decode > stage-manifest.json
           test "$(sha256sum stage-manifest.json | awk '{print $1}')" = "$STAGE_MANIFEST_SHA256"
-      - name: Publish only the staged deployment and wait for publication
+          commit="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["commit"])')"
+          core="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["core_commit"])')"
+          test "$commit" = "$(git rev-parse HEAD)"
+          test "$commit" = "$(git rev-list -n1 "$TAG")"
+          test "$core" = "$(git -C realm/realm-library/src/main/cpp/realm-core rev-parse HEAD)"
+          test -z "$(git status --porcelain --untracked-files=all)"
+      - name: Create fresh Central-only post-publication consumer runner
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          cat > build/run-g011-central-consumer.sh <<'SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          url=''; mode=''; home=''; evidence=''; expected_aar=''
+          while [[ $# -gt 0 ]]; do case "$1" in
+            --repository-url) url="$2"; shift 2;; --mode) mode="$2"; shift 2;;
+            --gradle-user-home) home="$2"; shift 2;; --evidence-dir) evidence="$2"; shift 2;;
+            --expected-realm-android-library-sha256) expected_aar="$2"; shift 2;;
+            --bearer-env) echo 'central consumer rejects credentials' >&2; exit 2;; *) exit 2;; esac; done
+          [[ "$mode" == central && "$url" == https://repo1.maven.org/maven2 ]] || exit 2
+          [[ "$expected_aar" =~ ^[0-9a-f]{64}$ ]] || exit 2
+          tools/g011-consume-six.sh --mode central --gradle-user-home "$home/six" --evidence-dir "$evidence/six"
+          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh --mode central --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5554 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID"
+          # The fresh Central-only consumer resolved the coordinates above.
+          # Download the exact public AAR again from Central, bind it to the
+          # immutable stage-manifest digest, and inspect that file -- never a
+          # staging-job build path unavailable after this checkout.
+          version="$(tr -d '[:space:]' < version.txt)"
+          aar="$evidence/realm-android-library-$version.aar"
+          mkdir -p "$evidence"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            "https://repo1.maven.org/maven2/io/github/leminity/realm/realm-android-library/$version/realm-android-library-$version.aar" \
+            --output "$aar"
+          printf '%s  %s\n' "$expected_aar" "$aar" | sha256sum -c -
+          tools/g011-verify-native-elf.sh --aar "$aar" --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
+          (
+            cd "$evidence"
+            rm -f SHA256SUMS checksum-verify.log
+            find . -type f ! -name SHA256SUMS ! -name checksum-verify.log -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.tmp
+            mv SHA256SUMS.tmp SHA256SUMS
+            sha256sum -c SHA256SUMS > checksum-verify.log
+          )
+          python3 - "$evidence/consumer-evidence.json" "$url" "$evidence/SHA256SUMS" <<'PY'
+          import hashlib, json, pathlib, sys
+          output = pathlib.Path(sys.argv[1]); sums = pathlib.Path(sys.argv[3])
+          output.write_text(json.dumps({'format':'realm-maven-central-consumer-evidence-v1','mode':'central','repository_url':sys.argv[2],'exact_six':'PASS','ac08':'PASS','native_elf':'PASS','sha256sums_sha256':hashlib.sha256(sums.read_bytes()).hexdigest()}, sort_keys=True)+'\n')
+          PY
+          SH
+          chmod 700 build/run-g011-central-consumer.sh
+      - name: Publish exact staged deployment then consume Maven Central freshly
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
+          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
         run: |
           set -euo pipefail
           python3 tools/central-portal.py release \
-            --stage-manifest stage-manifest.json \
-            --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
-            --token-env CENTRAL_PORTAL_BEARER_TOKEN \
-            --allow-network
+            --stage-manifest stage-manifest.json --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
+            --published-consumer-command build/run-g011-central-consumer.sh \
+            --published-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-central" \
+            --published-consumer-evidence "$RUNNER_TEMP/g011-consumer-central" \
+            --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network
