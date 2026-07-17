@@ -1,0 +1,37 @@
+plugins {
+    id 'com.android.application'
+}
+
+apply plugin: 'realm-android'
+
+android {
+    namespace 'io.realm.ac08.official'
+    // Match the immutable official-10.19.0 fixture generator exactly. The resulting
+    // APK is executed on the API-37/16-KiB device by run-ac08.sh.
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'io.realm.ac08.official'
+        minSdk 21
+        targetSdk 36
+        versionCode 1
+        versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // This module is the immutable 10.19.0 baseline side of AC-08. It is resolved
+    // offline by the runner and is never published or substituted with fork artifacts.
+    implementation 'io.realm:realm-android-library:10.19.0'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    // AndroidX Test 1.5 uses Kotlin at runtime. This matches the immutable official
+    // fixture-generator dependency and keeps the baseline app isolated from the fork.
+    androidTestImplementation 'org.jetbrains.kotlin:kotlin-stdlib:1.7.10'
+    androidTestImplementation 'junit:junit:4.13.2'
+}

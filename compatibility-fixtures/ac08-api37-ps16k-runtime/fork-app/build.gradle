@@ -1,0 +1,32 @@
+plugins {
+    id 'com.android.application'
+}
+
+apply plugin: 'realm-android'
+
+android {
+    namespace 'io.realm.ac08.fork'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId 'io.realm.ac08.fork'
+        minSdk 21
+        targetSdk 37
+        versionCode 1
+        versionName '1.0'
+        testInstrumentationRunner 'androidx.test.runner.AndroidJUnitRunner'
+    }
+
+    buildFeatures { buildConfig true }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    implementation 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.1'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'junit:junit:4.13.2'
+}

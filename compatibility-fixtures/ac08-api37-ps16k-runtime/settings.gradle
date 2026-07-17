@@ -1,0 +1,28 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+def g008Repository = System.getenv('G008_STAGING_REPOSITORY') ?:
+        'file:///mnt/d/workspace/jiran/realm/build/g008-root-final-stage-run1'
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven {
+            url = uri(g008Repository)
+            content { includeGroup('io.github.leminity.realm') }
+        }
+        google { content { excludeGroup('io.github.leminity.realm') } }
+        mavenCentral { content { excludeGroup('io.github.leminity.realm') } }
+    }
+}
+
+rootProject.name = 'ac08-api37-ps16k-runtime'
+// The official baseline is deliberately a separate Gradle build. Keeping only the fork
+// application here prevents the two Realm Gradle plugins (which share an id) from ever
+// sharing a classpath.
+include ':fork-app'

@@ -1,0 +1,16 @@
+// This is intentionally a separate build from the fork harness.  The Realm plugins use
+// the same plugin id, so isolation is necessary to prove that the schema-N producer is
+// the upstream io.realm:10.19.0 implementation rather than the local G008 fork.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // The exact upstream fixture-generator toolchain. Realm 10.19.0's official
+        // plugin targets the legacy BaseExtension API and therefore cannot be loaded by
+        // AGP 9. The fork build remains on its unchanged G008 AGP-9.1.1 toolchain.
+        classpath 'com.android.tools.build:gradle:7.4.0'
+        classpath 'io.realm:realm-gradle-plugin:10.19.0'
+    }
+}
