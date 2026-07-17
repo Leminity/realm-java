@@ -1,0 +1,140 @@
+name: Protected Maven Central release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  deployments: read
+
+jobs:
+  stage:
+    name: Stage one USER_MANAGED Central deployment
+    if: ${{ github.event.release.prerelease == false && github.event.release.draft == false }}
+    # This environment owns the Portal token and any signing material. Its
+    # protection rules are the approval gate before a release can stage.
+    environment: maven-central-stage
+    runs-on: ubuntu-24.04
+    outputs:
+      stage_manifest_b64: ${{ steps.stage_manifest.outputs.stage_manifest_b64 }}
+      stage_manifest_sha256: ${{ steps.stage_manifest.outputs.stage_manifest_sha256 }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          submodules: recursive
+          fetch-depth: 0
+      - name: Audit server-side required-reviewer and tag-policy configuration
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          policy_dir="$RUNNER_TEMP/maven-central-environment-policy"
+          mkdir -p "$policy_dir"
+          for environment in maven-central-stage maven-central-release; do
+            curl --fail --silent --show-error \
+              --header "Authorization: Bearer $GITHUB_TOKEN" \
+              --header 'Accept: application/vnd.github+json' \
+              "https://api.github.com/repos/$GITHUB_REPOSITORY/environments/$environment" \
+              > "$policy_dir/$environment.json"
+          done
+          python3 - "$policy_dir/maven-central-stage.json" "$policy_dir/maven-central-release.json" <<'PY'
+          import json
+          import sys
+
+          for path, environment in zip(sys.argv[1:], ("maven-central-stage", "maven-central-release")):
+              policy = json.load(open(path, encoding="utf-8"))
+              reviewers = [rule for rule in policy.get("protection_rules", []) if rule.get("type") == "required_reviewers"]
+              branch_policy = policy.get("deployment_branch_policy") or {}
+              if not reviewers:
+                  raise SystemExit(f"{environment}: required reviewers are not configured")
+              if not (branch_policy.get("protected_branches") or branch_policy.get("custom_branch_policies")):
+                  raise SystemExit(f"{environment}: protected/custom tag policy is not configured")
+          PY
+      - name: Bind approved tag to the checked-out source tree
+        id: source
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          version="$(tr -d '[:space:]' < version.txt)"
+          bash tools/verify-release-tag.sh "$TAG" "$version"
+          test "$GITHUB_REF" = "refs/tags/$TAG"
+          commit="$(git rev-parse HEAD)"
+          test "$commit" = "$(git rev-list -n1 "$TAG")"
+          test "$(git rev-parse "${TAG}^{commit}")" = "$commit"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          test -z "$(git diff --name-only)"
+          core_path=realm/realm-library/src/main/cpp/realm-core
+          core_commit="$(git ls-tree "$commit" "$core_path" | awk '{print $3}')"
+          test -n "$core_commit"
+          test "$(git -C "$core_path" rev-parse HEAD)" = "$core_commit"
+          printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
+          printf 'core_commit=%s\n' "$core_commit" >> "$GITHUB_OUTPUT"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+      - name: Freshly build and locally reverify the exact Central bundle
+        env:
+          # These protected-environment values are intentionally passed only
+          # to Gradle. The Portal client never reads or writes signing secrets.
+          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+        run: |
+          set -euo pipefail
+          ./tools/publish_release.sh --signed-bundle
+          test "$(git rev-parse HEAD)" = "${{ steps.source.outputs.commit }}"
+          test -z "$(git diff --name-only)"
+          python3 tools/central-portal.py verify-bundle \
+            --bundle build/g008-maven-central-bundle.zip \
+            --source-manifest build/g008-publication-manifest.json
+      - name: Upload exactly one USER_MANAGED deployment and wait for validation
+        env:
+          CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+        run: |
+          set -euo pipefail
+          python3 tools/central-portal.py stage \
+            --bundle build/g008-maven-central-bundle.zip \
+            --source-manifest build/g008-publication-manifest.json \
+            --tag '${{ github.event.release.tag_name }}' \
+            --version '${{ steps.source.outputs.version }}' \
+            --commit '${{ steps.source.outputs.commit }}' \
+            --core-commit '${{ steps.source.outputs.core_commit }}' \
+            --stage-manifest build/maven-central-stage-manifest.json \
+            --token-env CENTRAL_PORTAL_BEARER_TOKEN \
+            --allow-network
+      - name: Expose immutable stage manifest to the reviewer-gated release job
+        id: stage_manifest
+        run: |
+          set -euo pipefail
+          manifest=build/maven-central-stage-manifest.json
+          sha256sum "$manifest" | awk '{print $1}' | tee /tmp/stage-manifest.sha256
+          printf 'stage_manifest_sha256=%s\n' "$(cat /tmp/stage-manifest.sha256)" >> "$GITHUB_OUTPUT"
+          printf 'stage_manifest_b64=%s\n' "$(base64 -w0 "$manifest")" >> "$GITHUB_OUTPUT"
+
+  release:
+    name: Reviewer-gated Central publication
+    needs: stage
+    # A distinct protected environment must be configured with required
+    # reviewers. It owns the credential that can call the publish endpoint.
+    environment: maven-central-release
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Verify immutable staged deployment handoff
+        env:
+          STAGE_MANIFEST_B64: ${{ needs.stage.outputs.stage_manifest_b64 }}
+          STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+        run: |
+          set -euo pipefail
+          printf '%s' "$STAGE_MANIFEST_B64" | base64 --decode > stage-manifest.json
+          test "$(sha256sum stage-manifest.json | awk '{print $1}')" = "$STAGE_MANIFEST_SHA256"
+      - name: Publish only the staged deployment and wait for publication
+        env:
+          CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+        run: |
+          set -euo pipefail
+          python3 tools/central-portal.py release \
+            --stage-manifest stage-manifest.json \
+            --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
+            --token-env CENTRAL_PORTAL_BEARER_TOKEN \
+            --allow-network
