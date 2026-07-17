@@ -54,8 +54,10 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
-          policy_dir="$RUNNER_TEMP/maven-central-environment-policy"
-          mkdir -p "$policy_dir"
+          umask 077
+          policy_dir="$(mktemp -d "$RUNNER_TEMP/maven-central-environment-policy.XXXXXX")"
+          chmod 700 "$policy_dir"
+          trap 'rm -rf "$policy_dir"' EXIT
           github_curl() {
             local token_name="$1" token="${!1}"
             shift
@@ -86,6 +88,7 @@ jobs:
           bypass_args=()
           if [[ -n "$G011_ENVIRONMENT_BYPASS_ATTESTATION" ]]; then
             printf '%s' "$G011_ENVIRONMENT_BYPASS_ATTESTATION" > "$policy_dir/admin-bypass-attestation.json"
+            chmod 600 "$policy_dir/admin-bypass-attestation.json"
             bypass_args=(--admin-bypass-attestation "$policy_dir/admin-bypass-attestation.json")
           fi
           python3 tools/central-portal.py audit-environment-policy \
@@ -345,7 +348,7 @@ jobs:
           # Task32 parameterizes the existing AC08 semantic harness; it
           # rejects API/4KiB/AVD/property substitutions rather than falling
           # back to the historical local/offline runner.
-          ac08=(--mode validated-mirror --repository-url "$url" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
+          ac08=(--mode validated-mirror --repository-url "$url" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --official-gradle-home-archive "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE" --official-gradle-home-archive-sha256 "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
           compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh "${ac08[@]}"
           mirror="$(python3 - "$url" <<'PY'
           import pathlib, sys, urllib.parse
@@ -372,6 +375,26 @@ jobs:
           PY
           SH
           chmod 700 build/run-g011-consumer.sh
+      - name: Preflight persistent official inputs before Portal upload
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
+        env:
+          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
+          G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
+          G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
+          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
+        run: |
+          set -euo pipefail
+          test -n "$G011_OFFICIAL_GRADLE_75"
+          test -n "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE"
+          test -n "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256"
+          test -n "$G011_OFFICIAL_ENCRYPTED_REALM"
+          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh \
+            --sdk-root "$ANDROID_SDK_ROOT" \
+            --official-gradle "$G011_OFFICIAL_GRADLE_75" \
+            --official-gradle-home-archive "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE" \
+            --official-gradle-home-archive-sha256 "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" \
+            --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" \
+            --official-inputs-preflight-only
       - name: Write a fail-closed pre-upload transaction intent
         if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
@@ -413,14 +436,11 @@ jobs:
           path: build/maven-central-stage-intent.json
           if-no-files-found: error
           retention-days: 90
-      - name: Upload exactly one USER_MANAGED deployment, validate, and consume it once
+      - name: Upload exactly one USER_MANAGED deployment and prepare a verified mirror
         id: portal_stage
         if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
-          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
-          G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
-          G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
-          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
+          CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
         run: |
           set -euo pipefail
           : > build/maven-central-stage-entered
@@ -461,8 +481,7 @@ jobs:
             --validated-consumer-command build/run-g011-consumer.sh \
             --validated-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-validated" \
             --validated-consumer-evidence "$RUNNER_TEMP/g011-consumer-validated" \
-            --stage-manifest build/maven-central-stage-manifest.json --token-env CENTRAL_PORTAL_BEARER_TOKEN \
-            --drop-failed-deployment --allow-network
+            --stage-manifest build/maven-central-stage-manifest.json
       - name: Expose immutable stage manifest to reviewer-gated release
         id: stage_manifest
         run: |
@@ -549,6 +568,8 @@ jobs:
           path: |
             build/maven-central-environment-policy-audit.json
             build/maven-central-stage-entered
+            build/maven-central-stage-prepared.json
+            build/maven-central-stage-manifest.json.failed.json
           if-no-files-found: warn
           retention-days: 90
 
@@ -681,8 +702,10 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
-          policy_dir="$RUNNER_TEMP/maven-central-release-policy"
-          mkdir -p "$policy_dir"
+          umask 077
+          policy_dir="$(mktemp -d "$RUNNER_TEMP/maven-central-release-policy.XXXXXX")"
+          chmod 700 "$policy_dir"
+          trap 'rm -rf "$policy_dir"' EXIT
           github_curl() {
             local token_name="$1" token="${!1}"
             shift
@@ -711,6 +734,7 @@ jobs:
           bypass_args=()
           if [[ -n "$G011_ENVIRONMENT_BYPASS_ATTESTATION" ]]; then
             printf '%s' "$G011_ENVIRONMENT_BYPASS_ATTESTATION" > "$policy_dir/admin-bypass-attestation.json"
+            chmod 600 "$policy_dir/admin-bypass-attestation.json"
             bypass_args=(--admin-bypass-attestation "$policy_dir/admin-bypass-attestation.json")
           fi
           audit=build/maven-central-release-environment-policy-audit.json
@@ -724,6 +748,8 @@ jobs:
             --release-tag "$TAG" --audit-file "$audit"
           expected="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["environment_policy_audit_sha256"])')"
           test "$(sha256sum "$audit" | awk '{print $1}')" = "$expected"
+          rm -rf "$policy_dir"
+          trap - EXIT
       - name: Create fresh Central-only post-publication consumer runner
         run: |
           set -euo pipefail
@@ -767,6 +793,25 @@ jobs:
           PY
           SH
           chmod 700 build/run-g011-central-consumer.sh
+      - name: Preflight persistent official inputs before Central publication
+        env:
+          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
+          G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
+          G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
+          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
+        run: |
+          set -euo pipefail
+          test -n "$G011_OFFICIAL_GRADLE_75"
+          test -n "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE"
+          test -n "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256"
+          test -n "$G011_OFFICIAL_ENCRYPTED_REALM"
+          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh \
+            --sdk-root "$ANDROID_SDK_ROOT" \
+            --official-gradle "$G011_OFFICIAL_GRADLE_75" \
+            --official-gradle-home-archive "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE" \
+            --official-gradle-home-archive-sha256 "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" \
+            --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" \
+            --official-inputs-preflight-only
       - name: Write immutable publication intent after reviewer approval and final reaudit
         env:
           COMMIT: ${{ needs.stage.outputs.source_commit }}
@@ -807,13 +852,11 @@ jobs:
           path: build/maven-central-release-intent.json
           if-no-files-found: error
           retention-days: 90
-      - name: Publish exact staged deployment then consume Maven Central freshly
+      - name: Publish the exact staged deployment in a Portal-only process
         id: portal_release
         env:
-          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
-          G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
-          G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
-          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
+          CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
         run: |
           set -euo pipefail
           : > build/maven-central-release-entered
@@ -847,7 +890,6 @@ jobs:
             --published-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-central" \
             --published-consumer-evidence "$RUNNER_TEMP/g011-consumer-central" \
             --release-evidence build/maven-central-release-evidence.json \
-            --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network \
             | tee build/maven-central-release-result.json
       - name: Verify retained release evidence contains no credential material
         id: release_secret_scan
@@ -914,7 +956,9 @@ jobs:
             stage-manifest.json
             build/maven-central-release-intent.json
             build/maven-central-release-environment-policy-audit.json
+            build/maven-central-release-prepared.json
             build/maven-central-release-evidence.json
+            build/maven-central-release-portal-result.json
             build/maven-central-release-result.json
             ${{ runner.temp }}/g011-consumer-central
           if-no-files-found: error
@@ -929,5 +973,7 @@ jobs:
             build/maven-central-release-intent.json
             build/maven-central-release-environment-policy-audit.json
             build/maven-central-release-entered
+            build/maven-central-release-prepared.json
+            build/maven-central-release-portal-result.json
           if-no-files-found: warn
           retention-days: 90
