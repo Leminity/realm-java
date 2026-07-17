@@ -25,6 +25,9 @@ SPEC.loader.exec_module(CP)
 SECRET = "cG9ydGFsLXVzZXI6cG9ydGFsLXBhc3M="
 COMMIT = "a" * 40
 CORE_COMMIT = "b" * 40
+CI_ARTIFACT_SHA256 = "e" * 64
+CI_RUN_ID = "123456"
+CI_ARTIFACT_ID = "789012"
 
 
 class MockTransport:
@@ -48,9 +51,28 @@ class CentralPortalTests(unittest.TestCase):
         self.runtime_provenance.write_text(
             json.dumps(
                 {
-                    "source": {"head": COMMIT, "core_gitlink": CORE_COMMIT},
-                    "wsl": {"runtime_sha256": "c" * 64},
-                    "ci": {"evidence_sha256": "d" * 64},
+                    "schema_version": 2,
+                    "manifest_kind": "runtime",
+                    "source": {
+                        "current_head_commit": COMMIT,
+                        "core_commit": CORE_COMMIT,
+                        "core_gitlink": CORE_COMMIT,
+                        "core_submodules": {
+                            "external/catch": "1" * 40,
+                            "src/external/sha-1": "2" * 40,
+                            "src/external/sha-2": "3" * 40,
+                        },
+                    },
+                    "wsl": {"runtime_sha256": "c" * 64, "environment_sha256": "d" * 64},
+                    "ci": {
+                        "tree_sha256": "4" * 64,
+                        "checksum_manifest_sha256": "5" * 64,
+                        "checksum_verified": True,
+                        "required_exact": ["toolchain/verification.txt"],
+                        "required_prefixes": ["ac08/"],
+                        "files": {"toolchain/verification.txt": "6" * 64},
+                    },
+                    "gate_digests": {path: "7" * 64 for path in CP.RUNTIME_GATE_PATHS},
                 }
             ),
             encoding="utf-8",
@@ -131,6 +153,9 @@ class CentralPortalTests(unittest.TestCase):
             commit=COMMIT,
             core_commit=CORE_COMMIT,
             runtime_provenance=self.runtime_provenance,
+            ci_artifact_sha256=CI_ARTIFACT_SHA256,
+            ci_run_id=CI_RUN_ID,
+            ci_artifact_id=CI_ARTIFACT_ID,
             environment_policy_audit=self.policy_audit,
             validated_consumer_command=self.consumer_command,
             validated_consumer_gradle_home=self.root / "validated-home",
@@ -189,6 +214,9 @@ class CentralPortalTests(unittest.TestCase):
         self.assertNotIn(SECRET, manifest_text)
         manifest = json.loads(manifest_text)
         self.assertEqual(manifest["publishing_type"], "USER_MANAGED")
+        self.assertEqual(manifest["ci_artifact_sha256"], CI_ARTIFACT_SHA256)
+        self.assertEqual(manifest["ci_run_id"], CI_RUN_ID)
+        self.assertEqual(manifest["ci_artifact_id"], CI_ARTIFACT_ID)
         self.assertEqual(manifest["validation_state_trace"][-1]["state"], "VALIDATED")
         self.assertEqual(
             manifest["realm_android_library_aar_sha256"], hashlib.sha256(b"public-aar").hexdigest()
@@ -211,6 +239,9 @@ class CentralPortalTests(unittest.TestCase):
                 commit=COMMIT,
                 core_commit=CORE_COMMIT,
                 runtime_provenance=self.runtime_provenance,
+                ci_artifact_sha256=CI_ARTIFACT_SHA256,
+                ci_run_id=CI_RUN_ID,
+                ci_artifact_id=CI_ARTIFACT_ID,
                 environment_policy_audit=self.policy_audit,
                 validated_consumer_command=self.consumer_command,
                 validated_consumer_gradle_home=self.root / "blocked-home",
@@ -288,6 +319,47 @@ class CentralPortalTests(unittest.TestCase):
             )
         self.assertEqual(rejected_transport.calls, [])
 
+    def test_release_resume_after_published_skips_second_publish(self) -> None:
+        stage_transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        stage_result, stage_manifest = self._stage(stage_transport)
+        release_transport = MockTransport([CP.HttpResponse(200, b'{"deploymentState":"PUBLISHED"}')])
+        result = CP.release(
+            stage_manifest=stage_manifest,
+            stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
+            token_env="UNUSED",
+            allow_network=True,
+            attempts=2,
+            delay_seconds=0,
+            client=CP.PortalClient(SECRET, transport=release_transport, sleep=lambda _: None),
+            published_consumer_command=self.consumer_command,
+            published_consumer_gradle_home=self.root / "resume-home",
+            published_consumer_evidence=self.root / "resume-evidence",
+            consumer_runner=self._consumer_runner,
+        )
+        self.assertEqual(result["state"], "PUBLISHED")
+        self.assertEqual(len(release_transport.calls), 1)
+        self.assertIn("/status?id=deployment-123", release_transport.calls[0][1])
+
+    def test_runtime_provenance_rejects_legacy_ad_hoc_schema(self) -> None:
+        legacy = self.root / "legacy-runtime.json"
+        legacy.write_text(
+            json.dumps(
+                {
+                    "source": {"head": COMMIT, "core_gitlink": CORE_COMMIT},
+                    "wsl": {"runtime_sha256": "c" * 64},
+                    "ci": {"evidence_sha256": "d" * 64},
+                }
+            ),
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(CP.PortalError, "unsupported schema"):
+            CP.verify_runtime_provenance(legacy, COMMIT, CORE_COMMIT)
+
     def test_stage_cli_parses_only_stage_arguments_and_fails_closed_without_network(self) -> None:
         completed = subprocess.run(
             [
@@ -308,6 +380,12 @@ class CentralPortalTests(unittest.TestCase):
                 CORE_COMMIT,
                 "--runtime-provenance",
                 str(self.runtime_provenance),
+                "--ci-artifact-sha256",
+                CI_ARTIFACT_SHA256,
+                "--ci-run-id",
+                CI_RUN_ID,
+                "--ci-artifact-id",
+                CI_ARTIFACT_ID,
                 "--environment-policy-audit",
                 str(self.policy_audit),
                 "--validated-consumer-command",
@@ -386,6 +464,7 @@ class CentralPortalTests(unittest.TestCase):
             [
                 CP.HttpResponse(201, b"deployment-123"),
                 CP.HttpResponse(200, b'{"deploymentState":"FAILED"}'),
+                CP.HttpResponse(204, b""),
             ]
         )
         with self.assertRaises(CP.DeploymentFailed):
@@ -394,6 +473,8 @@ class CentralPortalTests(unittest.TestCase):
         first = failure_path.read_text(encoding="utf-8")
         self.assertIn('"observed_state":"FAILED"', first)
         self.assertNotIn(SECRET, first)
+        self.assertEqual(transport.calls[-1][0], "DELETE")
+        self.assertTrue(transport.calls[-1][1].endswith("/deployment/deployment-123"))
         failure_path.write_text("first-failure-is-immutable", encoding="utf-8")
         CP._write_first_failure(
             self.root / "stage-manifest.json",
@@ -424,6 +505,7 @@ class CentralPortalTests(unittest.TestCase):
             [
                 CP.HttpResponse(201, b"deployment-123"),
                 CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+                CP.HttpResponse(204, b""),
             ]
         )
 
@@ -436,6 +518,8 @@ class CentralPortalTests(unittest.TestCase):
         evidence = json.loads(failure_path.read_text(encoding="utf-8"))
         self.assertEqual(evidence["deployment_id"], "deployment-123")
         self.assertEqual(evidence["expected_state"], "CONSUMER_PASS")
+        self.assertEqual(transport.calls[-1][0], "DELETE")
+        self.assertTrue(transport.calls[-1][1].endswith("/deployment/deployment-123"))
         retry = MockTransport([])
         with self.assertRaisesRegex(CP.PortalError, "already has an upload outcome"):
             self._stage(retry)
@@ -511,22 +595,52 @@ class CentralPortalTests(unittest.TestCase):
         self.assertNotIn("tools/release.sh", workflow)
         self.assertIn("G011_ENVIRONMENT_POLICY_TOKEN", workflow)
         self.assertIn("audit-environment-policy", workflow)
-        self.assertIn("build/g011-runtime-provenance.json", workflow)
+        self.assertIn("actions: read", workflow)
+        self.assertIn("group: realm-central-${{ github.event.release.tag_name }}", workflow)
+        self.assertIn("cancel-in-progress: false", workflow)
+        self.assertIn("if: ${{ always() }}", workflow)
+        self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
+        self.assertIn("g011-central-stage-evidence-${{ github.run_id }}-${{ github.run_attempt }}", workflow)
+        self.assertIn("maven-central-stage-manifest.json.failed.json", workflow)
+        release_job = workflow[workflow.index("\n  release:\n    name:") :]
+        self.assertLess(
+            release_job.index('test -z "$(git status --porcelain --untracked-files=all)"'),
+            release_job.index('printf \'%s\' "$STAGE_MANIFEST_B64"'),
+        )
+        self.assertNotIn("build/g011-runtime-provenance.json", workflow)
+        self.assertNotIn("realm-g011-runtime-provenance-v1", workflow)
+        self.assertIn("g011-ci-evidence-{commit}", workflow)
+        self.assertIn("CI artifact lacks an exact SHA-256 digest", workflow)
+        self.assertIn("--ci-artifact-sha256", workflow)
+        self.assertIn("--ci-run-id", workflow)
+        self.assertIn("--ci-artifact-id", workflow)
+        self.assertEqual(workflow.count("--mode runtime"), 2)
+        self.assertGreaterEqual(workflow.count("--runtime-evidence-dir"), 2)
+        self.assertEqual(workflow.count('test "$actual_archive_sha" = "$expected_archive_sha"'), 1)
+        self.assertEqual(workflow.count('= "$expected_archive_sha"'), 2)
+        self.assertIn('test "$stage_tag" = "$TAG"', release_job)
+        self.assertIn('test "$stage_version" = "$(tr -d \'[:space:]\' < version.txt)"', release_job)
         self.assertIn("--validated-consumer-command", workflow)
         self.assertIn("--published-consumer-command", workflow)
-        release_job = workflow[workflow.index("\n  release:\n    name:") :]
         self.assertLess(release_job.index("actions/checkout@"), release_job.index("tools/central-portal.py release"))
         self.assertIn("g011-consume-six.sh", workflow)
         self.assertIn("compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh", workflow)
         self.assertIn("g011-verify-native-elf.sh", workflow)
         self.assertEqual(workflow.count("runs-on: [self-hosted, linux, api37, ps16k]"), 2)
         self.assertGreaterEqual(workflow.count("Preflight the trusted API37/ps16k runner contract"), 2)
-        self.assertIn("adb -s emulator-5554 wait-for-device", workflow)
+        self.assertIn("adb -s emulator-5654 wait-for-device", workflow)
+        self.assertNotIn("emulator-5554", workflow)
+        self.assertIn("pm.16kb.app_compat.disabled", workflow)
+        self.assertNotIn("pm.16kb.app_compat.package_enabled", workflow)
+        self.assertIn("g008SigningKey: ${{ secrets.MAVEN_SIGNING_KEY }}", workflow)
+        self.assertNotIn("ORG_GRADLE_PROJECT_signingKey", workflow)
         self.assertIn("getconf PAGE_SIZE", workflow)
         self.assertIn("--expected-realm-android-library-sha256", workflow)
         self.assertIn("realm-android-library-$version.aar", release_job)
         self.assertIn("sha256sum -c -", release_job)
         self.assertIn("g011-verify-native-elf.sh --aar \"$aar\"", release_job)
+        self.assertIn("https://repo.maven.apache.org/maven2", workflow)
+        self.assertNotIn("https://repo1.maven.org/maven2", workflow)
         self.assertNotIn("build/g008-maven-central-bundle.zip", release_job)
         self.assertNotIn("find . -type f -printf '%P\\0' | sort -z | xargs -0 sha256sum > SHA256SUMS", workflow)
         self.assertGreaterEqual(workflow.count("! -name SHA256SUMS ! -name checksum-verify.log"), 2)

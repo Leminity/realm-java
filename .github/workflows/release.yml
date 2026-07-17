@@ -6,7 +6,16 @@ on:
 
 permissions:
   contents: read
+  actions: read
   deployments: read
+
+concurrency:
+  group: realm-central-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+env:
+  ANDROID_SDK_ROOT: /home/leminity/Android/Sdk
+  EMULATOR_RUNTIME_LIB_DIR: /home/leminity/.local/realm-emulator-libs/root/usr/lib/x86_64-linux-gnu
 
 jobs:
   stage:
@@ -29,13 +38,13 @@ jobs:
           # The runner labels are a scheduling contract; verify the booted
           # device too, and never substitute an API/4KiB image.
           command -v adb >/dev/null
-          test -d "$ANDROID_SDK_ROOT/platforms/android-37"
-          adb -s emulator-5554 wait-for-device
-          test "$(adb -s emulator-5554 shell getprop ro.build.version.sdk | tr -d '\r')" = 37
-          test "$(adb -s emulator-5554 shell getconf PAGE_SIZE | tr -d '\r')" = 16384
-          test "$(adb -s emulator-5554 shell getprop ro.boot.qemu.avd_name | tr -d '\r')" = realm-api37-ps16k-kvm
-          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')" = fatal
-          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.package_enabled | tr -d '\r')" = true
+          test -d "$ANDROID_SDK_ROOT/platforms/android-37.0"
+          adb -s emulator-5654 wait-for-device
+          test "$(adb -s emulator-5654 shell getprop ro.build.version.sdk | tr -d '\r')" = 37
+          test "$(adb -s emulator-5654 shell getconf PAGE_SIZE | tr -d '\r')" = 16384
+          test "$(adb -s emulator-5654 shell getprop ro.boot.qemu.avd_name | tr -d '\r')" = realm-api37-ps16k-kvm
+          test "$(adb -s emulator-5654 shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')" = fatal
+          test "$(adb -s emulator-5654 shell getprop pm.16kb.app_compat.disabled | tr -d '\r')" = true
       - name: Audit server-side environment reviewer and tag policy
         env:
           GITHUB_TOKEN: ${{ github.token }}
@@ -80,38 +89,80 @@ jobs:
           printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
           printf 'core_commit=%s\n' "$core_commit" >> "$GITHUB_OUTPUT"
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
-      - name: Generate and independently verify exact G011 runtime provenance
+      - name: Download and independently verify exact successful CI evidence
+        id: ci_evidence
         env:
+          GH_TOKEN: ${{ github.token }}
           COMMIT: ${{ steps.source.outputs.commit }}
-          CORE_COMMIT: ${{ steps.source.outputs.core_commit }}
         run: |
           set -euo pipefail
-          python3 tools/g011-evidence-manifest.py --root . --verify evidence/provenance/g011-source-evidence-manifest.json
-          python3 - <<'PY'
-          import hashlib, json, os
-          from pathlib import Path
-          def digest(path):
-              return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-          ci_inputs = [
-              '.github/workflows/ci.yml', '.github/workflows/release.yml',
-              'tools/central-portal.py', 'tools/test-central-portal.py',
-              'evidence/provenance/g011-source-evidence-manifest.json',
-          ]
-          ci = hashlib.sha256(json.dumps({p: digest(p) for p in ci_inputs}, sort_keys=True).encode()).hexdigest()
-          value = {
-              'format': 'realm-g011-runtime-provenance-v1',
-              'source': {'head': os.environ['COMMIT'], 'core_gitlink': os.environ['CORE_COMMIT']},
-              'wsl': {'runtime_sha256': digest('evidence/toolchain/android17-wsl2/emulator-final-runtime.txt')},
-              'ci': {'evidence_sha256': ci},
+          root="$RUNNER_TEMP/g011-ci-handoff-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          test ! -e "$root"
+          mkdir -p "$root/extracted"
+          python3 - "$GITHUB_REPOSITORY" "$COMMIT" "$GH_TOKEN" "$root/selection.json" <<'PY'
+          import json, sys, urllib.parse, urllib.request
+          repository, commit, token, output = sys.argv[1:]
+          headers = {
+              'Accept': 'application/vnd.github+json',
+              'Authorization': f'Bearer {token}',
+              'X-GitHub-Api-Version': '2022-11-28',
           }
-          Path('build').mkdir(exist_ok=True)
-          Path('build/g011-runtime-provenance.json').write_text(json.dumps(value, sort_keys=True) + '\n')
+          def get(url):
+              with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as response:
+                  return json.load(response)
+          query = urllib.parse.urlencode({'head_sha': commit, 'status': 'success', 'per_page': 100})
+          base = f'https://api.github.com/repos/{repository}'
+          runs = get(f'{base}/actions/workflows/ci.yml/runs?{query}').get('workflow_runs', [])
+          selected = None
+          for run in sorted((item for item in runs if item.get('head_sha') == commit and item.get('conclusion') == 'success'), key=lambda item: int(item['id']), reverse=True):
+              artifacts = get(f'{base}/actions/runs/{run["id"]}/artifacts?per_page=100').get('artifacts', [])
+              matches = [item for item in artifacts if item.get('name') == f'g011-ci-evidence-{commit}' and not item.get('expired')]
+              if len(matches) == 1:
+                  selected = {**matches[0], 'run_id': str(run['id'])}
+                  break
+          if selected is None:
+              raise SystemExit('no exact successful unexpired G011 CI artifact for release commit')
+          digest = selected.get('digest')
+          if not isinstance(digest, str) or not digest.startswith('sha256:') or len(digest) != 71:
+              raise SystemExit('CI artifact lacks an exact SHA-256 digest')
+          with open(output, 'w', encoding='utf-8') as destination:
+              json.dump(selected, destination, sort_keys=True)
           PY
-          sha256sum build/g011-runtime-provenance.json
+          artifact_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["id"])' "$root/selection.json")"
+          run_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["run_id"])' "$root/selection.json")"
+          archive_url="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["archive_download_url"])' "$root/selection.json")"
+          expected_archive_sha="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["digest"].removeprefix("sha256:"))' "$root/selection.json")"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+            "$archive_url" --output "$root/ci-evidence.zip"
+          actual_archive_sha="$(sha256sum "$root/ci-evidence.zip" | awk '{print $1}')"
+          test "$actual_archive_sha" = "$expected_archive_sha"
+          unzip -q "$root/ci-evidence.zip" -d "$root/extracted"
+          mapfile -t runtime_manifests < <(find "$root/extracted" -type f -name 'g011-runtime-*.json' | sort)
+          mapfile -t runtime_shas < <(find "$root/extracted" -type f -name 'g011-runtime-*.sha256' | sort)
+          mapfile -t evidence_roots < <(find "$root/extracted" -type d -name 'g011-evidence-*' | sort)
+          test "${#runtime_manifests[@]}" = 1
+          test "${#runtime_shas[@]}" = 1
+          test "${#evidence_roots[@]}" = 1
+          runtime="${runtime_manifests[0]}"
+          runtime_sha_file="${runtime_shas[0]}"
+          expected_runtime_sha="$(awk 'NR==1 {print $1} END {if (NR != 1) exit 1}' "$runtime_sha_file")"
+          test "$(sha256sum "$runtime" | awk '{print $1}')" = "$expected_runtime_sha"
+          python3 tools/g011-evidence-manifest.py --mode baseline \
+            --verify evidence/provenance/g011-source-evidence-manifest.json
+          python3 tools/g011-evidence-manifest.py --mode runtime \
+            --runtime-evidence-dir "${evidence_roots[0]}" --verify "$runtime"
+          {
+            echo "runtime_provenance=$runtime"
+            echo "runtime_provenance_sha256=$expected_runtime_sha"
+            echo "ci_artifact_sha256=$actual_archive_sha"
+            echo "ci_run_id=$run_id"
+            echo "ci_artifact_id=$artifact_id"
+          } >> "$GITHUB_OUTPUT"
       - name: Freshly build and locally reverify the exact Central bundle
         env:
-          ORG_GRADLE_PROJECT_signingKey: ${{ secrets.MAVEN_SIGNING_KEY }}
-          ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+          g008SigningKey: ${{ secrets.MAVEN_SIGNING_KEY }}
+          g008SigningPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
         run: |
           set -euo pipefail
           ./tools/publish_release.sh --signed-bundle
@@ -135,7 +186,7 @@ jobs:
           # Task32 parameterizes the existing AC08 semantic harness; it
           # rejects API/4KiB/AVD/property substitutions rather than falling
           # back to the historical local/offline runner.
-          ac08=(--mode validated --repository-url "$url" --bearer-env "$bearer" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5554 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
+          ac08=(--mode validated --repository-url "$url" --bearer-env "$bearer" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
           compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh "${ac08[@]}"
           tools/g011-verify-native-elf.sh --bundle build/g008-maven-central-bundle.zip --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
           (
@@ -163,7 +214,10 @@ jobs:
             --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json \
             --tag '${{ github.event.release.tag_name }}' --version '${{ steps.source.outputs.version }}' \
             --commit '${{ steps.source.outputs.commit }}' --core-commit '${{ steps.source.outputs.core_commit }}' \
-            --runtime-provenance build/g011-runtime-provenance.json \
+            --runtime-provenance '${{ steps.ci_evidence.outputs.runtime_provenance }}' \
+            --ci-artifact-sha256 '${{ steps.ci_evidence.outputs.ci_artifact_sha256 }}' \
+            --ci-run-id '${{ steps.ci_evidence.outputs.ci_run_id }}' \
+            --ci-artifact-id '${{ steps.ci_evidence.outputs.ci_artifact_id }}' \
             --environment-policy-audit build/maven-central-environment-policy-audit.json \
             --validated-consumer-command build/run-g011-consumer.sh \
             --validated-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-validated" \
@@ -176,6 +230,18 @@ jobs:
           manifest=build/maven-central-stage-manifest.json
           printf 'stage_manifest_sha256=%s\n' "$(sha256sum "$manifest" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
           printf 'stage_manifest_b64=%s\n' "$(base64 -w0 "$manifest")" >> "$GITHUB_OUTPUT"
+      - name: Retain redacted stage and failure evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: g011-central-stage-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/maven-central-environment-policy-audit.json
+            build/maven-central-stage-manifest.json
+            build/maven-central-stage-manifest.json.failed.json
+            ${{ runner.temp }}/g011-consumer-validated
+          if-no-files-found: warn
+          retention-days: 14
 
   release:
     name: Reviewer-gated Central publication
@@ -193,28 +259,80 @@ jobs:
         run: |
           set -euo pipefail
           command -v adb >/dev/null
-          test -d "$ANDROID_SDK_ROOT/platforms/android-37"
-          adb -s emulator-5554 wait-for-device
-          test "$(adb -s emulator-5554 shell getprop ro.build.version.sdk | tr -d '\r')" = 37
-          test "$(adb -s emulator-5554 shell getconf PAGE_SIZE | tr -d '\r')" = 16384
-          test "$(adb -s emulator-5554 shell getprop ro.boot.qemu.avd_name | tr -d '\r')" = realm-api37-ps16k-kvm
-          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')" = fatal
-          test "$(adb -s emulator-5554 shell getprop bionic.linker.16kb.app_compat.package_enabled | tr -d '\r')" = true
+          test -d "$ANDROID_SDK_ROOT/platforms/android-37.0"
+          adb -s emulator-5654 wait-for-device
+          test "$(adb -s emulator-5654 shell getprop ro.build.version.sdk | tr -d '\r')" = 37
+          test "$(adb -s emulator-5654 shell getconf PAGE_SIZE | tr -d '\r')" = 16384
+          test "$(adb -s emulator-5654 shell getprop ro.boot.qemu.avd_name | tr -d '\r')" = realm-api37-ps16k-kvm
+          test "$(adb -s emulator-5654 shell getprop bionic.linker.16kb.app_compat.enabled | tr -d '\r')" = fatal
+          test "$(adb -s emulator-5654 shell getprop pm.16kb.app_compat.disabled | tr -d '\r')" = true
       - name: Reconstruct immutable handoff and reverify checked-out source
         env:
+          GH_TOKEN: ${{ github.token }}
           STAGE_MANIFEST_B64: ${{ needs.stage.outputs.stage_manifest_b64 }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
           TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
+          test -z "$(git status --porcelain --untracked-files=all)"
           printf '%s' "$STAGE_MANIFEST_B64" | base64 --decode > stage-manifest.json
           test "$(sha256sum stage-manifest.json | awk '{print $1}')" = "$STAGE_MANIFEST_SHA256"
+          stage_tag="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["tag"])')"
+          stage_version="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["version"])')"
           commit="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["commit"])')"
           core="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["core_commit"])')"
+          test "$stage_tag" = "$TAG"
+          test "$stage_version" = "$(tr -d '[:space:]' < version.txt)"
           test "$commit" = "$(git rev-parse HEAD)"
           test "$commit" = "$(git rev-list -n1 "$TAG")"
           test "$core" = "$(git -C realm/realm-library/src/main/cpp/realm-core rev-parse HEAD)"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          test -z "$(git status --porcelain --untracked-files=no)"
+          ci_run_id="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["ci_run_id"])')"
+          ci_artifact_id="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["ci_artifact_id"])')"
+          expected_archive_sha="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["ci_artifact_sha256"])')"
+          expected_runtime_sha="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["runtime_provenance"]["sha256"])')"
+          root="$RUNNER_TEMP/g011-release-ci-handoff-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          test ! -e "$root"
+          mkdir -p "$root/extracted"
+          api="https://api.github.com/repos/$GITHUB_REPOSITORY"
+          curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
+            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+            "$api/actions/runs/$ci_run_id" --output "$root/run.json"
+          curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
+            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+            "$api/actions/runs/$ci_run_id/artifacts?per_page=100" --output "$root/artifacts.json"
+          python3 - "$root/run.json" "$root/artifacts.json" "$commit" "$ci_artifact_id" "$expected_archive_sha" "$root/selection.json" <<'PY'
+          import json, sys
+          run_path, artifacts_path, commit, artifact_id, expected_sha, output = sys.argv[1:]
+          run = json.load(open(run_path, encoding='utf-8'))
+          if run.get('head_sha') != commit or run.get('conclusion') != 'success' or run.get('path') != '.github/workflows/ci.yml':
+              raise SystemExit('stage manifest CI run is not a successful exact-source CI workflow')
+          artifacts = json.load(open(artifacts_path, encoding='utf-8')).get('artifacts', [])
+          matches = [item for item in artifacts if str(item.get('id')) == artifact_id]
+          if len(matches) != 1:
+              raise SystemExit('stage manifest CI artifact ID is not unique in the bound run')
+          artifact = matches[0]
+          if artifact.get('name') != f'g011-ci-evidence-{commit}' or artifact.get('expired'):
+              raise SystemExit('stage manifest CI artifact is missing, expired, or renamed')
+          if artifact.get('digest') != f'sha256:{expected_sha}':
+              raise SystemExit('stage manifest CI artifact API digest differs')
+          json.dump(artifact, open(output, 'w', encoding='utf-8'), sort_keys=True)
+          PY
+          archive_url="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["archive_download_url"])' "$root/selection.json")"
+          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+            "$archive_url" --output "$root/ci-evidence.zip"
+          test "$(sha256sum "$root/ci-evidence.zip" | awk '{print $1}')" = "$expected_archive_sha"
+          unzip -q "$root/ci-evidence.zip" -d "$root/extracted"
+          mapfile -t runtime_manifests < <(find "$root/extracted" -type f -name 'g011-runtime-*.json' | sort)
+          mapfile -t evidence_roots < <(find "$root/extracted" -type d -name 'g011-evidence-*' | sort)
+          test "${#runtime_manifests[@]}" = 1
+          test "${#evidence_roots[@]}" = 1
+          test "$(sha256sum "${runtime_manifests[0]}" | awk '{print $1}')" = "$expected_runtime_sha"
+          python3 tools/g011-evidence-manifest.py --mode baseline \
+            --verify evidence/provenance/g011-source-evidence-manifest.json
+          python3 tools/g011-evidence-manifest.py --mode runtime \
+            --runtime-evidence-dir "${evidence_roots[0]}" --verify "${runtime_manifests[0]}"
       - name: Create fresh Central-only post-publication consumer runner
         run: |
           set -euo pipefail
@@ -228,10 +346,10 @@ jobs:
             --gradle-user-home) home="$2"; shift 2;; --evidence-dir) evidence="$2"; shift 2;;
             --expected-realm-android-library-sha256) expected_aar="$2"; shift 2;;
             --bearer-env) echo 'central consumer rejects credentials' >&2; exit 2;; *) exit 2;; esac; done
-          [[ "$mode" == central && "$url" == https://repo1.maven.org/maven2 ]] || exit 2
+          [[ "$mode" == central && "$url" == https://repo.maven.apache.org/maven2 ]] || exit 2
           [[ "$expected_aar" =~ ^[0-9a-f]{64}$ ]] || exit 2
           tools/g011-consume-six.sh --mode central --gradle-user-home "$home/six" --evidence-dir "$evidence/six"
-          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh --mode central --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5554 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID"
+          compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh --mode central --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID"
           # The fresh Central-only consumer resolved the coordinates above.
           # Download the exact public AAR again from Central, bind it to the
           # immutable stage-manifest digest, and inspect that file -- never a
@@ -240,7 +358,7 @@ jobs:
           aar="$evidence/realm-android-library-$version.aar"
           mkdir -p "$evidence"
           curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
-            "https://repo1.maven.org/maven2/io/github/leminity/realm/realm-android-library/$version/realm-android-library-$version.aar" \
+            "https://repo.maven.apache.org/maven2/io/github/leminity/realm/realm-android-library/$version/realm-android-library-$version.aar" \
             --output "$aar"
           printf '%s  %s\n' "$expected_aar" "$aar" | sha256sum -c -
           tools/g011-verify-native-elf.sh --aar "$aar" --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"

@@ -35,9 +35,16 @@ TAG_RE = re.compile(r"^v10\.19\.0-agp9\.[1-9][0-9]*$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DEPLOYMENT_ID_RE = re.compile(r"^[A-Za-z0-9._-]+$")
-STAGE_MANIFEST_FORMAT = "realm-maven-central-stage-v2"
+STAGE_MANIFEST_FORMAT = "realm-maven-central-stage-v3"
 POLICY_AUDIT_FORMAT = "realm-maven-central-environment-policy-audit-v1"
 CONSUMER_EVIDENCE_FORMAT = "realm-maven-central-consumer-evidence-v1"
+RUNTIME_PROVENANCE_SCHEMA_VERSION = 2
+RUNTIME_GATE_PATHS = (
+    ".github/workflows/ci.yml",
+    ".github/workflows/release.yml",
+    "tools/central-portal.py",
+    "tools/test-central-portal.py",
+)
 
 
 class PortalError(RuntimeError):
@@ -82,6 +89,13 @@ def _require_git_sha(value: object, field: str) -> str:
     if not isinstance(value, str) or not GIT_SHA_RE.fullmatch(value):
         raise PortalError(f"invalid {field}")
     return value
+
+
+def _require_positive_decimal(value: object, field: str) -> str:
+    rendered = str(value)
+    if not rendered.isdecimal() or int(rendered) < 1:
+        raise PortalError(f"invalid {field}")
+    return rendered
 
 
 def validate_release_binding(tag: str, version: str, commit: str, core_commit: str) -> None:
@@ -187,42 +201,61 @@ def _read_json_object(path: Path, description: str) -> Mapping[str, object]:
     return value
 
 
-def _first_string(value: Mapping[str, object], *names: str) -> str | None:
-    for name in names:
-        candidate = value.get(name)
-        if isinstance(candidate, str) and candidate:
-            return candidate
-    return None
-
-
 def verify_runtime_provenance(path: Path, commit: str, core_commit: str) -> Mapping[str, str]:
-    """Reject a runtime handoff that is not bound to this exact source state.
-
-    Task29 owns the producer. This deliberately accepts the producer's
-    explicit ``head``/``commit`` spelling while requiring all four facts the
-    release handoff needs: root HEAD, Core gitlink, WSL runtime evidence and
-    independently checksummed CI evidence. A baseline-only manifest is not
-    sufficient for a tag release.
-    """
+    """Verify Task35's exact schema-v2 runtime provenance handoff."""
 
     provenance = _read_json_object(path, "runtime provenance")
+    if provenance.get("schema_version") != RUNTIME_PROVENANCE_SCHEMA_VERSION:
+        raise PortalError("runtime provenance has an unsupported schema version")
+    if provenance.get("manifest_kind") != "runtime":
+        raise PortalError("runtime provenance is not a runtime manifest")
     source = provenance.get("source")
     wsl = provenance.get("wsl")
     ci = provenance.get("ci")
-    if not isinstance(source, dict) or not isinstance(wsl, dict) or not isinstance(ci, dict):
+    gate_digests = provenance.get("gate_digests")
+    if not all(isinstance(value, dict) for value in (source, wsl, ci, gate_digests)):
         raise PortalError("runtime provenance is incomplete")
-    head = _first_string(source, "head", "commit", "root_commit")
-    bound_core = _first_string(source, "core_gitlink", "core_commit")
-    wsl_sha256 = _first_string(wsl, "runtime_sha256", "evidence_sha256")
-    ci_sha256 = _first_string(ci, "evidence_sha256", "manifest_sha256")
-    if head != commit or bound_core != core_commit:
+    head = source.get("current_head_commit")
+    bound_core = source.get("core_commit")
+    core_gitlink = source.get("core_gitlink")
+    core_submodules = source.get("core_submodules")
+    if head != commit or bound_core != core_commit or core_gitlink != core_commit:
         raise PortalError("runtime provenance source binding differs from release source")
+    if (
+        not isinstance(core_submodules, dict)
+        or set(core_submodules) != {"external/catch", "src/external/sha-1", "src/external/sha-2"}
+        or any(not isinstance(value, str) or not GIT_SHA_RE.fullmatch(value) for value in core_submodules.values())
+    ):
+        raise PortalError("runtime provenance lacks exact Core submodule bindings")
+    if ci.get("checksum_verified") is not True:
+        raise PortalError("runtime provenance CI checksums are not independently verified")
+    required_exact = ci.get("required_exact")
+    required_prefixes = ci.get("required_prefixes")
+    files = ci.get("files")
+    if not isinstance(required_exact, list) or not required_exact or not isinstance(required_prefixes, list) or not required_prefixes:
+        raise PortalError("runtime provenance lacks required CI evidence contracts")
+    if not isinstance(files, dict) or any(not SHA256_RE.fullmatch(str(value)) for value in files.values()):
+        raise PortalError("runtime provenance lacks checksummed CI evidence files")
+    for required_path in RUNTIME_GATE_PATHS:
+        _require_sha256(gate_digests.get(required_path), f"runtime provenance gate digest {required_path}")
+    canonical_gates = json.dumps(gate_digests, sort_keys=True, separators=(",", ":")).encode("utf-8")
     return {
         "sha256": sha256_file(path),
         "head": _require_git_sha(head, "runtime provenance head"),
         "core_commit": _require_git_sha(bound_core, "runtime provenance core commit"),
-        "wsl_evidence_sha256": _require_sha256(wsl_sha256, "runtime provenance WSL evidence SHA-256"),
-        "ci_evidence_sha256": _require_sha256(ci_sha256, "runtime provenance CI evidence SHA-256"),
+        "wsl_evidence_sha256": _require_sha256(
+            wsl.get("runtime_sha256"), "runtime provenance WSL evidence SHA-256"
+        ),
+        "wsl_environment_sha256": _require_sha256(
+            wsl.get("environment_sha256"), "runtime provenance WSL environment SHA-256"
+        ),
+        "ci_evidence_tree_sha256": _require_sha256(
+            ci.get("tree_sha256"), "runtime provenance CI evidence tree SHA-256"
+        ),
+        "ci_checksum_manifest_sha256": _require_sha256(
+            ci.get("checksum_manifest_sha256"), "runtime provenance CI checksum manifest SHA-256"
+        ),
+        "gate_digests_sha256": hashlib.sha256(canonical_gates).hexdigest(),
     }
 
 
@@ -564,6 +597,13 @@ class PortalClient:
         encoded = quote(deployment_id, safe="-._~")
         self._request("POST", f"/api/v1/publisher/deployment/{encoded}", operation="publish")
 
+    def drop(self, deployment_id: str) -> None:
+        """Drop one evidenced, unpublished deployment after a failed gate."""
+
+        self._validate_deployment_id(deployment_id)
+        encoded = quote(deployment_id, safe="-._~")
+        self._request("DELETE", f"/api/v1/publisher/deployment/{encoded}", operation="drop")
+
     def deployment_repository(self, deployment_id: str) -> str:
         self._validate_deployment_id(deployment_id)
         encoded = quote(deployment_id, safe="-._~")
@@ -608,6 +648,9 @@ def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, objec
         "publishing_type",
         "validation_state_trace",
         "runtime_provenance",
+        "ci_artifact_sha256",
+        "ci_run_id",
+        "ci_artifact_id",
         "environment_policy_audit_sha256",
         "validated_consumer_evidence_sha256",
     )
@@ -627,8 +670,18 @@ def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, objec
         raise PortalError("stage manifest lacks runtime provenance")
     if provenance.get("head") != manifest["commit"] or provenance.get("core_commit") != manifest["core_commit"]:
         raise PortalError("stage manifest runtime provenance differs from source binding")
-    for field in ("sha256", "wsl_evidence_sha256", "ci_evidence_sha256"):
+    for field in (
+        "sha256",
+        "wsl_evidence_sha256",
+        "wsl_environment_sha256",
+        "ci_evidence_tree_sha256",
+        "ci_checksum_manifest_sha256",
+        "gate_digests_sha256",
+    ):
         _require_sha256(provenance.get(field), f"runtime provenance {field}")
+    _require_sha256(manifest["ci_artifact_sha256"], "CI artifact SHA-256")
+    _require_positive_decimal(manifest["ci_run_id"], "CI run ID")
+    _require_positive_decimal(manifest["ci_artifact_id"], "CI artifact ID")
     _require_sha256(manifest["environment_policy_audit_sha256"], "environment policy audit SHA-256")
     _require_sha256(manifest["validated_consumer_evidence_sha256"], "validated consumer evidence SHA-256")
     PortalClient._validate_deployment_id(str(manifest["deployment_id"]))
@@ -644,11 +697,10 @@ def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, objec
     ):
         raise PortalError("stage manifest lacks a validated exact-deployment trace")
     expected_endpoint = (
-        r"https://[^/]+/api/v1/publisher/deployment/"
-        + re.escape(str(manifest["deployment_id"]))
-        + r"/download/\{relative_path\}"
+        f"{PORTAL_URL}/api/v1/publisher/deployment/"
+        f"{manifest['deployment_id']}/download/{{relative_path}}"
     )
-    if not isinstance(manifest["deployment_repository"], str) or not re.fullmatch(expected_endpoint, manifest["deployment_repository"]):
+    if manifest["deployment_repository"] != expected_endpoint:
         raise PortalError("invalid exact deployment repository")
     return manifest
 
@@ -698,6 +750,9 @@ def stage(
     commit: str,
     core_commit: str,
     runtime_provenance: Path,
+    ci_artifact_sha256: str,
+    ci_run_id: str,
+    ci_artifact_id: str,
     environment_policy_audit: Path,
     validated_consumer_command: Path,
     validated_consumer_gradle_home: Path,
@@ -719,6 +774,9 @@ def stage(
     bundle_sha256, source_manifest_sha256 = verify_bundle_binding(bundle, source_manifest)
     realm_android_library_aar_sha256_value = realm_android_library_aar_sha256(bundle, version)
     provenance = verify_runtime_provenance(runtime_provenance, commit, core_commit)
+    ci_artifact_sha256 = _require_sha256(ci_artifact_sha256, "CI artifact SHA-256")
+    ci_run_id = _require_positive_decimal(ci_run_id, "CI run ID")
+    ci_artifact_id = _require_positive_decimal(ci_artifact_id, "CI artifact ID")
     policy_audit_sha256 = verify_environment_policy_audit(environment_policy_audit)
     if not allow_network:
         raise PortalError("network access requires --allow-network")
@@ -733,15 +791,29 @@ def stage(
             backoff_factor=backoff_factor,
             max_delay_seconds=max_delay_seconds,
         )
-    except DeploymentFailed as error:
+    except PortalError as error:
+        state = (
+            error.state
+            if isinstance(error, DeploymentFailed)
+            else str(client.last_poll_trace[-1]["state"])
+            if client.last_poll_trace
+            else "UNKNOWN"
+        )
         _write_first_failure(
             stage_manifest,
-            deployment_id=error.deployment_id,
-            expected=error.expected,
-            state=error.state,
+            deployment_id=deployment_id,
+            expected="VALIDATED",
+            state=state,
             bundle_sha256=bundle_sha256,
             source_manifest_sha256=source_manifest_sha256,
         )
+        if state in {"FAILED", "VALIDATED"}:
+            try:
+                client.drop(deployment_id)
+            except PortalError as drop_error:
+                raise PortalError(
+                    "stage failure evidence was preserved but deployment drop failed"
+                ) from drop_error
         raise
     repository_template = client.deployment_repository(deployment_id)
     repository_url = _deployment_repository_base(repository_template)
@@ -766,6 +838,12 @@ def stage(
             bundle_sha256=bundle_sha256,
             source_manifest_sha256=source_manifest_sha256,
         )
+        try:
+            client.drop(deployment_id)
+        except PortalError as drop_error:
+            raise PortalError(
+                "validated consumer failure was preserved but deployment drop failed"
+            ) from drop_error
         raise
     manifest: dict[str, object] = {
         "format": STAGE_MANIFEST_FORMAT,
@@ -777,6 +855,9 @@ def stage(
         "source_manifest_sha256": source_manifest_sha256,
         "realm_android_library_aar_sha256": realm_android_library_aar_sha256_value,
         "runtime_provenance": provenance,
+        "ci_artifact_sha256": ci_artifact_sha256,
+        "ci_run_id": ci_run_id,
+        "ci_artifact_id": ci_artifact_id,
         "environment_policy_audit_sha256": policy_audit_sha256,
         "validated_consumer_evidence_sha256": validated_consumer_evidence_sha256,
         "deployment_id": deployment_id,
@@ -813,30 +894,44 @@ def release(
         raise PortalError("network access requires --allow-network")
     client = client or PortalClient(_token_from_environment(token_env))
     deployment_id = str(manifest["deployment_id"])
-    # The release gate independently proves the exact deployment is still the
-    # staged, USER_MANAGED deployment before it can call the publish endpoint.
-    client.poll(
-        deployment_id,
-        "VALIDATED",
-        attempts=attempts,
-        delay_seconds=delay_seconds,
-        backoff_factor=backoff_factor,
-        max_delay_seconds=max_delay_seconds,
-    )
-    client.publish(deployment_id)
-    client.poll(
-        deployment_id,
-        "PUBLISHED",
-        attempts=attempts,
-        delay_seconds=delay_seconds,
-        backoff_factor=backoff_factor,
-        max_delay_seconds=max_delay_seconds,
-    )
+    # A reviewer-approved retry after a post-publish consumer failure must not
+    # publish again. Resume from the exact deployment's observed state.
+    state = client.deployment_status(deployment_id)
+    if state == "PUBLISHED":
+        pass
+    elif state == "PUBLISHING":
+        client.poll(
+            deployment_id,
+            "PUBLISHED",
+            attempts=attempts,
+            delay_seconds=delay_seconds,
+            backoff_factor=backoff_factor,
+            max_delay_seconds=max_delay_seconds,
+        )
+    else:
+        if state != "VALIDATED":
+            client.poll(
+                deployment_id,
+                "VALIDATED",
+                attempts=attempts,
+                delay_seconds=delay_seconds,
+                backoff_factor=backoff_factor,
+                max_delay_seconds=max_delay_seconds,
+            )
+        client.publish(deployment_id)
+        client.poll(
+            deployment_id,
+            "PUBLISHED",
+            attempts=attempts,
+            delay_seconds=delay_seconds,
+            backoff_factor=backoff_factor,
+            max_delay_seconds=max_delay_seconds,
+        )
     if not (published_consumer_command and published_consumer_gradle_home and published_consumer_evidence):
         raise PortalError("published consumer gate is required")
     consumer_sha256 = _run_consumer(
         published_consumer_command,
-        repository_url="https://repo1.maven.org/maven2",
+        repository_url="https://repo.maven.apache.org/maven2",
         mode="central",
         token_env=None,
         gradle_user_home=published_consumer_gradle_home,
@@ -875,6 +970,9 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     stage_parser.add_argument("--commit", required=True)
     stage_parser.add_argument("--core-commit", required=True)
     stage_parser.add_argument("--runtime-provenance", required=True, type=Path)
+    stage_parser.add_argument("--ci-artifact-sha256", required=True)
+    stage_parser.add_argument("--ci-run-id", required=True)
+    stage_parser.add_argument("--ci-artifact-id", required=True)
     stage_parser.add_argument("--environment-policy-audit", required=True, type=Path)
     stage_parser.add_argument("--validated-consumer-command", required=True, type=Path)
     stage_parser.add_argument("--validated-consumer-gradle-home", required=True, type=Path)
@@ -928,6 +1026,9 @@ def main(argv: Sequence[str] | None = None) -> int:
                 commit=args.commit,
                 core_commit=args.core_commit,
                 runtime_provenance=args.runtime_provenance,
+                ci_artifact_sha256=args.ci_artifact_sha256,
+                ci_run_id=args.ci_run_id,
+                ci_artifact_id=args.ci_artifact_id,
                 environment_policy_audit=args.environment_policy_audit,
                 validated_consumer_command=args.validated_consumer_command,
                 validated_consumer_gradle_home=args.validated_consumer_gradle_home,
