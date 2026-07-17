@@ -332,6 +332,8 @@ def build_manifest(root: Path, mode: str = "baseline", runtime_evidence_dir: Pat
         raise ManifestError(f"unsupported manifest mode: {mode}")
     root = root.resolve()
     if mode == "runtime":
+        if runtime_evidence_dir is None:
+            raise ManifestError("runtime mode requires --runtime-evidence-dir")
         assert_runtime_source_clean(root)
     if not git_succeeds(root, "merge-base", "--is-ancestor", EXPECTED_BASELINE_COMMIT, "HEAD"):
         raise ManifestError(f"baseline {EXPECTED_BASELINE_COMMIT} is not an ancestor of HEAD")
@@ -381,8 +383,6 @@ def build_manifest(root: Path, mode: str = "baseline", runtime_evidence_dir: Pat
     }
     if mode == "runtime":
         source["current_head_commit"] = run_git(root, "rev-parse", "HEAD")
-        if runtime_evidence_dir is None:
-            raise ManifestError("runtime mode requires --runtime-evidence-dir")
 
     manifest: dict[str, object] = {
         "schema_version": 2,

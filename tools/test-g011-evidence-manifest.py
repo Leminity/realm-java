@@ -20,10 +20,7 @@ SPEC.loader.exec_module(MODULE)
 
 
 def write_runtime_evidence(root: Path) -> None:
-    paths = list(MODULE.RUNTIME_REQUIRED_EXACT) + [
-        "ac08/run-1/result.txt",
-        "g008/staging/io/github/leminity/realm/artifact/file.pom",
-    ]
+    paths = list(MODULE.RUNTIME_REQUIRED_EXACT) + [f"{prefix}fixture.txt" for prefix in MODULE.RUNTIME_REQUIRED_PREFIXES]
     for relative in paths:
         path = root / relative
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -70,7 +67,10 @@ class ManifestTests(unittest.TestCase):
             self.assertEqual(manifest["manifest_kind"], "runtime")
             self.assertEqual(manifest["source"]["current_head_commit"], head)
             self.assertTrue(manifest["ci"]["checksum_verified"])
-            self.assertEqual(manifest["ci"]["file_count"], len(MODULE.RUNTIME_REQUIRED_EXACT) + 2)
+            self.assertEqual(
+                manifest["ci"]["file_count"],
+                len(MODULE.RUNTIME_REQUIRED_EXACT) + len(MODULE.RUNTIME_REQUIRED_PREFIXES),
+            )
             self.assertNotIn(str(evidence.parent), MODULE.canonical_json(manifest))
 
     def test_runtime_rejects_missing_stale_and_modified_evidence(self) -> None:
