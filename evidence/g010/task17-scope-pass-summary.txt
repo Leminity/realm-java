@@ -1,0 +1,9 @@
+result=PASS
+verification_head=37cb84c750cde6a64c93ef3cc8bb15a24b37531a
+base=0ab8d6961afb038d0e0c69478de45dda3958d641
+core=d7b52ccbada0283527db36143cfeab18692b4ed0
+forbidden_supported_graph_hits=0
+forbidden_runtime_hits=0
+retired_processor_evidence=true
+core_toolchain_prerequisite_valid=true
+ledger_approvals=core_backport,core_prerequisite,retired_processor,retired_root_s3_ossrh

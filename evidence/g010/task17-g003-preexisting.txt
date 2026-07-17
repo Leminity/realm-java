@@ -1,0 +1,8 @@
+driver=tools/test-verify-g003-independent-builds.sh
+failing_assertion=tools/verify-g003-independent-builds.sh:159 grep -REn --include=*.gradle -- kotlin-android realm
+base=0e8bddf0a46827a7336a6a13406df8e35834db25
+head=37cb84c750cde6a64c93ef3cc8bb15a24b37531a
+base_match=343:// AGP 9 built-in Kotlin replaces kotlin-android task configuration.
+head_match=343:// AGP 9 built-in Kotlin replaces kotlin-android task configuration.
+realm_delta_between_base_and_head=none
+classification=pre-existing verifier false positive: comment is matched as if it were an applied plugin

@@ -1,0 +1,97 @@
+{
+  "archival_sync_boundary": {
+    "kotlin extensions ObjectServer source retained": true,
+    "kotlin extensions ObjectServer variants disabled": true,
+    "realm-library ObjectServer source retained": true,
+    "realm-library ObjectServer variants disabled": true
+  },
+  "base": "0ab8d6961afb038d0e0c69478de45dda3958d641",
+  "changed": {
+    "all_count": 425,
+    "build_publication": [
+      "build.gradle",
+      "dependencies.list",
+      "examples/gradle/wrapper/gradle-wrapper.properties",
+      "gradle-plugin/build.gradle",
+      "gradle-plugin/gradle/wrapper/gradle-wrapper.properties",
+      "gradle/wrapper/gradle-wrapper.properties",
+      "library-benchmarks/gradle/wrapper/gradle-wrapper.properties",
+      "library-build-transformer/build.gradle",
+      "library-build-transformer/gradle/wrapper/gradle-wrapper.properties",
+      "mavencentral-properties.gradle",
+      "mavencentral-publications.gradle",
+      "mavencentral-publish.gradle",
+      "realm-annotations/build.gradle",
+      "realm-annotations/gradle/wrapper/gradle-wrapper.properties",
+      "realm-transformer/build.gradle",
+      "realm-transformer/gradle/wrapper/gradle-wrapper.properties",
+      "realm/build.gradle",
+      "realm/gradle/wrapper/gradle-wrapper.properties",
+      "realm/kotlin-extensions/build.gradle",
+      "realm/realm-annotations-processor/build.gradle",
+      "realm/realm-library/build.gradle",
+      "version.txt"
+    ],
+    "product_sources": [
+      "gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt",
+      "library-build-transformer/src/main/kotlin/io/realm/buildtransformer/RealmBuildTransformer.kt",
+      "realm-transformer/src/main/kotlin/io/realm/transformer/RealmTransformer.kt",
+      "realm-transformer/src/main/kotlin/io/realm/transformer/ext/ProjectExt.kt",
+      "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt",
+      "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmVersionChecker.kt",
+      "realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/CamelCaseConverter.kt",
+      "realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/LowerCaseWithSeparatorConverter.kt",
+      "realm/realm-annotations-processor/src/main/java/io/realm/processor/nameconverter/PascalCaseConverter.kt"
+    ]
+  },
+  "core": {
+    "base": "5533505d18fda93a7a971d58a191db5005583c92",
+    "changed_paths": [
+      "src/external/s2/base/macros.h",
+      "src/realm/alloc.hpp",
+      "src/realm/alloc_slab.cpp",
+      "src/realm/util/encrypted_file_mapping.cpp",
+      "src/realm/util/encrypted_file_mapping.hpp",
+      "src/realm/util/file.cpp",
+      "src/realm/util/file.hpp",
+      "src/realm/util/file_mapper.cpp",
+      "src/realm/util/file_mapper.hpp",
+      "test/test_alloc.cpp",
+      "test/test_encrypted_file_mapping.cpp",
+      "test/test_shared.cpp"
+    ],
+    "encrypted_page_backport_paths": [
+      "src/realm/alloc.hpp",
+      "src/realm/alloc_slab.cpp",
+      "src/realm/util/encrypted_file_mapping.cpp",
+      "src/realm/util/encrypted_file_mapping.hpp",
+      "src/realm/util/file.cpp",
+      "src/realm/util/file.hpp",
+      "src/realm/util/file_mapper.cpp",
+      "src/realm/util/file_mapper.hpp",
+      "test/test_alloc.cpp",
+      "test/test_encrypted_file_mapping.cpp",
+      "test/test_shared.cpp"
+    ],
+    "head": "d7b52ccbada0283527db36143cfeab18692b4ed0",
+    "toolchain_prerequisite": {
+      "commit": "b741862e7ca7cb1b81d276457989067b7737dc86",
+      "paths": [
+        "src/external/s2/base/macros.h"
+      ],
+      "valid": true
+    }
+  },
+  "failures": [],
+  "forbidden_runtime_hits": [],
+  "forbidden_supported_graph_hits": [],
+  "head": "37cb84c750cde6a64c93ef3cc8bb15a24b37531a",
+  "ledger_approvals": {
+    "core_backport": true,
+    "core_prerequisite": true,
+    "retired_processor": true,
+    "retired_root_s3_ossrh": true
+  },
+  "retired_processor_evidence": true,
+  "status": "PASS"
+}

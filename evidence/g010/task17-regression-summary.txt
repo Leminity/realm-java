@@ -1,0 +1,6 @@
+G010 scope verifier regression: PASS (tools/test-verify-g010-scope.py)
+G010 scope verifier: PASS (task17-scope-pass-report.json)
+Root supported release dry-run: PASS (./gradlew --no-daemon --console=plain --dry-run installRealmJava)
+G008 publication regression: PASS (10 offline tests via python3 tools/test-g008-publication.py)
+G009 AC-09 verifier regression: PASS (python3 tools/test-verify-g009-ac09-compatibility.py)
+G003 independent-build verifier: pre-existing false positive, not a Task17 regression; see task17-g003-preexisting.txt.
