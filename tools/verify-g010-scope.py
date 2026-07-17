@@ -15,6 +15,9 @@ BASELINE_TAG = "v10.19.0"
 BASELINE_CORE = "5533505d18fda93a7a971d58a191db5005583c92"
 EXPECTED_CORE = "d7b52ccbada0283527db36143cfeab18692b4ed0"
 CORE_PATH = "realm/realm-library/src/main/cpp/realm-core"
+CORE_TOOLCHAIN_PREREQUISITE = "b741862e7ca7cb1b81d276457989067b7737dc86"
+CORE_TOOLCHAIN_PREREQUISITE_PATH = "src/external/s2/base/macros.h"
+RETIRED_PROCESSOR_EVIDENCE = "tools/verify-g009-ac09-compatibility.py"
 
 # These are the only non-fixture production source deltas from v10.19.0.
 # Their ledger keys deliberately name the reproduced failure, not a task order.
@@ -68,6 +71,15 @@ CORE_APPROVED_PATHS = {
     "test/test_encrypted_file_mapping.cpp",
     "test/test_shared.cpp",
 }
+CORE_EXPECTED_PATHS = CORE_APPROVED_PATHS | {CORE_TOOLCHAIN_PREREQUISITE_PATH}
+
+# The two processor changes remove the retired checker and its static update URL.
+# G009's verifier is the durable acceptance evidence for that deletion; it is not
+# a compatibility ledger failure-id because it was a supported-graph removal.
+RETIRED_PROCESSOR_PATHS = {
+    "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmProcessor.kt",
+    "realm/realm-annotations-processor/src/main/java/io/realm/processor/RealmVersionChecker.kt",
+}
 
 SUPPORTED_GRAPH_FILES = tuple(BUILD_APPROVALS) + ("dependencies.list",)
 FORBIDDEN_EXECUTION = re.compile(
@@ -100,6 +112,15 @@ def run(root: Path, *args: str) -> str:
     if completed.returncode:
         raise VerificationError(f"git {' '.join(args)}: {completed.stderr.strip()}")
     return completed.stdout
+
+
+def git_succeeds(root: Path, *args: str) -> bool:
+    return subprocess.run(
+        ["git", "-C", str(root), *args],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    ).returncode == 0
 
 
 def changed_paths(root: Path, base: str, head: str) -> list[str]:
@@ -139,11 +160,19 @@ def code_lines(path: Path) -> list[tuple[int, str]]:
     return lines
 
 
-def numstat_paths(root: Path, base: str, head: str, ignore_space: bool = False) -> set[str]:
+def numstat_paths(
+    root: Path,
+    base: str,
+    head: str,
+    ignore_space: bool = False,
+    paths: tuple[str, ...] = (),
+) -> set[str]:
     args = ["diff"]
     if ignore_space:
         args.append("-w")
     args.extend(["--numstat", f"{base}..{head}"])
+    if paths:
+        args.extend(["--", *paths])
     paths = set()
     for line in run(root, *args).splitlines():
         fields = line.split("\t")
@@ -159,6 +188,17 @@ def core_paths(root: Path, base_core: str) -> tuple[str, list[str]]:
     return head, sorted(set(paths))
 
 
+def retired_processor_approval(root: Path) -> bool:
+    evidence = root / RETIRED_PROCESSOR_EVIDENCE
+    if not evidence.is_file():
+        return False
+    text = evidence.read_text(encoding="utf-8")
+    return all(
+        f'"{path}": "retired checker removal"' in text
+        for path in RETIRED_PROCESSOR_PATHS
+    ) and "RETIRED_PROCESSOR_BYTECODE_STRINGS" in text
+
+
 def verify(root: Path, base: str, head: str) -> dict:
     failures: list[str] = []
     ledger = (root / "compatibility-change-ledger.md").read_text(encoding="utf-8")
@@ -166,7 +206,10 @@ def verify(root: Path, base: str, head: str) -> dict:
     paths = changed_paths(root, base, head)
     sources = sorted(path for path in paths if is_product_source(path))
     builds = sorted(path for path in paths if is_build_or_publication(path))
-    whitespace_only = numstat_paths(root, base, head) - numstat_paths(root, base, head, ignore_space=True)
+    approved_release_paths = tuple(sorted(set(SOURCE_APPROVALS) | set(BUILD_APPROVALS)))
+    whitespace_only = numstat_paths(root, base, head, paths=approved_release_paths) - numstat_paths(
+        root, base, head, ignore_space=True, paths=approved_release_paths
+    )
 
     if "Future production changes must reference a `failure-id`" not in production_ledger:
         failures.append("production diff ledger lacks the failure-id boundary")
@@ -174,7 +217,14 @@ def verify(root: Path, base: str, head: str) -> dict:
         failures.append(f"unledgered production source diff: expected {sorted(SOURCE_APPROVALS)}, got {sources}")
     if set(builds) != set(BUILD_APPROVALS):
         failures.append(f"unledgered build/publication diff: expected {sorted(BUILD_APPROVALS)}, got {builds}")
+    retirement_approved = retired_processor_approval(root)
     for path, token in {**SOURCE_APPROVALS, **BUILD_APPROVALS}.items():
+        if path in RETIRED_PROCESSOR_PATHS:
+            if not retirement_approved:
+                failures.append(f"retired processor evidence missing for {path}")
+            if path in whitespace_only:
+                failures.append(f"formatting-only cleanup is forbidden: {path}")
+            continue
         if token not in ledger:
             failures.append(f"ledger token {token} missing for {path}")
         if path in whitespace_only:
@@ -186,11 +236,25 @@ def verify(root: Path, base: str, head: str) -> dict:
         failures.append(f"unexpected baseline Core gitlink {base_core}")
     if core_head != EXPECTED_CORE:
         failures.append(f"unexpected Core revision {core_head}")
-    if not CORE_APPROVED_PATHS.issubset(actual_core_paths):
-        failures.append(f"Core encrypted-page portability paths missing: {sorted(CORE_APPROVED_PATHS - set(actual_core_paths))}")
-    extra_core = set(actual_core_paths) - CORE_APPROVED_PATHS - {"src/realm/util/config.hpp"}
-    if extra_core:
-        failures.append(f"unledgered Core paths: {sorted(extra_core)}")
+    core = root / CORE_PATH
+    prerequisite_paths = changed_paths(core, BASELINE_CORE, CORE_TOOLCHAIN_PREREQUISITE)
+    backport_paths = changed_paths(core, CORE_TOOLCHAIN_PREREQUISITE, core_head)
+    prerequisite_valid = (
+        git_succeeds(core, "merge-base", "--is-ancestor", CORE_TOOLCHAIN_PREREQUISITE, core_head)
+        and prerequisite_paths == [CORE_TOOLCHAIN_PREREQUISITE_PATH]
+    )
+    if not prerequisite_valid:
+        failures.append(
+            "Core toolchain prerequisite is not the verified one-file b741862 delta: "
+            f"{prerequisite_paths}"
+        )
+    if set(backport_paths) != CORE_APPROVED_PATHS:
+        failures.append(
+            "Core encrypted-page portability backport paths differ from c970 scope: "
+            f"expected {sorted(CORE_APPROVED_PATHS)}, got {backport_paths}"
+        )
+    if set(actual_core_paths) != CORE_EXPECTED_PATHS:
+        failures.append(f"unledgered Core paths: {sorted(set(actual_core_paths) ^ CORE_EXPECTED_PATHS)}")
 
     forbidden_hits: list[str] = []
     for relative in SUPPORTED_GRAPH_FILES:
@@ -230,9 +294,20 @@ def verify(root: Path, base: str, head: str) -> dict:
     return {
         "base": run(root, "rev-parse", base).strip(),
         "head": run(root, "rev-parse", head).strip(),
-        "core": {"base": base_core, "head": core_head, "changed_paths": actual_core_paths},
+        "core": {
+            "base": base_core,
+            "head": core_head,
+            "changed_paths": actual_core_paths,
+            "toolchain_prerequisite": {
+                "commit": CORE_TOOLCHAIN_PREREQUISITE,
+                "paths": prerequisite_paths,
+                "valid": prerequisite_valid,
+            },
+            "encrypted_page_backport_paths": backport_paths,
+        },
         "changed": {"all_count": len(paths), "product_sources": sources, "build_publication": builds},
         "archival_sync_boundary": archival_markers,
+        "retired_processor_evidence": retirement_approved,
         "forbidden_supported_graph_hits": forbidden_hits,
         "forbidden_runtime_hits": runtime_hits,
         "status": "PASS" if not failures else "FAIL",

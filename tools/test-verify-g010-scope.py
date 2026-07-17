@@ -32,6 +32,11 @@ assert MODULE.CORE_APPROVED_PATHS <= {
     "test/test_encrypted_file_mapping.cpp",
     "test/test_shared.cpp",
 }
+assert MODULE.CORE_EXPECTED_PATHS == MODULE.CORE_APPROVED_PATHS | {
+    "src/external/s2/base/macros.h"
+}
+assert MODULE.RETIRED_PROCESSOR_PATHS <= set(MODULE.SOURCE_APPROVALS)
+assert MODULE.CORE_TOOLCHAIN_PREREQUISITE == "b741862e7ca7cb1b81d276457989067b7737dc86"
 
 with tempfile.TemporaryDirectory() as temporary:
     source = Path(temporary) / "fixture.gradle"
@@ -41,6 +46,6 @@ with tempfile.TemporaryDirectory() as temporary:
 assert MODULE.FORBIDDEN_EXECUTION.search("project.hasProperty('ossrhUsername')")
 assert not MODULE.FORBIDDEN_RUNTIME.search("Realm Sync/ObjectServer is unsupported by this fork")
 assert MODULE.FORBIDDEN_RUNTIME.search("https://static.realm.io/update")
-assert MODULE.numstat_paths.__defaults__ == (False,)
+assert MODULE.numstat_paths.__defaults__ == (False, ())
 
 print("G010 scope verifier regression tests: PASS")
