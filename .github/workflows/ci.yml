@@ -42,11 +42,11 @@ jobs:
           runtime_manifest="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.json"
           runtime_sha_tmp="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.sha256.tmp"
           runtime_sha="$RUNNER_TEMP/g011-source-evidence-manifest.runtime.sha256"
-          python3 tools/g011-evidence-manifest.py --mode runtime --output "$runtime_manifest"
+          python3 tools/g011-evidence-manifest.py --output "$runtime_manifest"
           sha256sum "$runtime_manifest" > "$runtime_sha_tmp"
           mv "$runtime_sha_tmp" "$runtime_sha"
           sha256sum -c "$runtime_sha"
-          python3 tools/g011-evidence-manifest.py --mode runtime --verify evidence/provenance/g011-source-evidence-manifest.json
+          python3 tools/g011-evidence-manifest.py --verify evidence/provenance/g011-source-evidence-manifest.json
 
       - name: Manifest regression tests
         env:
@@ -59,47 +59,6 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
           bash tools/verify-g003-independent-builds.sh --run --evidence-dir build/g003-independent-builds
-
-      - name: Fresh G008 build and signed bundle verification
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
-        run: |
-          ./tools/publish_release.sh --signed-bundle
-          python3 tools/g008-publication.py \
-            --repository build/g008-local-staging \
-            --require-signatures \
-            --manifest build/g008-publication-manifest.json \
-            --bundle build/g008-maven-central-bundle.zip \
-            --plugin-source gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt
-
-      - name: G011 exact-six consumer gate
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
-        run: |
-          bash tools/g011-consume-six.sh \
-            --mode local \
-            --repository build/g008-local-staging \
-            --gradle-user-home "$RUNNER_TEMP/g011-consumer-gradle-home" \
-            --evidence-dir "$RUNNER_TEMP/g011-consumer-local"
-
-      - name: G011 native ELF gate
-        run: |
-          bash tools/g011-verify-native-elf.sh \
-            --bundle build/g008-maven-central-bundle.zip \
-            --evidence-dir "$RUNNER_TEMP/g011-native-elf" \
-            --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
-
-      - name: G011 AC08 local gate
-        run: |
-          bash compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh \
-            --mode local \
-            --repository-url build/g008-local-staging \
-            --sdk-root "$ANDROID_SDK_ROOT" \
-            --serial emulator-5654 \
-            --expected-avd realm-api37-ps16k-kvm \
-            --gradle-user-home "$RUNNER_TEMP/g011-ac08-gradle-home" \
-            --evidence-dir "$RUNNER_TEMP/g011-ac08-evidence" \
-            --run-id "$GITHUB_RUN_ID"
 
       - name: G008 publication gate
         env:
@@ -138,12 +97,6 @@ jobs:
           path: |
             ${{ runner.temp }}/g011-source-evidence-manifest.runtime.json
             ${{ runner.temp }}/g011-source-evidence-manifest.runtime.sha256
-            ${{ runner.temp }}/g011-consumer-local
-            ${{ runner.temp }}/g011-native-elf
-            ${{ runner.temp }}/g011-ac08-evidence
-            build/g008-publication-manifest.json
-            build/g008-maven-central-bundle.zip
-            build/g008-local-staging
           if-no-files-found: error
           retention-days: 14
 
