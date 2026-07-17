@@ -1,0 +1,1 @@
+AC-09 compatibility verification: FAIL: realm-annotations-processor public-signature delta: ['io.realm.processor.Constants$RealmFieldType']

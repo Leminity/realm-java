@@ -23,7 +23,10 @@ for allowed in \
   'evidence/audit/task-9-preflight.md' \
   'evidence/audit/g003-independent-build-recovery.md' \
   'tools/verify-g003-independent-builds.sh' \
-  'tools/test-verify-g003-independent-builds.sh'; do
+  'tools/test-verify-g003-independent-builds.sh' \
+  'tools/verify-g009-ac09-compatibility.py' \
+  'tools/test-verify-g009-ac09-compatibility.py' \
+  'evidence/g009/ac09/report.json'; do
   if ! is_baseline_allowed_path "$allowed"; then
     printf 'approved audit path was rejected: %s\n' "$allowed" >&2
     exit 1

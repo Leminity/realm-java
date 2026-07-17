@@ -1,0 +1,1 @@
+AC-09 compatibility verification: FAIL: realm-gradle-plugin public-signature delta: ['io.realm.gradle.Realm', 'io.realm.gradle.Realm$Companion', 'io.realm.gradle.SimpleAGPVersion$Companion']

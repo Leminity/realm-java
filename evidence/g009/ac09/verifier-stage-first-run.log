@@ -1,0 +1,1 @@
+AC-09 compatibility verification: FAIL: realm-gradle-plugin public-class delta: missing=['io.realm.gradle.SimpleAGPVersion$Companion$ANDROID_GRADLE_PLUGIN_VERSION$2'], added=['io.realm.gradle.Realm$apply$1', 'io.realm.gradle.Realm$apply$2', 'io.realm.gradle.Realm$apply$3', 'io.realm.gradle.Realm$configureAndroidProject$1', 'io.realm.gradle.Realm$configureKapt$1']

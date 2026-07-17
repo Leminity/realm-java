@@ -1,0 +1,80 @@
+{
+  "artifact_hashes": {
+    "realm-android-kotlin-extensions": {
+      "fork_sha256": "bf2299cf9f07264224564e95d11feb984c25f820d1421f017157bce64ca04d0d",
+      "official_sha256": "cea228b11202d1f279ec4ed6f6cbf972d44bf86cb403bc513e00355ae8e3ffb6"
+    },
+    "realm-android-library": {
+      "fork_sha256": "df8e93998515653ee6261eba03e8b60bcdb1158f87f514d2fb88f1729f9e3aab",
+      "official_sha256": "2a54afec5cdf79240037707accbf1b964ee06290b83fc1ed1748352d3faebc58"
+    },
+    "realm-annotations": {
+      "fork_sha256": "32db43c612256f4128f29452654b447e2eb4e797ce97aed0ad28e35b3ce68c3e",
+      "official_sha256": "758a1f965a24eac1bc47d5711a6739f2847224afa0591b351e64a17c6ac2a5b3"
+    },
+    "realm-annotations-processor": {
+      "fork_sha256": "89adf8651bb251bad53828f3b3753ebde0f673a0546a9a56aa9e5c2f0b683e1d",
+      "official_sha256": "710f82ae98c3ab5b27b06478fc43630fb208ae5babd2b394fcb12a2bd4001131"
+    },
+    "realm-gradle-plugin": {
+      "fork_sha256": "a22cf433ae8942f8623ed05f67353b343bd06dd6712d4789f403dddd1fb9351c",
+      "official_sha256": "6d9a2f169be56af757b2d6d654cd4cc2490db1d375b4c9bd50dd74d6e8729e81"
+    },
+    "realm-transformer": {
+      "fork_sha256": "af57e699903bf1ca0001d3746495e74d6f30b5ab376b3aedc31b21d76e024a24",
+      "official_sha256": "ca1b1b40de104d4500f3236c003fd4a377effe12952c548071b756f471efecb6"
+    }
+  },
+  "artifacts": {
+    "realm-android-library": {
+      "approved_removed_public_classes": [],
+      "fork_sha256": "df8e93998515653ee6261eba03e8b60bcdb1158f87f514d2fb88f1729f9e3aab",
+      "official_sha256": "2a54afec5cdf79240037707accbf1b964ee06290b83fc1ed1748352d3faebc58",
+      "public_class_count": 167,
+      "resource_entry_count": 1
+    },
+    "realm-annotations": {
+      "approved_removed_public_classes": [],
+      "fork_sha256": "32db43c612256f4128f29452654b447e2eb4e797ce97aed0ad28e35b3ce68c3e",
+      "official_sha256": "758a1f965a24eac1bc47d5711a6739f2847224afa0591b351e64a17c6ac2a5b3",
+      "public_class_count": 10,
+      "resource_entry_count": 0
+    },
+    "realm-annotations-processor": {
+      "approved_removed_public_classes": [
+        "io.realm.processor.RealmVersionChecker",
+        "io.realm.processor.RealmVersionChecker$Companion"
+      ],
+      "fork_sha256": "89adf8651bb251bad53828f3b3753ebde0f673a0546a9a56aa9e5c2f0b683e1d",
+      "official_sha256": "710f82ae98c3ab5b27b06478fc43630fb208ae5babd2b394fcb12a2bd4001131",
+      "public_class_count": 32,
+      "resource_entry_count": 0
+    },
+    "realm-gradle-plugin": {
+      "approved_removed_public_classes": [],
+      "fork_sha256": "a22cf433ae8942f8623ed05f67353b343bd06dd6712d4789f403dddd1fb9351c",
+      "official_sha256": "6d9a2f169be56af757b2d6d654cd4cc2490db1d375b4c9bd50dd74d6e8729e81",
+      "public_class_count": 8,
+      "resource_entry_count": 0
+    },
+    "realm-transformer": {
+      "approved_removed_public_classes": [],
+      "fork_sha256": "af57e699903bf1ca0001d3746495e74d6f30b5ab376b3aedc31b21d76e024a24",
+      "official_sha256": "ca1b1b40de104d4500f3236c003fd4a377effe12952c548071b756f471efecb6",
+      "public_class_count": 24,
+      "resource_entry_count": 0
+    }
+  },
+  "baseline": {
+    "tag": "v10.19.0",
+    "version": "10.19.0"
+  },
+  "failure": "realm-android-kotlin-extensions public-class delta: missing=['io.realm.kotlin.BuildConfig'], added=[]",
+  "fork_version": "10.19.0-agp9.1",
+  "official_oracle_sha256": {
+    "artifact_manifest": "255be75f1dca64e2cc94574ced12c5acaa2bb749f8c7a3998056631f08c203a1",
+    "public_api_javap": "503a98611c35bd135b30a80fe35eb323d1e7c8b081234f3b142db1d0a2fce262",
+    "public_class_inventory": "5c455d58aa755263042b53f68ac77693089402515077104762c16f6382efc8e7"
+  },
+  "status": "FAIL"
+}

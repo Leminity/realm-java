@@ -1,0 +1,132 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :library-build-transformer:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :library-build-transformer:compileKotlin UP-TO-DATE
+> Task :library-build-transformer:compileJava NO-SOURCE
+> Task :library-build-transformer:processResources NO-SOURCE
+> Task :library-build-transformer:classes UP-TO-DATE
+> Task :library-build-transformer:jar UP-TO-DATE
+> Task :library-build-transformer:generateMetadataFileForRealmPublication
+> Task :library-build-transformer:generatePomFileForRealmPublication
+> Task :library-build-transformer:publishRealmPublicationToMavenLocal
+> Task :library-build-transformer:publishToMavenLocal
+> Task :installBuildTransformer
+> Task :realm-annotations:compileJava UP-TO-DATE
+> Task :realm-annotations:processResources NO-SOURCE
+> Task :realm-annotations:classes UP-TO-DATE
+> Task :realm-annotations:jar UP-TO-DATE
+> Task :realm-annotations:javadoc UP-TO-DATE
+> Task :realm-annotations:javadocJar UP-TO-DATE
+> Task :realm-annotations:sourcesJar UP-TO-DATE
+> Task :realm-annotations:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm-annotations:generatePomFileForRealmPublication
+> Task :realm-annotations:publishRealmPublicationToMavenLocal
+> Task :realm-annotations:publishToMavenLocal
+> Task :installAnnotations
+> Task :realm-transformer:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-transformer:generateVersionClass
+> Task :realm-transformer:compileKotlin UP-TO-DATE
+> Task :realm-transformer:compileJava UP-TO-DATE
+> Task :realm-transformer:processResources NO-SOURCE
+> Task :realm-transformer:classes UP-TO-DATE
+> Task :realm-transformer:jar UP-TO-DATE
+> Task :realm-transformer:javadoc UP-TO-DATE
+> Task :realm-transformer:javadocJar UP-TO-DATE
+> Task :realm-transformer:sourcesJar UP-TO-DATE
+> Task :realm-transformer:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm-transformer:generatePomFileForRealmPublication
+> Task :realm-transformer:publishRealmPublicationToMavenLocal
+> Task :realm-transformer:publishToMavenLocal
+> Task :installTransformer
+
+> Configure project :realm:kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :realm:kotlin-extensions:preBuild UP-TO-DATE
+> Task :realm:kotlin-extensions:preBaseReleaseBuild UP-TO-DATE
+> Task :realm:realm-library:preBuild UP-TO-DATE
+> Task :realm:realm-library:stageBaseReleaseJniHeaderSnapshot UP-TO-DATE
+> Task :realm:realm-library:preBaseReleaseBuild UP-TO-DATE
+> Task :realm:realm-library:writeBaseReleaseAarMetadata UP-TO-DATE
+> Task :realm:kotlin-extensions:checkBaseReleaseAarMetadata UP-TO-DATE
+> Task :realm:kotlin-extensions:mergeBaseReleaseJniLibFolders UP-TO-DATE
+> Task :realm:kotlin-extensions:mergeBaseReleaseNativeLibs NO-SOURCE
+> Task :realm:kotlin-extensions:stripBaseReleaseDebugSymbols NO-SOURCE
+> Task :realm:kotlin-extensions:copyBaseReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :realm:kotlin-extensions:generateBaseReleaseResources UP-TO-DATE
+> Task :realm:kotlin-extensions:packageBaseReleaseResources UP-TO-DATE
+> Task :realm:kotlin-extensions:processBaseReleaseNavigationResources UP-TO-DATE
+> Task :realm:kotlin-extensions:parseBaseReleaseLocalResources UP-TO-DATE
+> Task :realm:kotlin-extensions:generateBaseReleaseRFile UP-TO-DATE
+> Task :realm:realm-annotations-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm:realm-annotations-processor:generateVersionClass
+> Task :realm:realm-annotations-processor:compileKotlin UP-TO-DATE
+> Task :realm:realm-annotations-processor:compileJava UP-TO-DATE
+> Task :realm:realm-annotations-processor:processResources UP-TO-DATE
+> Task :realm:realm-annotations-processor:classes UP-TO-DATE
+> Task :realm:realm-annotations-processor:jar UP-TO-DATE
+> Task :realm:realm-library:cleanBaseReleaseJniHeaderValidation
+> Task :realm:realm-library:generateBaseReleaseBuildConfig UP-TO-DATE
+> Task :realm:realm-library:generateBaseReleaseResources UP-TO-DATE
+> Task :realm:realm-library:packageBaseReleaseResources UP-TO-DATE
+> Task :realm:realm-library:processBaseReleaseNavigationResources UP-TO-DATE
+> Task :realm:realm-library:parseBaseReleaseLocalResources UP-TO-DATE
+> Task :realm:realm-library:generateBaseReleaseRFile UP-TO-DATE
+> Task :realm:realm-library:kaptGenerateStubsBaseReleaseKotlin UP-TO-DATE
+> Task :realm:realm-library:kaptBaseReleaseKotlin UP-TO-DATE
+> Task :realm:realm-library:compileBaseReleaseKotlin UP-TO-DATE
+> Task :realm:realm-library:javaPreCompileBaseRelease UP-TO-DATE
+> Task :installRealm
+> Task :realm:realm-library:compileBaseReleaseJavaWithJavac
+> Task :realm:realm-library:compileBaseReleaseJavaWithJavac FROM-CACHE
+> Task :realm:realm-library:baseReleaseRealmBuildTransformer UP-TO-DATE
+> Task :realm:realm-library:bundleLibCompileToJarBaseRelease UP-TO-DATE
+> Task :realm:kotlin-extensions:extractBaseReleaseAnnotations UP-TO-DATE
+> Task :realm:kotlin-extensions:extractDeepLinksForAarBaseRelease UP-TO-DATE
+> Task :realm:kotlin-extensions:generateBaseReleaseAssets UP-TO-DATE
+> Task :realm:kotlin-extensions:mergeBaseReleaseAssets UP-TO-DATE
+> Task :realm:kotlin-extensions:kaptGenerateStubsBaseReleaseKotlin UP-TO-DATE
+> Task :realm:kotlin-extensions:kaptBaseReleaseKotlin SKIPPED
+> Task :realm:kotlin-extensions:compileBaseReleaseKotlin UP-TO-DATE
+> Task :realm:kotlin-extensions:javaPreCompileBaseRelease UP-TO-DATE
+> Task :realm:kotlin-extensions:compileBaseReleaseJavaWithJavac NO-SOURCE
+> Task :realm:kotlin-extensions:mergeBaseReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :realm:kotlin-extensions:mergeBaseReleaseConsumerProguardFiles UP-TO-DATE
+> Task :realm:kotlin-extensions:prepareBaseReleaseArtProfile UP-TO-DATE
+> Task :realm:kotlin-extensions:prepareLintJarForPublish UP-TO-DATE
+> Task :realm:kotlin-extensions:processBaseReleaseManifest UP-TO-DATE
+> Task :realm:kotlin-extensions:processBaseReleaseJavaRes UP-TO-DATE
+> Task :realm:kotlin-extensions:mergeBaseReleaseJavaResource UP-TO-DATE
+> Task :realm:kotlin-extensions:syncBaseReleaseLibJars UP-TO-DATE
+> Task :realm:kotlin-extensions:writeBaseReleaseAarMetadata UP-TO-DATE
+> Task :realm:kotlin-extensions:bundleBaseReleaseAar UP-TO-DATE
+> Task :realm:kotlin-extensions:generatePomFileForRealmPublication
+> Task :realm:kotlin-extensions:dokkaHtml UP-TO-DATE
+> Task :realm:kotlin-extensions:javadocJar UP-TO-DATE
+> Task :realm:kotlin-extensions:sourcesJar UP-TO-DATE
+> Task :realm:kotlin-extensions:publishRealmPublicationToMavenLocal
+> Task :realm:kotlin-extensions:publishToMavenLocal
+> Task :realm:realm-annotations-processor:javadoc UP-TO-DATE
+> Task :realm:realm-annotations-processor:javadocJar UP-TO-DATE
+> Task :realm:realm-annotations-processor:sourcesJar UP-TO-DATE
+> Task :realm:realm-annotations-processor:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm:realm-annotations-processor:generatePomFileForRealmPublication
+> Task :realm:realm-annotations-processor:publishRealmPublicationToMavenLocal
+> Task :realm:realm-annotations-processor:publishToMavenLocal
+> Task :realm:realm-library:generatePomFileForBasePublicationPublication
+> Task :realm:realm-library:javadoc UP-TO-DATE
+> Task :realm:realm-library:javadocJar UP-TO-DATE
+> Task :realm:realm-library:sourcesJar UP-TO-DATE
+> Task :realm:realm-library:checkBaseReleaseAarMetadata UP-TO-DATE
+
+> Task :realm:realm-library:configureCMakeRelWithDebInfo[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+C/C++: Build type: RelWithDebInfo
+C/C++: JNI Header directory: /mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseRelease/jni_include
+C/C++: Dependencies:  PACKAGE_NAME=realm-core VERSION=13.26.0 OPENSSL_VERSION=3.0.8 ZLIB_VERSION=1.2.13 BAAS_VERSION=5087ffd5a0e4975e625f0fbcceed23107f611055

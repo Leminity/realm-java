@@ -1,0 +1,1 @@
+AC-09 compatibility verification: FAIL: realm-annotations-processor public-class delta: missing=['io.realm.processor.RealmVersionChecker', 'io.realm.processor.RealmVersionChecker$Companion'], added=[]

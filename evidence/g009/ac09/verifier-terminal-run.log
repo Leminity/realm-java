@@ -1,0 +1,2 @@
+AC-09 compatibility verification: FAIL: realm-android-kotlin-extensions public-class delta: missing=['io.realm.kotlin.BuildConfig'], added=[]
+exit=1

@@ -130,12 +130,14 @@ is_baseline_allowed_path() {
     evidence/oracle/official-10.19.0/*|\
     evidence/toolchain/android17-wsl2/*|\
     evidence/toolchain/task-12-api37-runtime-audit/*|\
+    evidence/g009/ac09/*|\
     evidence/audit/g002-toolchain-final.md|\
     evidence/audit/g003-independent-build-recovery.md|\
     evidence/audit/task-9-preflight.md|\
     compatibility-fixtures/official-10.19.0-generator/*|\
     tools/capture-baseline.py|tools/verify-baseline.sh|\
     tools/verify-release-tag.sh|tools/test-verify-release-tag.sh|\
+    tools/verify-g009-ac09-compatibility.py|tools/test-verify-g009-ac09-compatibility.py|\
     tools/bootstrap-wsl-android.sh|tools/verify-toolchain.sh|\
     tools/verify-g003-independent-builds.sh|\
     tools/test-verify-g003-independent-builds.sh|\
