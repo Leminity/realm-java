@@ -56,6 +56,29 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
             rejected_url = self.run_script(*common, "--repository-url", "https://central.example/deployment/x/download")
             self.assertNotEqual(rejected_url.returncode, 0)
 
+    def test_validated_mirror_dry_run_is_tokenless_and_online_for_external_dependencies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = pathlib.Path(tmp)
+            repository = tmp / "mirror"
+            repository.mkdir()
+            result = self.run_script(
+                "--mode", "validated-mirror",
+                "--repository-url", repository.resolve().as_uri(),
+                "--sdk-root", "/not-used-by-dry-run",
+                "--official-gradle", "/not-used-by-dry-run/gradle",
+                "--immutable-encrypted", "/not-used-by-dry-run/input.realm",
+                "--gradle-user-home", str(tmp / "home"),
+                "--evidence-dir", str(tmp / "evidence"),
+                "--run-id", "validated-mirror",
+                "--dry-run", "--dry-run-identity", "37,16384,realm-api37-ps16k-kvm,fatal,true",
+                env={"CENTRAL_PORTAL_BEARER_TOKEN": "must-not-be-used"},
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            plan = (tmp / "evidence/validated-mirror/dry-run-command-plan.txt").read_text()
+            self.assertIn("G011_REPOSITORY_MODE=validated-mirror", plan)
+            self.assertNotIn("G011_FORK_BEARER", plan)
+            self.assertNotIn("--offline", plan)
+
     def test_gradle_routing_is_exclusive_in_all_resolution_paths(self):
         build = (FIXTURE / "build.gradle").read_text()
         settings = (FIXTURE / "settings.gradle").read_text()

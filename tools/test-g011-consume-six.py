@@ -60,6 +60,36 @@ class G011ConsumeSixTests(unittest.TestCase):
             )
             self.assertNotEqual(invalid.returncode, 0)
 
+    def test_validated_mirror_is_file_only_tokenless_and_online_for_external_dependencies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            repository = root / "validated-mirror"
+            repository.mkdir()
+            evidence = root / "evidence"
+            result = self.run_script(
+                "--mode", "validated-mirror",
+                "--repository-url", repository.resolve().as_uri(),
+                "--gradle-user-home", str(root / "home"),
+                "--evidence-dir", str(evidence),
+                "--dry-run",
+                env={"CENTRAL_PORTAL_BEARER_TOKEN": "must-not-be-used"},
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            settings = (evidence / "settings.gradle.redacted").read_text()
+            command = (evidence / "command.redacted.txt").read_text()
+            self.assertIn("G011_REPOSITORY_MODE') == 'validated'", settings)
+            self.assertNotIn("G011_FORK_BEARER", command)
+            self.assertNotIn("--offline", command)
+            self.assertIn(repository.resolve().as_uri(), command)
+            rejected = self.run_script(
+                "--mode", "validated-mirror",
+                "--repository-url", "https://central.example/deployment/x/download",
+                "--gradle-user-home", str(root / "home2"),
+                "--evidence-dir", str(root / "evidence2"),
+                "--dry-run",
+            )
+            self.assertNotEqual(rejected.returncode, 0)
+
     def test_local_empty_cache_allows_only_external_dependencies_from_public_repositories(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)

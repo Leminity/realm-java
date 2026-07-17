@@ -7,11 +7,12 @@ FORK_GROUP='io.github.leminity.realm'
 
 usage() {
   cat >&2 <<'USAGE'
-usage: g011-consume-six.sh --mode local|validated|central \
+usage: g011-consume-six.sh --mode local|validated|validated-mirror|central \
   --gradle-user-home <empty-dir> --evidence-dir <dir> [repository options] [--dry-run]
 
 local:     --repository <local Maven-layout directory>
 validated: --repository-url <https://.../deployment/<id>/download> --bearer-env <ENV_NAME>
+validated-mirror: --repository-url <file:///trusted/mirror> (no credential)
 central:   no repository URL, path, or bearer option (uses mavenCentral only)
 USAGE
   exit 64
@@ -20,6 +21,7 @@ fail() { printf 'G011 consumer FAIL: %s\n' "$*" >&2; exit 1; }
 require_value() { [[ $# -ge 2 && -n $2 ]] || usage; }
 valid_env_name() { [[ $1 =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; }
 valid_deployment_url() { [[ $1 == https://* && $1 != *'?'* && $1 != *'#'* && $1 =~ /deployment/[A-Za-z0-9._-]+/download/?$ ]]; }
+valid_file_repository_url() { [[ $1 == file:///* && $1 != *'?'* && $1 != *'#'* ]]; }
 
 mode=''
 repository=''
@@ -42,7 +44,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ $mode == local || $mode == validated || $mode == central ]] || usage
+[[ $mode == local || $mode == validated || $mode == validated-mirror || $mode == central ]] || usage
 [[ -n $gradle_user_home && -n $evidence ]] || usage
 case "$mode" in
   local)
@@ -57,6 +59,13 @@ case "$mode" in
     valid_env_name "$bearer_env" || fail 'bearer environment variable name is invalid'
     bearer_value="${!bearer_env:-}"
     [[ -n $bearer_value ]] || fail "validated mode requires non-empty bearer environment variable: $bearer_env"
+    fork_url=$repository_url
+    ;;
+  validated-mirror)
+    [[ -z $repository && -n $repository_url && -z $bearer_env ]] || usage
+    valid_file_repository_url "$repository_url" || fail 'validated mirror repository URL must be one credential-free file URL'
+    mirror_path=${repository_url#file://}
+    [[ -d $mirror_path ]] || fail "validated mirror repository does not exist: $mirror_path"
     fork_url=$repository_url
     ;;
   central)
@@ -203,7 +212,7 @@ else
   if [[ $mode == validated ]]; then
     env G011_REPOSITORY_MODE="$mode" G011_FORK_REPOSITORY_URL="$fork_url" G011_FORK_BEARER="$bearer_value" \
       GRADLE_USER_HOME="$gradle_user_home" "${command[@]}" > "$evidence/dependency-report.txt" 2>&1
-  elif [[ $mode == local ]]; then
+  elif [[ $mode == local || $mode == validated-mirror ]]; then
     env G011_REPOSITORY_MODE="$mode" G011_FORK_REPOSITORY_URL="$fork_url" \
       GRADLE_USER_HOME="$gradle_user_home" "${command[@]}" > "$evidence/dependency-report.txt" 2>&1
   else

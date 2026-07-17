@@ -12,7 +12,7 @@ DEFAULT_SDK=/home/leminity/Android/Sdk
 
 usage() {
   cat >&2 <<'USAGE'
-usage: run-ac08.sh [--mode local|validated|central] [--repository <local-stage>]
+usage: run-ac08.sh [--mode local|validated|validated-mirror|central] [--repository <local-stage>]
   [--repository-url <https://.../deployment/<id>/download> --bearer-env <ENV>]
   [--sdk-root <path> --serial <serial> --expected-avd <name>]
   [--official-gradle <path> --immutable-encrypted <path>]
@@ -28,6 +28,7 @@ fail() { echo "AC08 FAIL: $*" >&2; exit 1; }
 require_value() { [[ $# -ge 2 && -n $2 ]] || usage; }
 valid_env_name() { [[ $1 =~ ^[A-Za-z_][A-Za-z0-9_]*$ ]]; }
 valid_deployment_url() { [[ $1 == https://* && $1 != *'?'* && $1 != *'#'* && $1 =~ /deployment/[A-Za-z0-9._-]+/download/?$ ]]; }
+valid_file_repository_url() { [[ $1 == file:///* && $1 != *'?'* && $1 != *'#'* ]]; }
 
 MODE=local
 REPOSITORY=$DEFAULT_REPOSITORY
@@ -66,7 +67,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-[[ $MODE == local || $MODE == validated || $MODE == central ]] || usage
+[[ $MODE == local || $MODE == validated || $MODE == validated-mirror || $MODE == central ]] || usage
 case "$MODE" in
   local)
     [[ -z $REPOSITORY_URL && -z $BEARER_ENV ]] || usage
@@ -81,6 +82,14 @@ case "$MODE" in
     BEARER_VALUE="${!BEARER_ENV:-}"
     [[ -n $BEARER_VALUE ]] || fail "validated mode requires non-empty bearer environment variable: $BEARER_ENV"
     [[ -n $GRADLE_USER_HOME && $EVIDENCE_EXPLICIT == true ]] || fail 'remote mode requires --gradle-user-home and --evidence-dir (or AC08_EVIDENCE_DIR)'
+    FORK_REPOSITORY_URL=$REPOSITORY_URL
+    ;;
+  validated-mirror)
+    [[ -n $REPOSITORY_URL && -z $BEARER_ENV ]] || usage
+    valid_file_repository_url "$REPOSITORY_URL" || fail 'validated mirror repository URL must be one credential-free file URL'
+    mirror_path=${REPOSITORY_URL#file://}
+    [[ -d $mirror_path || $DRY_RUN == true ]] || fail "validated mirror repository does not exist: $mirror_path"
+    [[ -n $GRADLE_USER_HOME && $EVIDENCE_EXPLICIT == true ]] || fail 'validated mirror mode requires --gradle-user-home and --evidence-dir'
     FORK_REPOSITORY_URL=$REPOSITORY_URL
     ;;
   central)
@@ -222,6 +231,8 @@ if [[ $DRY_RUN == true ]]; then
       printf 'env G011_REPOSITORY_MODE=local G008_STAGING_REPOSITORY=%q ' "$FORK_REPOSITORY_URL"
     elif [[ $MODE == validated ]]; then
       printf 'env G011_REPOSITORY_MODE=validated G008_STAGING_REPOSITORY=%q G011_FORK_BEARER=<redacted> GRADLE_USER_HOME=%q ' "$FORK_REPOSITORY_URL" "$GRADLE_USER_HOME"
+    elif [[ $MODE == validated-mirror ]]; then
+      printf 'env G011_REPOSITORY_MODE=validated-mirror G008_STAGING_REPOSITORY=%q GRADLE_USER_HOME=%q ' "$FORK_REPOSITORY_URL" "$GRADLE_USER_HOME"
     else
       printf 'env G011_REPOSITORY_MODE=central GRADLE_USER_HOME=%q ' "$GRADLE_USER_HOME"
     fi
