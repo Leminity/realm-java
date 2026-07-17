@@ -1,0 +1,12 @@
+command=python3 tools/verify-g010-scope.py --write-report evidence/g010/task14-scope-ac15-report.json
+root=0e8bddf0a46827a7336a6a13406df8e35834db25
+verification_head=01640b4fd6be630409f9a9eb71cba20f01c40e83
+base=0ab8d6961afb038d0e0c69478de45dda3958d641
+core=d7b52ccbada0283527db36143cfeab18692b4ed0
+retired_processor_evidence=true
+core_toolchain_prerequisite=b741862e7ca7cb1b81d276457989067b7737dc86
+core_toolchain_prerequisite_valid=true
+result=FAIL
+remaining_failure_count=1
+remaining_genuine_blocker=
+forbidden supported-graph execution reference: build.gradle:26:if (project.hasProperty('s3cfg')) { | build.gradle:27:startParameter.projectProperties += [s3cfg: project.getProperty('s3cfg')] | build.gradle:44:if (project.hasProperty('ossrhUsername')) { | build.gradle:45:startParameter.projectProperties += [ossrhUsername: project.getProperty('ossrhUsername')] | build.gradle:47:if (project.hasProperty('ossrhPassword')) { | build.gradle:48:startParameter.projectProperties += [ossrhPassword: project.getProperty('ossrhPassword')]
