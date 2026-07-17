@@ -24,6 +24,7 @@ jobs:
     environment: maven-central-stage
     runs-on: [self-hosted, linux, api37, ps16k]
     outputs:
+      source_commit: ${{ steps.source.outputs.commit }}
       stage_manifest_b64: ${{ steps.stage_manifest.outputs.stage_manifest_b64 }}
       stage_manifest_sha256: ${{ steps.stage_manifest.outputs.stage_manifest_sha256 }}
     steps:
@@ -49,25 +50,52 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           G011_ENVIRONMENT_POLICY_TOKEN: ${{ secrets.G011_ENVIRONMENT_POLICY_TOKEN }}
+          G011_ENVIRONMENT_BYPASS_ATTESTATION: ${{ secrets.G011_ENVIRONMENT_BYPASS_ATTESTATION }}
+          TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
           policy_dir="$RUNNER_TEMP/maven-central-environment-policy"
           mkdir -p "$policy_dir"
-          fetch_policy() {
-            local environment="$1" destination="$2"
-            local endpoint="https://api.github.com/repos/$GITHUB_REPOSITORY/environments/$environment"
-            if curl --fail --silent --show-error --header "Authorization: Bearer $GITHUB_TOKEN" --header 'Accept: application/vnd.github+json' "$endpoint" > "$destination"; then return; fi
-            # github.token may be unable to read environment protection data.
-            # The fallback is an explicitly protected preflight credential,
-            # never an assumed/default-pass policy.
-            test -n "$G011_ENVIRONMENT_POLICY_TOKEN" || { echo 'environment policy preflight credential is required' >&2; exit 1; }
-            curl --fail --silent --show-error --header "Authorization: Bearer $G011_ENVIRONMENT_POLICY_TOKEN" --header 'Accept: application/vnd.github+json' "$endpoint" > "$destination"
+          github_curl() {
+            local token_name="$1" token="${!1}"
+            shift
+            test -n "$token"
+            printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\n' "$token" |
+              curl --config - "$@"
           }
-          fetch_policy maven-central-stage "$policy_dir/maven-central-stage.json"
-          fetch_policy maven-central-release "$policy_dir/maven-central-release.json"
+          fetch_policy() {
+            local environment="$1" destination="$2" policies_destination="$3"
+            local endpoint="https://api.github.com/repos/$GITHUB_REPOSITORY/environments/$environment"
+            local policies_endpoint="$endpoint/deployment-branch-policies?per_page=100"
+            fetch_pair() {
+              github_curl "$1" --fail --silent --show-error --proto '=https' --tlsv1.2 "$endpoint" > "$destination.tmp" &&
+                github_curl "$1" --fail --silent --show-error --proto '=https' --tlsv1.2 "$policies_endpoint" > "$policies_destination.tmp"
+            }
+            if ! fetch_pair GITHUB_TOKEN; then
+              # github.token may be unable to read private environment policy.
+              # The fallback is an explicit protected preflight credential.
+              rm -f "$destination.tmp" "$policies_destination.tmp"
+              test -n "$G011_ENVIRONMENT_POLICY_TOKEN" || { echo 'environment policy preflight credential is required' >&2; exit 1; }
+              fetch_pair G011_ENVIRONMENT_POLICY_TOKEN
+            fi
+            mv "$destination.tmp" "$destination"
+            mv "$policies_destination.tmp" "$policies_destination"
+          }
+          fetch_policy maven-central-stage "$policy_dir/maven-central-stage.json" "$policy_dir/maven-central-stage-deployment-policies.json"
+          fetch_policy maven-central-release "$policy_dir/maven-central-release.json" "$policy_dir/maven-central-release-deployment-policies.json"
+          bypass_args=()
+          if [[ -n "$G011_ENVIRONMENT_BYPASS_ATTESTATION" ]]; then
+            printf '%s' "$G011_ENVIRONMENT_BYPASS_ATTESTATION" > "$policy_dir/admin-bypass-attestation.json"
+            bypass_args=(--admin-bypass-attestation "$policy_dir/admin-bypass-attestation.json")
+          fi
           python3 tools/central-portal.py audit-environment-policy \
             --stage-policy "$policy_dir/maven-central-stage.json" \
+            --stage-deployment-policies "$policy_dir/maven-central-stage-deployment-policies.json" \
             --release-policy "$policy_dir/maven-central-release.json" \
+            --release-deployment-policies "$policy_dir/maven-central-release-deployment-policies.json" \
+            --repository "$GITHUB_REPOSITORY" "${bypass_args[@]}" \
+            --gate-time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --release-tag "$TAG" \
             --audit-file build/maven-central-environment-policy-audit.json
       - name: Bind approved tag to the checked-out source tree
         id: source
@@ -89,8 +117,113 @@ jobs:
           printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
           printf 'core_commit=%s\n' "$core_commit" >> "$GITHUB_OUTPUT"
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+      - name: Recover a prior immutable stage outcome without re-uploading
+        id: stage_recovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ steps.source.outputs.commit }}
+          TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.source.outputs.version }}
+        run: |
+          set -euo pipefail
+          mkdir -p build
+          root="$RUNNER_TEMP/g011-stage-recovery-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          mkdir -p "$root/extracted"
+          github_curl() {
+            printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\n' "$GH_TOKEN" |
+              curl --config - "$@"
+          }
+          name="g011-central-stage-outcome-$COMMIT"
+          api="https://api.github.com/repos/$GITHUB_REPOSITORY"
+          python3 - "$api" "$name" "$COMMIT" "$root/selection.json" <<'PY'
+          import json, os, sys, urllib.parse, urllib.request
+          api, name, commit, output = sys.argv[1:]
+          token = os.environ['GH_TOKEN']
+          headers = {
+                  'Accept': 'application/vnd.github+json',
+                  'Authorization': f'Bearer {token}',
+                  'X-GitHub-Api-Version': '2022-11-28',
+          }
+          def matches_for(artifact_name):
+              query = urllib.parse.urlencode({'name': artifact_name, 'per_page': 100})
+              request = urllib.request.Request(f'{api}/actions/artifacts?{query}', headers=headers)
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  artifacts = json.load(response).get('artifacts', [])
+              return [
+                  item for item in artifacts
+                  if item.get('name') == artifact_name
+                  and item.get('workflow_run', {}).get('head_sha') == commit
+              ]
+          outcomes = matches_for(name)
+          intents = matches_for(name.replace('-outcome-', '-intent-'))
+          if len(outcomes) > 1 or len(intents) > 1:
+              raise SystemExit('multiple prior stage outcomes exist for the exact release commit')
+          with open(output, 'w', encoding='utf-8') as destination:
+              json.dump(
+                  {
+                      'outcome': outcomes[0] if outcomes else {},
+                      'intent': intents[0] if intents else {},
+                  },
+                  destination,
+                  sort_keys=True,
+              )
+          PY
+          artifact_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["outcome"].get("id", ""))' "$root/selection.json")"
+          intent_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["intent"].get("id", ""))' "$root/selection.json")"
+          expired="$(python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(str(d["outcome"].get("expired", False) or d["intent"].get("expired", False)).lower())' "$root/selection.json")"
+          if [[ "$expired" == true ]]; then
+            echo 'a prior stage transaction artifact expired; manual Portal audit is required' >&2
+            exit 1
+          fi
+          if [[ -z "$artifact_id" ]]; then
+            if [[ -n "$intent_id" ]]; then
+              echo 'a prior pre-upload intent has no immutable outcome; manual Portal audit is required' >&2
+              exit 1
+            fi
+            echo 'recovered=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          expected_archive_sha="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["outcome"].get("digest", "").removeprefix("sha256:"))' "$root/selection.json")"
+          [[ "$expected_archive_sha" =~ ^[0-9a-f]{64}$ ]]
+          prior_run_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["outcome"]["workflow_run"]["id"])' "$root/selection.json")"
+          github_curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
+            "$api/actions/runs/$prior_run_id" --output "$root/prior-run.json"
+          python3 - "$root/prior-run.json" "$COMMIT" <<'PY'
+          import json, sys
+          run = json.load(open(sys.argv[1], encoding='utf-8'))
+          if (
+              str(run.get('path', '')).split('@', 1)[0] != '.github/workflows/release.yml'
+              or run.get('event') != 'release'
+              or run.get('head_sha') != sys.argv[2]
+          ):
+              raise SystemExit('prior stage artifact is not from the exact release workflow event')
+          PY
+          github_curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
+            "$api/actions/artifacts/$artifact_id/zip" --output "$root/outcome.zip"
+          test "$(sha256sum "$root/outcome.zip" | awk '{print $1}')" = "$expected_archive_sha"
+          unzip -q "$root/outcome.zip" -d "$root/extracted"
+          mapfile -t manifests < <(find "$root/extracted" -type f -name 'maven-central-stage-manifest.json' | sort)
+          mapfile -t failures < <(find "$root/extracted" -type f -name 'maven-central-stage-manifest.json.failed.json' | sort)
+          if (( ${#failures[@]} > 0 )); then
+            echo 'a prior immutable failed/ambiguous stage outcome forbids automatic re-upload' >&2
+            exit 1
+          fi
+          test "${#manifests[@]}" = 1
+          cp "${manifests[0]}" build/maven-central-stage-manifest.json
+          manifest_sha="$(sha256sum build/maven-central-stage-manifest.json | awk '{print $1}')"
+          python3 tools/central-portal.py verify-stage-manifest \
+            --stage-manifest build/maven-central-stage-manifest.json \
+            --stage-manifest-sha256 "$manifest_sha"
+          python3 - build/maven-central-stage-manifest.json "$COMMIT" "$TAG" "$VERSION" <<'PY'
+          import json, sys
+          manifest = json.load(open(sys.argv[1], encoding='utf-8'))
+          if (manifest.get('commit'), manifest.get('tag'), manifest.get('version')) != tuple(sys.argv[2:]):
+              raise SystemExit('prior stage outcome differs from exact source/tag/version')
+          PY
+          echo 'recovered=true' >> "$GITHUB_OUTPUT"
       - name: Download and independently verify exact successful CI evidence
         id: ci_evidence
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           COMMIT: ${{ steps.source.outputs.commit }}
@@ -99,9 +232,14 @@ jobs:
           root="$RUNNER_TEMP/g011-ci-handoff-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           test ! -e "$root"
           mkdir -p "$root/extracted"
-          python3 - "$GITHUB_REPOSITORY" "$COMMIT" "$GH_TOKEN" "$root/selection.json" <<'PY'
-          import json, sys, urllib.parse, urllib.request
-          repository, commit, token, output = sys.argv[1:]
+          github_curl() {
+            printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\n' "$GH_TOKEN" |
+              curl --config - "$@"
+          }
+          python3 - "$GITHUB_REPOSITORY" "$COMMIT" "$root/selection.json" <<'PY'
+          import json, os, sys, urllib.parse, urllib.request
+          repository, commit, output = sys.argv[1:]
+          token = os.environ['GH_TOKEN']
           headers = {
               'Accept': 'application/vnd.github+json',
               'Authorization': f'Bearer {token}',
@@ -132,8 +270,7 @@ jobs:
           run_id="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["run_id"])' "$root/selection.json")"
           archive_url="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["archive_download_url"])' "$root/selection.json")"
           expected_archive_sha="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["digest"].removeprefix("sha256:"))' "$root/selection.json")"
-          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
-            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+          github_curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
             "$archive_url" --output "$root/ci-evidence.zip"
           actual_archive_sha="$(sha256sum "$root/ci-evidence.zip" | awk '{print $1}')"
           test "$actual_archive_sha" = "$expected_archive_sha"
@@ -160,35 +297,65 @@ jobs:
             echo "ci_artifact_id=$artifact_id"
           } >> "$GITHUB_OUTPUT"
       - name: Freshly build and locally reverify the exact Central bundle
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
           g008SigningKey: ${{ secrets.MAVEN_SIGNING_KEY }}
           g008SigningPassword: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+          GRADLE_USER_HOME: ${{ runner.temp }}/g011-gradle-signing-${{ github.run_id }}-${{ github.run_attempt }}
         run: |
           set -euo pipefail
+          test ! -e "$GRADLE_USER_HOME"
+          mkdir -m 700 "$GRADLE_USER_HOME"
+          trap 'rm -rf "$GRADLE_USER_HOME"' EXIT
           ./tools/publish_release.sh --signed-bundle
           test "$(git rev-parse HEAD)" = "${{ steps.source.outputs.commit }}"
           test -z "$(git diff --name-only)"
           python3 tools/central-portal.py verify-bundle --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json
+          python3 - "$GRADLE_USER_HOME" <<'PY'
+          import os, pathlib, sys
+          forbidden = [
+              value.encode()
+              for name in ('g008SigningKey', 'g008SigningPassword')
+              if (value := os.environ.get(name))
+          ] + [b'BEGIN PGP PRIVATE KEY BLOCK']
+          for path in pathlib.Path(sys.argv[1]).rglob('*'):
+              if path.is_file() and any(value and value in path.read_bytes() for value in forbidden):
+                  raise SystemExit(f'credential material detected in signing Gradle home: {path}')
+          print('signing Gradle home secret scan PASS')
+          PY
+          rm -rf "$GRADLE_USER_HOME"
+          trap - EXIT
       - name: Create an ephemeral exact-consumer runner
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         run: |
           set -euo pipefail
           cat > build/run-g011-consumer.sh <<'SH'
           #!/usr/bin/env bash
           set -euo pipefail
-          url=''; mode=''; home=''; evidence=''; bearer=''
+          url=''; mode=''; home=''; evidence=''
           while [[ $# -gt 0 ]]; do case "$1" in
             --repository-url) url="$2"; shift 2;; --mode) mode="$2"; shift 2;;
             --gradle-user-home) home="$2"; shift 2;; --evidence-dir) evidence="$2"; shift 2;;
-            --bearer-env) bearer="$2"; shift 2;; *) exit 2;; esac; done
-          args=(--repository-url "$url" --mode "$mode" --gradle-user-home "$home/six" --evidence-dir "$evidence/six")
-          [[ -n "$bearer" ]] && args+=(--bearer-env "$bearer")
-          tools/g011-consume-six.sh "${args[@]}"
+            --bearer-env) echo 'validated mirror consumer rejects credentials' >&2; exit 2;; *) exit 2;; esac; done
+          [[ "$mode" == validated-mirror && "$url" == file://* ]] || exit 2
+          tools/g011-consume-six.sh --repository-url "$url" --mode validated-mirror \
+            --gradle-user-home "$home/six" --evidence-dir "$evidence/six"
           # Task32 parameterizes the existing AC08 semantic harness; it
           # rejects API/4KiB/AVD/property substitutions rather than falling
           # back to the historical local/offline runner.
-          ac08=(--mode validated --repository-url "$url" --bearer-env "$bearer" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
+          ac08=(--mode validated-mirror --repository-url "$url" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
           compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh "${ac08[@]}"
-          tools/g011-verify-native-elf.sh --bundle build/g008-maven-central-bundle.zip --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
+          mirror="$(python3 - "$url" <<'PY'
+          import pathlib, sys, urllib.parse
+          parsed = urllib.parse.urlparse(sys.argv[1])
+          if parsed.scheme != 'file' or parsed.netloc not in ('', 'localhost'):
+              raise SystemExit('validated mirror URL is invalid')
+          print(pathlib.Path(urllib.parse.unquote(parsed.path)))
+          PY
+          )"
+          version="$(tr -d '[:space:]' < version.txt)"
+          aar="$mirror/io/github/leminity/realm/realm-android-library/$version/realm-android-library-$version.aar"
+          tools/g011-verify-native-elf.sh --aar "$aar" --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
           (
             cd "$evidence"
             rm -f SHA256SUMS checksum-verify.log
@@ -203,13 +370,57 @@ jobs:
           PY
           SH
           chmod 700 build/run-g011-consumer.sh
+      - name: Write a fail-closed pre-upload transaction intent
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
+        env:
+          COMMIT: ${{ steps.source.outputs.commit }}
+          CORE_COMMIT: ${{ steps.source.outputs.core_commit }}
+          TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.source.outputs.version }}
+          RUNTIME_PROVENANCE: ${{ steps.ci_evidence.outputs.runtime_provenance }}
+        run: |
+          set -euo pipefail
+          python3 - "$COMMIT" "$CORE_COMMIT" "$TAG" "$VERSION" "$RUNTIME_PROVENANCE" <<'PY'
+          import hashlib, json, pathlib, sys
+          commit, core, tag, version, runtime = sys.argv[1:]
+          digest = lambda path: hashlib.sha256(pathlib.Path(path).read_bytes()).hexdigest()
+          value = {
+              'format': 'realm-maven-central-pre-upload-intent-v1',
+              'state': 'PRE_UPLOAD_INTENT',
+              'commit': commit,
+              'core_commit': core,
+              'tag': tag,
+              'version': version,
+              'bundle_sha256': digest('build/g008-maven-central-bundle.zip'),
+              'source_manifest_sha256': digest('build/g008-publication-manifest.json'),
+              'runtime_provenance_sha256': digest(runtime),
+              'environment_policy_audit_sha256': digest(
+                  'build/maven-central-environment-policy-audit.json'
+              ),
+          }
+          pathlib.Path('build/maven-central-stage-intent.json').write_text(
+              json.dumps(value, sort_keys=True, separators=(',', ':')) + '\n',
+              encoding='utf-8',
+          )
+          PY
+      - name: Persist the pre-upload intent before contacting Central
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: g011-central-stage-intent-${{ steps.source.outputs.commit }}
+          path: build/maven-central-stage-intent.json
+          if-no-files-found: error
+          retention-days: 90
       - name: Upload exactly one USER_MANAGED deployment, validate, and consume it once
+        id: portal_stage
+        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
           G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
           G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
         run: |
           set -euo pipefail
+          : > build/maven-central-stage-entered
           python3 tools/central-portal.py stage \
             --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json \
             --tag '${{ github.event.release.tag_name }}' --version '${{ steps.source.outputs.version }}' \
@@ -222,7 +433,8 @@ jobs:
             --validated-consumer-command build/run-g011-consumer.sh \
             --validated-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-validated" \
             --validated-consumer-evidence "$RUNNER_TEMP/g011-consumer-validated" \
-            --stage-manifest build/maven-central-stage-manifest.json --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network
+            --stage-manifest build/maven-central-stage-manifest.json --token-env CENTRAL_PORTAL_BEARER_TOKEN \
+            --drop-failed-deployment --allow-network
       - name: Expose immutable stage manifest to reviewer-gated release
         id: stage_manifest
         run: |
@@ -230,18 +442,86 @@ jobs:
           manifest=build/maven-central-stage-manifest.json
           printf 'stage_manifest_sha256=%s\n' "$(sha256sum "$manifest" | awk '{print $1}')" >> "$GITHUB_OUTPUT"
           printf 'stage_manifest_b64=%s\n' "$(base64 -w0 "$manifest")" >> "$GITHUB_OUTPUT"
-      - name: Retain redacted stage and failure evidence
-        if: ${{ always() }}
+      - name: Verify retained stage evidence contains no credential material
+        id: stage_secret_scan
+        if: ${{ always() && steps.stage_recovery.outputs.recovered != 'true' }}
+        env:
+          PORTAL_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          POLICY_TOKEN: ${{ secrets.G011_ENVIRONMENT_POLICY_TOKEN }}
+          BYPASS_ATTESTATION: ${{ secrets.G011_ENVIRONMENT_BYPASS_ATTESTATION }}
+          SIGNING_KEY: ${{ secrets.MAVEN_SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.MAVEN_SIGNING_PASSWORD }}
+        run: |
+          set -euo pipefail
+          status=0
+          python3 - build "$RUNNER_TEMP/g011-consumer-validated" "$RUNNER_TEMP/g011-gradle-validated" <<'PY' || status=$?
+          import os, pathlib, sys
+          secrets = [
+              value.encode()
+              for name in ('PORTAL_TOKEN', 'POLICY_TOKEN', 'BYPASS_ATTESTATION', 'SIGNING_KEY', 'SIGNING_PASSWORD')
+              if (value := os.environ.get(name))
+          ]
+          forbidden = secrets + [b'BEGIN PGP PRIVATE KEY BLOCK', b'Authorization: Bearer ']
+          for root_name in sys.argv[1:]:
+              root = pathlib.Path(root_name)
+              candidates = [root] if root.is_file() else root.rglob('*') if root.exists() else []
+              for path in candidates:
+                  if not path.is_file() or (
+                      path.parent.name == 'build'
+                      and not path.name.startswith('maven-central-')
+                  ):
+                      continue
+                  data = path.read_bytes()
+                  if any(value and value in data for value in forbidden):
+                      raise SystemExit(f'credential material detected in retained evidence: {path}')
+          print('stage evidence secret scan PASS')
+          PY
+          rm -rf "$RUNNER_TEMP/g011-gradle-validated"
+          exit "$status"
+      - name: Classify exact stage transaction evidence
+        id: stage_transaction
+        if: ${{ always() && steps.stage_recovery.outputs.recovered != 'true' }}
+        run: |
+          set -euo pipefail
+          entered=false
+          [[ -f build/maven-central-stage-entered ]] && entered=true
+          manifest_count=0
+          failure_count=0
+          [[ -f build/maven-central-stage-manifest.json ]] && manifest_count=1
+          [[ -f build/maven-central-stage-manifest.json.failed.json ]] && failure_count=1
+          if [[ "$entered" == true && $((manifest_count + failure_count)) -eq 1 ]]; then
+            echo 'transaction=true' >> "$GITHUB_OUTPUT"
+            echo 'diagnostic=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 'transaction=false' >> "$GITHUB_OUTPUT"
+          echo 'diagnostic=true' >> "$GITHUB_OUTPUT"
+          if [[ "$entered" == true ]]; then
+            echo 'Portal stage entered without exactly one durable outcome; pre-upload intent now requires manual Portal audit' >&2
+            exit 1
+          fi
+      - name: Retain immutable redacted stage transaction outcome
+        if: ${{ always() && steps.stage_transaction.outputs.transaction == 'true' && steps.stage_secret_scan.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: g011-central-stage-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          name: g011-central-stage-outcome-${{ steps.source.outputs.commit }}
           path: |
             build/maven-central-environment-policy-audit.json
             build/maven-central-stage-manifest.json
             build/maven-central-stage-manifest.json.failed.json
             ${{ runner.temp }}/g011-consumer-validated
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain run-scoped pre-transaction diagnostics without poisoning recovery
+        if: ${{ always() && steps.stage_transaction.outputs.diagnostic == 'true' && steps.stage_secret_scan.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: g011-central-stage-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            build/maven-central-environment-policy-audit.json
+            build/maven-central-stage-entered
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 90
 
   release:
     name: Reviewer-gated Central publication
@@ -294,18 +574,24 @@ jobs:
           root="$RUNNER_TEMP/g011-release-ci-handoff-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           test ! -e "$root"
           mkdir -p "$root/extracted"
+          github_curl() {
+            printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\n' "$GH_TOKEN" |
+              curl --config - "$@"
+          }
           api="https://api.github.com/repos/$GITHUB_REPOSITORY"
-          curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
-            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+          github_curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
             "$api/actions/runs/$ci_run_id" --output "$root/run.json"
-          curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
-            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+          github_curl --fail --silent --show-error --proto '=https' --tlsv1.2 \
             "$api/actions/runs/$ci_run_id/artifacts?per_page=100" --output "$root/artifacts.json"
           python3 - "$root/run.json" "$root/artifacts.json" "$commit" "$ci_artifact_id" "$expected_archive_sha" "$root/selection.json" <<'PY'
           import json, sys
           run_path, artifacts_path, commit, artifact_id, expected_sha, output = sys.argv[1:]
           run = json.load(open(run_path, encoding='utf-8'))
-          if run.get('head_sha') != commit or run.get('conclusion') != 'success' or run.get('path') != '.github/workflows/ci.yml':
+          if (
+              run.get('head_sha') != commit
+              or run.get('conclusion') != 'success'
+              or str(run.get('path', '')).split('@', 1)[0] != '.github/workflows/ci.yml'
+          ):
               raise SystemExit('stage manifest CI run is not a successful exact-source CI workflow')
           artifacts = json.load(open(artifacts_path, encoding='utf-8')).get('artifacts', [])
           matches = [item for item in artifacts if str(item.get('id')) == artifact_id]
@@ -319,8 +605,7 @@ jobs:
           json.dump(artifact, open(output, 'w', encoding='utf-8'), sort_keys=True)
           PY
           archive_url="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["archive_download_url"])' "$root/selection.json")"
-          curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
-            --header "Authorization: Bearer $GH_TOKEN" --header 'Accept: application/vnd.github+json' \
+          github_curl --fail --silent --show-error --location --proto '=https' --tlsv1.2 \
             "$archive_url" --output "$root/ci-evidence.zip"
           test "$(sha256sum "$root/ci-evidence.zip" | awk '{print $1}')" = "$expected_archive_sha"
           unzip -q "$root/ci-evidence.zip" -d "$root/extracted"
@@ -333,6 +618,83 @@ jobs:
             --verify evidence/provenance/g011-source-evidence-manifest.json
           python3 tools/g011-evidence-manifest.py --mode runtime \
             --runtime-evidence-dir "${evidence_roots[0]}" --verify "${runtime_manifests[0]}"
+          python3 - "$api" "$commit" "$root/release-guard.json" <<'PY'
+          import json, os, sys, urllib.parse, urllib.request
+          api, commit, output = sys.argv[1:]
+          headers = {
+              'Accept': 'application/vnd.github+json',
+              'Authorization': f"Bearer {os.environ['GH_TOKEN']}",
+              'X-GitHub-Api-Version': '2022-11-28',
+          }
+          def matches(name):
+              query = urllib.parse.urlencode({'name': name, 'per_page': 100})
+              request = urllib.request.Request(f'{api}/actions/artifacts?{query}', headers=headers)
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  artifacts = json.load(response).get('artifacts', [])
+              return [
+                  item for item in artifacts
+                  if item.get('name') == name
+                  and item.get('workflow_run', {}).get('head_sha') == commit
+              ]
+          intent = matches(f'g011-central-release-intent-{commit}')
+          outcome = matches(f'g011-central-release-outcome-{commit}')
+          json.dump({'intent': intent, 'outcome': outcome}, open(output, 'w', encoding='utf-8'), sort_keys=True)
+          if intent or outcome:
+              if any(item.get('expired') for item in intent + outcome):
+                  raise SystemExit('a prior publication transaction artifact expired; manual Portal audit is required')
+              raise SystemExit('a prior publication intent or outcome forbids same-version retry; manual audit and a new fork revision are required')
+          PY
+      - name: Reaudit protected environments immediately before publication
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          G011_ENVIRONMENT_POLICY_TOKEN: ${{ secrets.G011_ENVIRONMENT_POLICY_TOKEN }}
+          G011_ENVIRONMENT_BYPASS_ATTESTATION: ${{ secrets.G011_ENVIRONMENT_BYPASS_ATTESTATION }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          policy_dir="$RUNNER_TEMP/maven-central-release-policy"
+          mkdir -p "$policy_dir"
+          github_curl() {
+            local token_name="$1" token="${!1}"
+            shift
+            test -n "$token"
+            printf 'header = "Authorization: Bearer %s"\nheader = "Accept: application/vnd.github+json"\n' "$token" |
+              curl --config - "$@"
+          }
+          fetch_policy() {
+            local environment="$1" destination="$2" policies_destination="$3"
+            local endpoint="https://api.github.com/repos/$GITHUB_REPOSITORY/environments/$environment"
+            local policies_endpoint="$endpoint/deployment-branch-policies?per_page=100"
+            fetch_pair() {
+              github_curl "$1" --fail --silent --show-error --proto '=https' --tlsv1.2 "$endpoint" > "$destination.tmp" &&
+                github_curl "$1" --fail --silent --show-error --proto '=https' --tlsv1.2 "$policies_endpoint" > "$policies_destination.tmp"
+            }
+            if ! fetch_pair GITHUB_TOKEN; then
+              rm -f "$destination.tmp" "$policies_destination.tmp"
+              test -n "$G011_ENVIRONMENT_POLICY_TOKEN" || { echo 'environment policy preflight credential is required' >&2; exit 1; }
+              fetch_pair G011_ENVIRONMENT_POLICY_TOKEN
+            fi
+            mv "$destination.tmp" "$destination"
+            mv "$policies_destination.tmp" "$policies_destination"
+          }
+          fetch_policy maven-central-stage "$policy_dir/maven-central-stage.json" "$policy_dir/maven-central-stage-deployment-policies.json"
+          fetch_policy maven-central-release "$policy_dir/maven-central-release.json" "$policy_dir/maven-central-release-deployment-policies.json"
+          bypass_args=()
+          if [[ -n "$G011_ENVIRONMENT_BYPASS_ATTESTATION" ]]; then
+            printf '%s' "$G011_ENVIRONMENT_BYPASS_ATTESTATION" > "$policy_dir/admin-bypass-attestation.json"
+            bypass_args=(--admin-bypass-attestation "$policy_dir/admin-bypass-attestation.json")
+          fi
+          audit=build/maven-central-release-environment-policy-audit.json
+          python3 tools/central-portal.py audit-environment-policy \
+            --stage-policy "$policy_dir/maven-central-stage.json" \
+            --stage-deployment-policies "$policy_dir/maven-central-stage-deployment-policies.json" \
+            --release-policy "$policy_dir/maven-central-release.json" \
+            --release-deployment-policies "$policy_dir/maven-central-release-deployment-policies.json" \
+            --repository "$GITHUB_REPOSITORY" "${bypass_args[@]}" \
+            --gate-time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --release-tag "$TAG" --audit-file "$audit"
+          expected="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["environment_policy_audit_sha256"])')"
+          test "$(sha256sum "$audit" | awk '{print $1}')" = "$expected"
       - name: Create fresh Central-only post-publication consumer runner
         run: |
           set -euo pipefail
@@ -376,7 +738,48 @@ jobs:
           PY
           SH
           chmod 700 build/run-g011-central-consumer.sh
+      - name: Write immutable publication intent after reviewer approval and final reaudit
+        env:
+          COMMIT: ${{ needs.stage.outputs.source_commit }}
+          STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+        run: |
+          set -euo pipefail
+          python3 - "$COMMIT" "$STAGE_MANIFEST_SHA256" <<'PY'
+          import hashlib, json, pathlib, sys
+          commit, expected_stage_sha = sys.argv[1:]
+          stage = pathlib.Path('stage-manifest.json')
+          actual_stage_sha = hashlib.sha256(stage.read_bytes()).hexdigest()
+          if actual_stage_sha != expected_stage_sha:
+              raise SystemExit('publication intent stage manifest digest differs')
+          manifest = json.loads(stage.read_text(encoding='utf-8'))
+          if manifest.get('commit') != commit:
+              raise SystemExit('publication intent commit differs from stage manifest')
+          audit = pathlib.Path('build/maven-central-release-environment-policy-audit.json')
+          value = {
+              'format': 'realm-maven-central-publication-intent-v1',
+              'state': 'PUBLICATION_INTENT',
+              'commit': commit,
+              'core_commit': manifest['core_commit'],
+              'tag': manifest['tag'],
+              'version': manifest['version'],
+              'deployment_id': manifest['deployment_id'],
+              'stage_manifest_sha256': actual_stage_sha,
+              'release_environment_policy_audit_sha256': hashlib.sha256(audit.read_bytes()).hexdigest(),
+          }
+          pathlib.Path('build/maven-central-release-intent.json').write_text(
+              json.dumps(value, sort_keys=True, separators=(',', ':')) + '\n',
+              encoding='utf-8',
+          )
+          PY
+      - name: Persist publication intent before contacting Central
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: g011-central-release-intent-${{ needs.stage.outputs.source_commit }}
+          path: build/maven-central-release-intent.json
+          if-no-files-found: error
+          retention-days: 90
       - name: Publish exact staged deployment then consume Maven Central freshly
+        id: portal_release
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
@@ -384,9 +787,94 @@ jobs:
           G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
         run: |
           set -euo pipefail
+          : > build/maven-central-release-entered
           python3 tools/central-portal.py release \
             --stage-manifest stage-manifest.json --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
             --published-consumer-command build/run-g011-central-consumer.sh \
             --published-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-central" \
             --published-consumer-evidence "$RUNNER_TEMP/g011-consumer-central" \
-            --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network
+            --release-evidence build/maven-central-release-evidence.json \
+            --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network \
+            | tee build/maven-central-release-result.json
+      - name: Verify retained release evidence contains no credential material
+        id: release_secret_scan
+        if: ${{ always() }}
+        env:
+          PORTAL_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          POLICY_TOKEN: ${{ secrets.G011_ENVIRONMENT_POLICY_TOKEN }}
+          BYPASS_ATTESTATION: ${{ secrets.G011_ENVIRONMENT_BYPASS_ATTESTATION }}
+        run: |
+          set -euo pipefail
+          status=0
+          python3 - stage-manifest.json build "$RUNNER_TEMP/g011-consumer-central" "$RUNNER_TEMP/g011-gradle-central" <<'PY' || status=$?
+          import os, pathlib, sys
+          secrets = [
+              value.encode()
+              for name in ('PORTAL_TOKEN', 'POLICY_TOKEN', 'BYPASS_ATTESTATION')
+              if (value := os.environ.get(name))
+          ]
+          forbidden = secrets + [b'Authorization: Bearer ']
+          for root_name in sys.argv[1:]:
+              root = pathlib.Path(root_name)
+              candidates = [root] if root.is_file() else root.rglob('*') if root.exists() else []
+              for path in candidates:
+                  if not path.is_file() or (
+                      path.parent.name == 'build'
+                      and not path.name.startswith('maven-central-')
+                  ):
+                      continue
+                  data = path.read_bytes()
+                  if any(value and value in data for value in forbidden):
+                      raise SystemExit(f'credential material detected in retained evidence: {path}')
+          print('release evidence secret scan PASS')
+          PY
+          rm -rf "$RUNNER_TEMP/g011-gradle-central"
+          exit "$status"
+      - name: Classify exact publication transaction evidence
+        id: release_transaction
+        if: ${{ always() }}
+        run: |
+          set -euo pipefail
+          entered=false
+          [[ -f build/maven-central-release-entered ]] && entered=true
+          intent=false
+          [[ -f build/maven-central-release-intent.json ]] && intent=true
+          evidence=false
+          [[ -f build/maven-central-release-evidence.json ]] && evidence=true
+          if [[ "$entered" == true && "$intent" == true && "$evidence" == true ]]; then
+            echo 'transaction=true' >> "$GITHUB_OUTPUT"
+            echo 'diagnostic=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo 'transaction=false' >> "$GITHUB_OUTPUT"
+          echo 'diagnostic=true' >> "$GITHUB_OUTPUT"
+          if [[ "$entered" == true ]]; then
+            echo 'publication entered without durable release evidence; publication intent now requires manual Portal audit' >&2
+            exit 1
+          fi
+      - name: Retain immutable publication transaction outcome
+        if: ${{ always() && steps.release_transaction.outputs.transaction == 'true' && steps.release_secret_scan.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: g011-central-release-outcome-${{ needs.stage.outputs.source_commit }}
+          path: |
+            stage-manifest.json
+            build/maven-central-release-intent.json
+            build/maven-central-release-environment-policy-audit.json
+            build/maven-central-release-evidence.json
+            build/maven-central-release-result.json
+            ${{ runner.temp }}/g011-consumer-central
+          if-no-files-found: error
+          retention-days: 90
+      - name: Retain run-scoped pre-outcome publication diagnostics
+        if: ${{ always() && steps.release_transaction.outputs.diagnostic == 'true' && steps.release_secret_scan.outcome == 'success' }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: g011-central-release-diagnostic-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            stage-manifest.json
+            build/maven-central-release-intent.json
+            build/maven-central-release-environment-policy-audit.json
+            build/maven-central-release-entered
+          if-no-files-found: warn
+          retention-days: 90

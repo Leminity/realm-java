@@ -13,4 +13,4 @@ elif [[ $# -ne 0 ]]; then
   exit 2
 fi
 
-exec "$root/gradlew" "$task"
+exec "$root/gradlew" --no-daemon "$task"

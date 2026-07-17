@@ -13,6 +13,8 @@ from __future__ import annotations
 import argparse
 import base64
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from fnmatch import fnmatchcase
 import hashlib
 import json
 import os
@@ -37,8 +39,12 @@ GIT_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 DEPLOYMENT_ID_RE = re.compile(r"^[A-Za-z0-9._-]+$")
 STAGE_MANIFEST_FORMAT = "realm-maven-central-stage-v3"
 POLICY_AUDIT_FORMAT = "realm-maven-central-environment-policy-audit-v1"
+ADMIN_BYPASS_ATTESTATION_FORMAT = "realm-github-environment-admin-bypass-attestation-v1"
 CONSUMER_EVIDENCE_FORMAT = "realm-maven-central-consumer-evidence-v1"
+MIRROR_EVIDENCE_FORMAT = "realm-maven-central-validated-mirror-v1"
 RUNTIME_PROVENANCE_SCHEMA_VERSION = 2
+APPROVED_DEPLOYMENT_TAG_PATTERN = "v10.19.0-agp9.*"
+ADMIN_BYPASS_PROOF_MAX_AGE_SECONDS = 15 * 60
 RUNTIME_GATE_PATHS = (
     ".github/workflows/ci.yml",
     ".github/workflows/release.yml",
@@ -69,6 +75,7 @@ class HttpResponse:
 
 
 Transport = Callable[[str, str, Mapping[str, str], bytes | None], HttpResponse]
+ConsumerRunner = Callable[[Sequence[str], Mapping[str, str]], None]
 
 
 def sha256_file(path: Path) -> str:
@@ -286,13 +293,182 @@ def _reviewer_fingerprints(policy: Mapping[str, object], environment: str) -> se
     return reviewers
 
 
-def _environment_policy_summary(policy: Mapping[str, object], environment: str) -> Mapping[str, object]:
+def _admin_bypass_proof(
+    policy: Mapping[str, object],
+    attestation: Mapping[str, object] | None,
+    *,
+    repository: str,
+    environment: str,
+    gate_time: datetime,
+) -> Mapping[str, object]:
+    """Fail closed unless the current environment proves admin bypass is off.
+
+    GitHub's documented environment response does not consistently expose this
+    setting.  When the server returns it directly, that value is authoritative.
+    Otherwise an independently captured GitHub security/audit-log prerequisite
+    must bind the exact repository, environment, and current ``updated_at``.
+    Any later environment edit therefore invalidates the prerequisite.
+    """
+
+    updated_at = policy.get("updated_at")
+    if not isinstance(updated_at, str) or not updated_at:
+        raise PortalError(f"{environment}: environment updated_at is unavailable")
+    direct = policy.get("can_admins_bypass")
+    if direct is True:
+        raise PortalError(f"{environment}: administrator bypass is enabled")
+    if direct is False:
+        proof = {
+            "source": "github-environment-api",
+            "repository": repository,
+            "environment": environment,
+            "environment_updated_at": updated_at,
+            "can_admins_bypass": False,
+        }
+        canonical = json.dumps(proof, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return {
+            "admin_bypass_disabled": True,
+            "admin_bypass_proof_source": proof["source"],
+            "admin_bypass_proof_sha256": hashlib.sha256(canonical).hexdigest(),
+            "environment_updated_at": updated_at,
+        }
+    if attestation is None:
+        raise PortalError(f"{environment}: administrator bypass state is unproven")
+    if (
+        attestation.get("format") != ADMIN_BYPASS_ATTESTATION_FORMAT
+        or attestation.get("repository") != repository
+    ):
+        raise PortalError(f"{environment}: administrator bypass attestation is invalid")
+    source = attestation.get("source_kind")
+    if source not in {"user-export", "org-export", "org-api", "enterprise-stream"}:
+        raise PortalError(f"{environment}: administrator bypass attestation source is untrusted")
+    if attestation.get("complete") is not True:
+        raise PortalError(f"{environment}: administrator bypass log coverage is incomplete")
+
+    def parse_timestamp(value: object, field: str) -> datetime:
+        if not isinstance(value, str):
+            raise PortalError(f"{environment}: invalid administrator bypass {field}")
+        try:
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        except ValueError as error:
+            raise PortalError(f"{environment}: invalid administrator bypass {field}") from error
+        if parsed.tzinfo is None:
+            raise PortalError(f"{environment}: invalid administrator bypass {field}")
+        return parsed.astimezone(timezone.utc)
+
+    coverage_start = parse_timestamp(attestation.get("coverage_start"), "coverage_start")
+    coverage_end = parse_timestamp(attestation.get("coverage_end"), "coverage_end")
+    policy_updated_at = parse_timestamp(updated_at, "environment updated_at")
+    if coverage_start > coverage_end:
+        raise PortalError(f"{environment}: administrator bypass log coverage is invalid")
+    if coverage_end < policy_updated_at:
+        raise PortalError(f"{environment}: administrator bypass log does not cover the live policy")
+    age_seconds = (gate_time - coverage_end).total_seconds()
+    if age_seconds < -60 or age_seconds > ADMIN_BYPASS_PROOF_MAX_AGE_SECONDS:
+        raise PortalError(f"{environment}: administrator bypass log coverage is stale")
+    events = attestation.get("events")
+    if not isinstance(events, list) or not events:
+        raise PortalError(f"{environment}: administrator bypass log has no events")
+
+    def event_value(event: Mapping[str, object], *names: str) -> object:
+        nested = event.get("data")
+        nested_map = nested if isinstance(nested, dict) else {}
+        values: list[object] = []
+        for name in names:
+            if name in event:
+                values.append(event[name])
+            if name in nested_map:
+                values.append(nested_map[name])
+        if not values:
+            return None
+        first = values[0]
+        if any(value != first for value in values[1:]):
+            raise PortalError(f"{environment}: administrator bypass log fields conflict")
+        return first
+
+    environment_id = policy.get("id")
+    if environment_id is None:
+        raise PortalError(f"{environment}: environment id is unavailable")
+    relevant: list[tuple[datetime, str, object]] = []
+    for raw_event in events:
+        if not isinstance(raw_event, dict):
+            raise PortalError(f"{environment}: administrator bypass log event is invalid")
+        event_repository = event_value(raw_event, "repo", "repository")
+        event_environment = event_value(raw_event, "environment_name")
+        if event_repository != repository or event_environment != environment:
+            continue
+        event_time = parse_timestamp(
+            event_value(raw_event, "@timestamp", "created_at"), "event timestamp"
+        )
+        if not (coverage_start <= event_time <= coverage_end):
+            raise PortalError(f"{environment}: administrator bypass event is outside log coverage")
+        event_id = event_value(raw_event, "environment_id")
+        if str(event_id) != str(environment_id):
+            raise PortalError(f"{environment}: administrator bypass evidence binds another environment")
+        action = event_value(raw_event, "action")
+        if action == "environment.delete":
+            relevant.append((event_time, str(action), None))
+        elif action == "environment.update_protection_rule":
+            bypass = event_value(raw_event, "can_admins_bypass", "new_value")
+            if not isinstance(bypass, bool):
+                raise PortalError(f"{environment}: administrator bypass event is ambiguous")
+            relevant.append((event_time, str(action), bypass))
+    if not relevant:
+        raise PortalError(f"{environment}: administrator bypass event is missing")
+    _, latest_action, latest_bypass = max(relevant, key=lambda item: item[0])
+    if latest_action != "environment.update_protection_rule" or latest_bypass is not False:
+        raise PortalError(f"{environment}: administrator bypass is not disabled")
+    canonical = json.dumps(
+        {
+            "format": ADMIN_BYPASS_ATTESTATION_FORMAT,
+            "repository": repository,
+            "environment": environment,
+            "environment_id": str(environment_id),
+            "environment_updated_at": updated_at,
+            "can_admins_bypass": False,
+        },
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    return {
+        "admin_bypass_disabled": True,
+        "admin_bypass_proof_source": source,
+        "admin_bypass_proof_sha256": hashlib.sha256(canonical).hexdigest(),
+        "environment_updated_at": updated_at,
+    }
+
+
+def _environment_policy_summary(
+    policy: Mapping[str, object],
+    deployment_policies: Mapping[str, object],
+    admin_bypass_attestation: Mapping[str, object] | None,
+    repository: str,
+    environment: str,
+    release_tag: str,
+    gate_time: datetime,
+) -> Mapping[str, object]:
     reviewers = _reviewer_fingerprints(policy, environment)
     branch_policy = policy.get("deployment_branch_policy")
     if not isinstance(branch_policy, dict) or not (
-        branch_policy.get("protected_branches") or branch_policy.get("custom_branch_policies")
+        branch_policy.get("protected_branches") is False
+        and branch_policy.get("custom_branch_policies") is True
     ):
-        raise PortalError(f"{environment}: protected/custom tag policy is not configured")
+        raise PortalError(f"{environment}: exact custom tag policy is not enabled")
+    raw_policies = deployment_policies.get("branch_policies")
+    if (
+        not isinstance(raw_policies, list)
+        or deployment_policies.get("total_count") != len(raw_policies)
+        or len(raw_policies) != 1
+    ):
+        raise PortalError(f"{environment}: custom tag policy list is missing")
+    names = {
+        item.get("name")
+        for item in raw_policies
+        if isinstance(item, dict) and isinstance(item.get("name"), str)
+    }
+    if names != {APPROVED_DEPLOYMENT_TAG_PATTERN} or not fnmatchcase(
+        release_tag, APPROVED_DEPLOYMENT_TAG_PATTERN
+    ):
+        raise PortalError(f"{environment}: custom tag policy differs from the approved release family")
     # GitHub's GET environment response places this setting on the
     # ``required_reviewers`` protection-rule object, not on the environment
     # object. Treat every other shape as unproven.
@@ -312,14 +488,67 @@ def _environment_policy_summary(policy: Mapping[str, object], environment: str) 
         "reviewer_fingerprints": sorted(reviewers),
         "prevent_self_review": True,
         "protected_or_custom_tag_policy": True,
+        "release_tag": release_tag,
+        "deployment_tag_policy_sha256": hashlib.sha256(
+            APPROVED_DEPLOYMENT_TAG_PATTERN.encode("utf-8")
+        ).hexdigest(),
+        **_admin_bypass_proof(
+            policy,
+            admin_bypass_attestation,
+            repository=repository,
+            environment=environment,
+            gate_time=gate_time,
+        ),
     }
 
 
-def write_environment_policy_audit(stage_policy: Path, release_policy: Path, audit_file: Path) -> str:
+def write_environment_policy_audit(
+    stage_policy: Path,
+    stage_deployment_policies: Path,
+    release_policy: Path,
+    release_deployment_policies: Path,
+    repository: str,
+    admin_bypass_attestation: Path | None,
+    gate_time: str,
+    release_tag: str,
+    audit_file: Path,
+) -> str:
     """Create a redacted, self-hashed proof of the server-side environment rules."""
 
-    stage = _environment_policy_summary(_read_json_object(stage_policy, "stage environment policy"), "maven-central-stage")
-    release = _environment_policy_summary(_read_json_object(release_policy, "release environment policy"), "maven-central-release")
+    if not TAG_RE.fullmatch(release_tag):
+        raise PortalError("environment policy audit tag is outside the approved release family")
+    if not repository or "/" not in repository:
+        raise PortalError("environment policy audit repository is invalid")
+    attestation = (
+        _read_json_object(admin_bypass_attestation, "administrator bypass attestation")
+        if admin_bypass_attestation is not None
+        else None
+    )
+    try:
+        parsed_gate_time = datetime.fromisoformat(gate_time.replace("Z", "+00:00"))
+    except (AttributeError, ValueError) as error:
+        raise PortalError("environment policy audit gate time is invalid") from error
+    if parsed_gate_time.tzinfo is None:
+        raise PortalError("environment policy audit gate time is invalid")
+    parsed_gate_time = parsed_gate_time.astimezone(timezone.utc)
+    stage = _environment_policy_summary(
+        _read_json_object(stage_policy, "stage environment policy"),
+        _read_json_object(stage_deployment_policies, "stage deployment policies"),
+        attestation,
+        repository,
+        "maven-central-stage",
+        release_tag,
+        parsed_gate_time,
+    )
+    release = _environment_policy_summary(
+        _read_json_object(release_policy, "release environment policy"),
+        _read_json_object(release_deployment_policies, "release deployment policies"),
+        attestation,
+        repository,
+        "maven-central-release",
+        release_tag,
+        parsed_gate_time,
+    )
     if set(stage["reviewer_fingerprints"]) & set(release["reviewer_fingerprints"]):
         raise PortalError("stage and release required reviewers are not distinct")
     payload: dict[str, object] = {"format": POLICY_AUDIT_FORMAT, "stage": stage, "release": release}
@@ -342,11 +571,34 @@ def verify_environment_policy_audit(path: Path) -> str:
             raise PortalError("environment policy audit lacks prevent-self-review")
         if policy.get("protected_or_custom_tag_policy") is not True:
             raise PortalError("environment policy audit lacks protected/custom tag policy")
+        if policy.get("admin_bypass_disabled") is not True:
+            raise PortalError("environment policy audit lacks disabled administrator bypass")
+        if policy.get("admin_bypass_proof_source") not in {
+            "github-environment-api",
+            "user-export",
+            "org-export",
+            "org-api",
+            "enterprise-stream",
+        }:
+            raise PortalError("environment policy audit has an invalid administrator bypass proof")
+        _require_sha256(
+            policy.get("admin_bypass_proof_sha256"),
+            "environment policy administrator bypass proof SHA-256",
+        )
+        if not isinstance(policy.get("environment_updated_at"), str) or not policy["environment_updated_at"]:
+            raise PortalError("environment policy audit lacks environment update binding")
+        if not TAG_RE.fullmatch(str(policy.get("release_tag", ""))):
+            raise PortalError("environment policy audit lacks the approved release tag")
+        expected_policy_sha = hashlib.sha256(APPROVED_DEPLOYMENT_TAG_PATTERN.encode("utf-8")).hexdigest()
+        if policy.get("deployment_tag_policy_sha256") != expected_policy_sha:
+            raise PortalError("environment policy audit tag policy differs")
         reviewers = policy.get("reviewer_fingerprints")
         if not isinstance(reviewers, list) or not reviewers or any(not SHA256_RE.fullmatch(str(item)) for item in reviewers):
             raise PortalError("environment policy audit lacks required reviewers")
     if set(stage["reviewer_fingerprints"]) & set(release["reviewer_fingerprints"]):
         raise PortalError("environment policy audit reviewers are not distinct")
+    if stage["release_tag"] != release["release_tag"]:
+        raise PortalError("environment policy audit tags differ")
     expected = audit.get("audit_sha256")
     stripped = {key: value for key, value in audit.items() if key != "audit_sha256"}
     actual = hashlib.sha256(json.dumps(stripped, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
@@ -375,16 +627,70 @@ def _deployment_repository_base(template: str) -> str:
     return template[: -len(suffix)]
 
 
+_CONSUMER_ENV_ALLOWLIST = frozenset(
+    {
+        "ANDROID_HOME",
+        "ANDROID_SDK_ROOT",
+        "CI",
+        "EMULATOR_RUNTIME_LIB_DIR",
+        "G011_OFFICIAL_ENCRYPTED_REALM",
+        "G011_OFFICIAL_GRADLE_75",
+        "GITHUB_ACTIONS",
+        "GITHUB_REF",
+        "GITHUB_REPOSITORY",
+        "GITHUB_RUN_ATTEMPT",
+        "GITHUB_RUN_ID",
+        "JAVA_HOME",
+        "LANG",
+        "LC_ALL",
+        "LC_CTYPE",
+        "LOGNAME",
+        "PATH",
+        "SHELL",
+        "TMP",
+        "TEMP",
+        "TMPDIR",
+        "USER",
+    }
+)
+
+
+def _consumer_environment(gradle_user_home: Path, token_env: str) -> dict[str, str]:
+    child = {name: os.environ[name] for name in _CONSUMER_ENV_ALLOWLIST if name in os.environ}
+    isolated_home = gradle_user_home / "process-home"
+    isolated_home.mkdir(parents=True, exist_ok=True)
+    child["HOME"] = str(isolated_home)
+    child["GRADLE_USER_HOME"] = str(gradle_user_home)
+    # These names are intentionally checked even though the allowlist already
+    # excludes them.  The assertions make future allowlist edits fail closed.
+    forbidden_names = {
+        token_env,
+        "CENTRAL_PORTAL_BEARER_TOKEN",
+        "CENTRAL_PORTAL_TOKEN",
+        "G011_ENVIRONMENT_POLICY_TOKEN",
+        "G011_ENVIRONMENT_BYPASS_ATTESTATION",
+        "MAVEN_SIGNING_KEY",
+        "MAVEN_SIGNING_PASSWORD",
+        "g008SigningKey",
+        "g008SigningPassword",
+    }
+    for name in forbidden_names:
+        child.pop(name, None)
+    if forbidden_names & set(child):
+        raise PortalError("consumer environment contains protected credentials")
+    return child
+
+
 def _run_consumer(
     command: Path,
     *,
     repository_url: str,
     mode: str,
-    token_env: str | None,
+    token_env: str,
     gradle_user_home: Path,
     evidence: Path,
     expected_realm_android_library_aar_sha256: str | None = None,
-    runner: Callable[[Sequence[str]], None] | None = None,
+    runner: ConsumerRunner | None = None,
 ) -> str:
     if not command.is_file():
         raise PortalError("consumer command does not exist")
@@ -399,14 +705,15 @@ def _run_consumer(
         "--evidence-dir",
         str(evidence),
     ]
-    if token_env:
-        args.extend(("--bearer-env", token_env))
     if expected_realm_android_library_aar_sha256 is not None:
         args.extend(
             ("--expected-realm-android-library-sha256", expected_realm_android_library_aar_sha256)
         )
     try:
-        (runner or (lambda values: subprocess.run(values, check=True)))(args)
+        child_env = _consumer_environment(gradle_user_home, token_env)
+        (runner or (lambda values, env: subprocess.run(values, check=True, env=dict(env))))(
+            args, child_env
+        )
     except (OSError, subprocess.CalledProcessError) as error:
         raise PortalError("exact deployment consumer failed") from error
     return _verify_consumer_evidence(evidence / "consumer-evidence.json", mode=mode, repository_url=repository_url)
@@ -563,12 +870,22 @@ class PortalClient:
         delay_seconds: float,
         backoff_factor: float = 1.5,
         max_delay_seconds: float = 60.0,
+        deadline_seconds: float = 900.0,
     ) -> str:
-        if attempts < 1 or delay_seconds < 0 or backoff_factor < 1 or max_delay_seconds < 0:
+        if (
+            attempts < 1
+            or delay_seconds < 0
+            or backoff_factor < 1
+            or max_delay_seconds < 0
+            or deadline_seconds <= 0
+        ):
             raise PortalError("invalid polling configuration")
         expected = expected.upper()
         self.last_poll_trace = []
+        deadline = self._clock() + deadline_seconds
         for attempt in range(attempts):
+            if self._clock() >= deadline:
+                raise PortalError(f"deployment did not reach {expected} within bounded polling deadline")
             state, retry_after = self.deployment_status_with_retry_after(deployment_id)
             self.last_poll_trace.append(
                 {
@@ -582,13 +899,20 @@ class PortalClient:
                 return state
             if state == "FAILED":
                 raise DeploymentFailed(deployment_id, expected, state)
-            if state in {"PUBLISHED", "VALIDATED"}:
+            if expected == "VALIDATED" and state in {"PUBLISHING", "PUBLISHED"}:
+                raise PortalError(f"deployment did not reach expected {expected} state")
+            if expected != "PUBLISHED" and state in {"PUBLISHED", "VALIDATED"}:
                 raise PortalError(f"deployment did not reach expected {expected} state")
             if attempt + 1 < attempts:
                 if retry_after is not None:
                     delay = retry_after
                 else:
                     delay = self._jitter(min(max_delay_seconds, delay_seconds * (backoff_factor**attempt)))
+                remaining = deadline - self._clock()
+                if delay > remaining:
+                    raise PortalError(
+                        f"deployment did not reach {expected} within bounded polling deadline"
+                    )
                 self._sleep(delay)
         raise PortalError(f"deployment did not reach {expected} within bounded polling")
 
@@ -612,10 +936,79 @@ class PortalClient:
         # plural deployment download API, which could select another release.
         return f"{self._base_url}/api/v1/publisher/deployment/{encoded}/download/{{relative_path}}"
 
+    def download(self, deployment_id: str, relative_path: str) -> bytes:
+        self._validate_deployment_id(deployment_id)
+        if (
+            not relative_path
+            or relative_path.startswith("/")
+            or any(part in {"", ".", ".."} for part in relative_path.split("/"))
+        ):
+            raise PortalError("invalid deployment download path")
+        encoded_deployment = quote(deployment_id, safe="-._~")
+        encoded_path = quote(relative_path, safe="/-._~")
+        response = self._request(
+            "GET",
+            f"/api/v1/publisher/deployment/{encoded_deployment}/download/{encoded_path}",
+            headers={"Accept": "application/octet-stream"},
+            operation="download",
+        )
+        return response.body
+
     @staticmethod
     def _validate_deployment_id(deployment_id: str) -> None:
         if not DEPLOYMENT_ID_RE.fullmatch(deployment_id):
             raise PortalError("invalid deployment ID")
+
+
+def _materialize_verified_deployment_mirror(
+    client: PortalClient,
+    *,
+    deployment_id: str,
+    source_manifest: Path,
+    evidence_root: Path,
+) -> tuple[str, str]:
+    """Download the exact validated deployment in the trusted parent process.
+
+    The Portal credential never crosses into Gradle, the Realm plugin, or the
+    runtime fixture.  The token-bearing parent verifies every remote byte
+    against the already signed source manifest, then the untrusted consumer
+    receives only a local file repository.
+    """
+
+    manifest = _read_json_object(source_manifest, "source manifest")
+    expected = _safe_manifest_paths(manifest)
+    mirror = evidence_root / "validated-deployment-mirror"
+    if mirror.exists() and any(mirror.iterdir()):
+        raise PortalError("validated deployment mirror is not empty")
+    mirror.mkdir(parents=True, exist_ok=True)
+    materialized: list[dict[str, object]] = []
+    for relative_path, expected_sha256 in sorted(expected.items()):
+        contents = client.download(deployment_id, relative_path)
+        actual_sha256 = hashlib.sha256(contents).hexdigest()
+        if actual_sha256 != expected_sha256:
+            raise PortalError("validated deployment download differs from source manifest")
+        destination = mirror.joinpath(*relative_path.split("/"))
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        temporary = destination.with_name(destination.name + ".part")
+        temporary.write_bytes(contents)
+        os.replace(temporary, destination)
+        materialized.append(
+            {"path": relative_path, "sha256": actual_sha256, "size": len(contents)}
+        )
+    files_canonical = json.dumps(
+        materialized, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    evidence = {
+        "format": MIRROR_EVIDENCE_FORMAT,
+        "deployment_id": deployment_id,
+        "deployment_repository": client.deployment_repository(deployment_id),
+        "source_manifest_sha256": sha256_file(source_manifest),
+        "files": materialized,
+        "files_sha256": hashlib.sha256(files_canonical).hexdigest(),
+    }
+    evidence_path = evidence_root / "validated-deployment-mirror-evidence.json"
+    _write_json(evidence_path, evidence)
+    return mirror.resolve().as_uri(), sha256_file(evidence_path)
 
 
 def _write_json(path: Path, value: Mapping[str, object]) -> None:
@@ -652,6 +1045,7 @@ def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, objec
         "ci_run_id",
         "ci_artifact_id",
         "environment_policy_audit_sha256",
+        "validated_deployment_mirror_evidence_sha256",
         "validated_consumer_evidence_sha256",
     )
     if any(key not in manifest for key in required):
@@ -683,6 +1077,10 @@ def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, objec
     _require_positive_decimal(manifest["ci_run_id"], "CI run ID")
     _require_positive_decimal(manifest["ci_artifact_id"], "CI artifact ID")
     _require_sha256(manifest["environment_policy_audit_sha256"], "environment policy audit SHA-256")
+    _require_sha256(
+        manifest["validated_deployment_mirror_evidence_sha256"],
+        "validated deployment mirror evidence SHA-256",
+    )
     _require_sha256(manifest["validated_consumer_evidence_sha256"], "validated consumer evidence SHA-256")
     PortalClient._validate_deployment_id(str(manifest["deployment_id"]))
     if manifest["publishing_type"] != "USER_MANAGED":
@@ -722,6 +1120,8 @@ def _write_first_failure(
     state: str,
     bundle_sha256: str,
     source_manifest_sha256: str,
+    state_trace: Sequence[Mapping[str, object]] = (),
+    drop_failed_deployment: bool = False,
 ) -> None:
     """Preserve one redacted stage failure without overwriting the first fact."""
 
@@ -733,6 +1133,12 @@ def _write_first_failure(
         "observed_state": state,
         "bundle_sha256": bundle_sha256,
         "source_manifest_sha256": source_manifest_sha256,
+        "state_trace": list(state_trace),
+        "drop_policy": (
+            "drop-after-evidence"
+            if drop_failed_deployment
+            else "retain-for-support-or-manual-recovery"
+        ),
     }
     try:
         with failure_path.open("x", encoding="utf-8") as destination:
@@ -764,8 +1170,10 @@ def stage(
     delay_seconds: float,
     backoff_factor: float = 1.5,
     max_delay_seconds: float = 60.0,
+    deadline_seconds: float = 900.0,
     client: PortalClient | None = None,
-    consumer_runner: Callable[[Sequence[str]], None] | None = None,
+    consumer_runner: ConsumerRunner | None = None,
+    drop_failed_deployment: bool = False,
 ) -> Mapping[str, object]:
     validate_release_binding(tag, version, commit, core_commit)
     failure_path = stage_manifest.with_name(stage_manifest.name + ".failed.json")
@@ -781,7 +1189,22 @@ def stage(
     if not allow_network:
         raise PortalError("network access requires --allow-network")
     client = client or PortalClient(_token_from_environment(token_env))
-    deployment_id = client.upload_user_managed(bundle, tag)
+    try:
+        deployment_id = client.upload_user_managed(bundle, tag)
+    except PortalError:
+        # A transport failure after sending the bundle has an ambiguous remote
+        # outcome. Persist that fact so automation never guesses and uploads a
+        # replacement deployment.
+        _write_first_failure(
+            stage_manifest,
+            deployment_id="UNKNOWN",
+            expected="UPLOAD_201",
+            state="AMBIGUOUS",
+            bundle_sha256=bundle_sha256,
+            source_manifest_sha256=source_manifest_sha256,
+            drop_failed_deployment=drop_failed_deployment,
+        )
+        raise
     try:
         client.poll(
             deployment_id,
@@ -790,6 +1213,7 @@ def stage(
             delay_seconds=delay_seconds,
             backoff_factor=backoff_factor,
             max_delay_seconds=max_delay_seconds,
+            deadline_seconds=deadline_seconds,
         )
     except PortalError as error:
         state = (
@@ -806,8 +1230,10 @@ def stage(
             state=state,
             bundle_sha256=bundle_sha256,
             source_manifest_sha256=source_manifest_sha256,
+            state_trace=client.last_poll_trace,
+            drop_failed_deployment=drop_failed_deployment,
         )
-        if state in {"FAILED", "VALIDATED"}:
+        if drop_failed_deployment and state in {"FAILED", "VALIDATED"}:
             try:
                 client.drop(deployment_id)
             except PortalError as drop_error:
@@ -816,12 +1242,17 @@ def stage(
                 ) from drop_error
         raise
     repository_template = client.deployment_repository(deployment_id)
-    repository_url = _deployment_repository_base(repository_template)
     try:
+        repository_url, mirror_evidence_sha256 = _materialize_verified_deployment_mirror(
+            client,
+            deployment_id=deployment_id,
+            source_manifest=source_manifest,
+            evidence_root=validated_consumer_evidence,
+        )
         validated_consumer_evidence_sha256 = _run_consumer(
             validated_consumer_command,
             repository_url=repository_url,
-            mode="validated",
+            mode="validated-mirror",
             token_env=token_env,
             gradle_user_home=validated_consumer_gradle_home,
             evidence=validated_consumer_evidence,
@@ -837,13 +1268,16 @@ def stage(
             state="VALIDATED",
             bundle_sha256=bundle_sha256,
             source_manifest_sha256=source_manifest_sha256,
+            state_trace=client.last_poll_trace,
+            drop_failed_deployment=drop_failed_deployment,
         )
-        try:
-            client.drop(deployment_id)
-        except PortalError as drop_error:
-            raise PortalError(
-                "validated consumer failure was preserved but deployment drop failed"
-            ) from drop_error
+        if drop_failed_deployment:
+            try:
+                client.drop(deployment_id)
+            except PortalError as drop_error:
+                raise PortalError(
+                    "validated consumer failure was preserved but deployment drop failed"
+                ) from drop_error
         raise
     manifest: dict[str, object] = {
         "format": STAGE_MANIFEST_FORMAT,
@@ -859,6 +1293,7 @@ def stage(
         "ci_run_id": ci_run_id,
         "ci_artifact_id": ci_artifact_id,
         "environment_policy_audit_sha256": policy_audit_sha256,
+        "validated_deployment_mirror_evidence_sha256": mirror_evidence_sha256,
         "validated_consumer_evidence_sha256": validated_consumer_evidence_sha256,
         "deployment_id": deployment_id,
         "publishing_type": "USER_MANAGED",
@@ -883,42 +1318,27 @@ def release(
     delay_seconds: float,
     backoff_factor: float = 1.5,
     max_delay_seconds: float = 60.0,
+    deadline_seconds: float = 900.0,
     client: PortalClient | None = None,
     published_consumer_command: Path | None = None,
     published_consumer_gradle_home: Path | None = None,
     published_consumer_evidence: Path | None = None,
-    consumer_runner: Callable[[Sequence[str]], None] | None = None,
+    consumer_runner: ConsumerRunner | None = None,
+    release_evidence: Path | None = None,
 ) -> Mapping[str, object]:
     manifest = _read_stage_manifest(stage_manifest, stage_manifest_sha256)
     if not allow_network:
         raise PortalError("network access requires --allow-network")
     client = client or PortalClient(_token_from_environment(token_env))
     deployment_id = str(manifest["deployment_id"])
-    # A reviewer-approved retry after a post-publish consumer failure must not
-    # publish again. Resume from the exact deployment's observed state.
-    state = client.deployment_status(deployment_id)
-    if state == "PUBLISHED":
-        pass
-    elif state == "PUBLISHING":
-        client.poll(
-            deployment_id,
-            "PUBLISHED",
-            attempts=attempts,
-            delay_seconds=delay_seconds,
-            backoff_factor=backoff_factor,
-            max_delay_seconds=max_delay_seconds,
-        )
-    else:
+    publication_trace: list[dict[str, object]] = []
+    try:
+        state = client.deployment_status(deployment_id)
+        publication_trace.append({"step": "initial-status", "state": state})
         if state != "VALIDATED":
-            client.poll(
-                deployment_id,
-                "VALIDATED",
-                attempts=attempts,
-                delay_seconds=delay_seconds,
-                backoff_factor=backoff_factor,
-                max_delay_seconds=max_delay_seconds,
-            )
+            raise PortalError("exact deployment was published outside the approved release transaction")
         client.publish(deployment_id)
+        publication_trace.append({"step": "publish-request", "state": "PUBLISHING"})
         client.poll(
             deployment_id,
             "PUBLISHED",
@@ -926,20 +1346,60 @@ def release(
             delay_seconds=delay_seconds,
             backoff_factor=backoff_factor,
             max_delay_seconds=max_delay_seconds,
+            deadline_seconds=deadline_seconds,
         )
-    if not (published_consumer_command and published_consumer_gradle_home and published_consumer_evidence):
-        raise PortalError("published consumer gate is required")
-    consumer_sha256 = _run_consumer(
-        published_consumer_command,
-        repository_url="https://repo.maven.apache.org/maven2",
-        mode="central",
-        token_env=None,
-        gradle_user_home=published_consumer_gradle_home,
-        evidence=published_consumer_evidence,
-        expected_realm_android_library_aar_sha256=str(manifest["realm_android_library_aar_sha256"]),
-        runner=consumer_runner,
-    )
-    return {"deployment_id": deployment_id, "state": "PUBLISHED", "published_consumer_evidence_sha256": consumer_sha256}
+        publication_trace.extend(client.last_poll_trace)
+        if not (
+            published_consumer_command
+            and published_consumer_gradle_home
+            and published_consumer_evidence
+        ):
+            raise PortalError("published consumer gate is required")
+        consumer_sha256 = _run_consumer(
+            published_consumer_command,
+            repository_url="https://repo.maven.apache.org/maven2",
+            mode="central",
+            token_env=token_env,
+            gradle_user_home=published_consumer_gradle_home,
+            evidence=published_consumer_evidence,
+            expected_realm_android_library_aar_sha256=str(
+                manifest["realm_android_library_aar_sha256"]
+            ),
+            runner=consumer_runner,
+        )
+    except PortalError:
+        if release_evidence is not None:
+            _write_json(
+                release_evidence,
+                {
+                    "format": "realm-maven-central-release-evidence-v1",
+                    "deployment_id": deployment_id,
+                    "stage_manifest_sha256": stage_manifest_sha256,
+                    "result": "FAILED",
+                    "publication_state_trace": publication_trace,
+                },
+            )
+        raise
+    result = {
+        "deployment_id": deployment_id,
+        "state": "PUBLISHED",
+        "published_consumer_evidence_sha256": consumer_sha256,
+        "publication_state_trace": publication_trace,
+    }
+    if release_evidence is not None:
+        _write_json(
+            release_evidence,
+            {
+                "format": "realm-maven-central-release-evidence-v1",
+                "deployment_id": deployment_id,
+                "stage_manifest_sha256": stage_manifest_sha256,
+                "result": "PASS",
+                "published_consumer_evidence_sha256": consumer_sha256,
+                "publication_state_trace": publication_trace,
+            },
+        )
+        result["release_evidence_sha256"] = sha256_file(release_evidence)
+    return result
 
 
 def _positive_int(value: str) -> int:
@@ -957,9 +1417,21 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     verify.add_argument("--bundle", required=True, type=Path)
     verify.add_argument("--source-manifest", required=True, type=Path)
 
+    verify_stage = commands.add_parser(
+        "verify-stage-manifest", help="verify an immutable stage manifest without network"
+    )
+    verify_stage.add_argument("--stage-manifest", required=True, type=Path)
+    verify_stage.add_argument("--stage-manifest-sha256", required=True)
+
     policy = commands.add_parser("audit-environment-policy", help="write a redacted, hashed environment-policy audit")
     policy.add_argument("--stage-policy", required=True, type=Path)
+    policy.add_argument("--stage-deployment-policies", required=True, type=Path)
     policy.add_argument("--release-policy", required=True, type=Path)
+    policy.add_argument("--release-deployment-policies", required=True, type=Path)
+    policy.add_argument("--repository", required=True)
+    policy.add_argument("--admin-bypass-attestation", type=Path)
+    policy.add_argument("--gate-time", required=True)
+    policy.add_argument("--release-tag", required=True)
     policy.add_argument("--audit-file", required=True, type=Path)
 
     stage_parser = commands.add_parser("stage", help="upload one USER_MANAGED deployment and wait for VALIDATED")
@@ -983,7 +1455,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     stage_parser.add_argument("--poll-delay-seconds", default=5.0, type=float)
     stage_parser.add_argument("--poll-backoff-factor", default=1.5, type=float)
     stage_parser.add_argument("--poll-max-delay-seconds", default=60.0, type=float)
+    stage_parser.add_argument("--poll-deadline-seconds", default=900.0, type=float)
     stage_parser.add_argument("--allow-network", action="store_true")
+    stage_parser.add_argument(
+        "--drop-failed-deployment",
+        action="store_true",
+        help="after preserving evidence, drop a FAILED or VALIDATED unpublished deployment",
+    )
 
     release_parser = commands.add_parser("release", help="publish the exact deployment in a staged manifest")
     release_parser.add_argument("--stage-manifest", required=True, type=Path)
@@ -991,11 +1469,13 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     release_parser.add_argument("--published-consumer-command", required=True, type=Path)
     release_parser.add_argument("--published-consumer-gradle-home", required=True, type=Path)
     release_parser.add_argument("--published-consumer-evidence", required=True, type=Path)
+    release_parser.add_argument("--release-evidence", required=True, type=Path)
     release_parser.add_argument("--token-env", default="CENTRAL_PORTAL_TOKEN")
     release_parser.add_argument("--poll-attempts", default=12, type=_positive_int)
     release_parser.add_argument("--poll-delay-seconds", default=5.0, type=float)
     release_parser.add_argument("--poll-backoff-factor", default=1.5, type=float)
     release_parser.add_argument("--poll-max-delay-seconds", default=60.0, type=float)
+    release_parser.add_argument("--poll-deadline-seconds", default=900.0, type=float)
     release_parser.add_argument("--allow-network", action="store_true")
     return parser.parse_args(argv)
 
@@ -1010,11 +1490,26 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "bundle_sha256": bundle_sha256,
                 "source_manifest_sha256": source_manifest_sha256,
             }
+        elif args.command == "verify-stage-manifest":
+            manifest = _read_stage_manifest(args.stage_manifest, args.stage_manifest_sha256)
+            result = {
+                "status": "VERIFIED",
+                "deployment_id": manifest["deployment_id"],
+                "stage_manifest_sha256": args.stage_manifest_sha256,
+            }
         elif args.command == "audit-environment-policy":
             result = {
                 "status": "VERIFIED",
                 "environment_policy_audit_sha256": write_environment_policy_audit(
-                    args.stage_policy, args.release_policy, args.audit_file
+                    args.stage_policy,
+                    args.stage_deployment_policies,
+                    args.release_policy,
+                    args.release_deployment_policies,
+                    args.repository,
+                    args.admin_bypass_attestation,
+                    args.gate_time,
+                    args.release_tag,
+                    args.audit_file,
                 ),
             }
         elif args.command == "stage":
@@ -1040,6 +1535,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 delay_seconds=args.poll_delay_seconds,
                 backoff_factor=args.poll_backoff_factor,
                 max_delay_seconds=args.poll_max_delay_seconds,
+                deadline_seconds=args.poll_deadline_seconds,
+                drop_failed_deployment=args.drop_failed_deployment,
             )
         else:
             result = release(
@@ -1051,9 +1548,11 @@ def main(argv: Sequence[str] | None = None) -> int:
                 delay_seconds=args.poll_delay_seconds,
                 backoff_factor=args.poll_backoff_factor,
                 max_delay_seconds=args.poll_max_delay_seconds,
+                deadline_seconds=args.poll_deadline_seconds,
                 published_consumer_command=args.published_consumer_command,
                 published_consumer_gradle_home=args.published_consumer_gradle_home,
                 published_consumer_evidence=args.published_consumer_evidence,
+                release_evidence=args.release_evidence,
             )
     except PortalError as error:
         print(f"central portal: FAIL: {error}", file=sys.stderr)
