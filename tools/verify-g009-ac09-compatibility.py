@@ -71,6 +71,15 @@ APPROVED_PUBLIC_CLASS_REMOVALS = {
         "io.realm.processor.RealmVersionChecker$Companion",
     },
 }
+# Kotlin emits these implementation-only enum-switch mapping holders as public
+# classes without ACC_SYNTHETIC.  The checked-in 10.19.0 inventory and javap
+# oracle deliberately omit them, so keep that authoritative source-level API
+# boundary with this exact, processor-only name set.
+COMPILER_GENERATED_PUBLIC_CLASS_EXCLUSIONS = {
+    "io.realm.processor.ClassMetaData$WhenMappings",
+    "io.realm.processor.RealmProxyClassGenerator$WhenMappings",
+    "io.realm.processor.Utils$WhenMappings",
+}
 RETIRED_PROCESSOR_BYTECODE_STRINGS = (b"RealmVersionChecker", b"static.realm.io")
 PRODUCTION_SOURCE_APPROVALS = {
     "gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt": "G004 public AGP migration",
@@ -193,6 +202,11 @@ def load_oracle_signatures(root: Path) -> dict[str, dict[str, str]]:
     for artifact, class_name, output in blocks:
         if artifact not in signatures:
             fail(f"unexpected artifact in public API oracle: {artifact}")
+        # Keep the javap oracle aligned with class_entries and the checked-in
+        # inventory: Kotlin's exact enum-switch holders are implementation
+        # details even though javap prints them as public classes.
+        if class_name in COMPILER_GENERATED_PUBLIC_CLASS_EXCLUSIONS:
+            continue
         if class_name in signatures[artifact]:
             fail(f"duplicate public API oracle entry: {artifact}:{class_name}")
         signatures[artifact][class_name] = normalize_javap_output(class_name, output)
@@ -228,7 +242,7 @@ def class_access_flags(classfile: bytes) -> int:
 
 
 def class_entries(archive: Path, extracted: Path) -> tuple[Path, dict[str, int]]:
-    """Return a classpath JAR and public, non-synthetic class access flags."""
+    """Return a classpath JAR and checked public API class access flags."""
     extracted.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive) as bundle:
         if archive.suffix == ".aar":
@@ -242,10 +256,14 @@ def class_entries(archive: Path, extracted: Path) -> tuple[Path, dict[str, int]]
             if not name.endswith(".class") or name.startswith("META-INF/"):
                 continue
             flags = class_access_flags(bundle.read(name))
+            class_name = name.removesuffix(".class").replace("/", ".")
             # Kotlin compiler closures and lambdas are not source-level public
-            # API. Compare only classes that are public and non-synthetic.
-            if flags & 0x0001 and not flags & 0x1000:
-                names[name.removesuffix(".class").replace("/", ".")] = flags
+            # API. Compare only classes that are public and non-synthetic, plus
+            # exclude the exact non-synthetic enum-switch holders omitted by
+            # the checked-in official public API oracle.
+            if (flags & 0x0001 and not flags & 0x1000
+                    and class_name not in COMPILER_GENERATED_PUBLIC_CLASS_EXCLUSIONS):
+                names[class_name] = flags
     return class_jar, names
 
 

@@ -27,6 +27,13 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
+
+    // AGP 9 disables this generated public compatibility class unless it is
+    // explicitly requested. Realm 10.19.0 publishes io.realm.kotlin.BuildConfig.
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
         debug {
             // https://youtrack.jetbrains.com/issue/KT-11333

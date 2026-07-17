@@ -3,6 +3,7 @@
 
 import hashlib
 import importlib.util
+import re
 import tempfile
 import zipfile
 from pathlib import Path
@@ -29,15 +30,38 @@ assert MODULE.APPROVED_COMPILER_SIGNATURE_ADDITIONS == {
         "descriptor": "()Lkotlin/enums/EnumEntries;",
     },
 }
+assert MODULE.COMPILER_GENERATED_PUBLIC_CLASS_EXCLUSIONS == {
+    "io.realm.processor.ClassMetaData$WhenMappings",
+    "io.realm.processor.RealmProxyClassGenerator$WhenMappings",
+    "io.realm.processor.Utils$WhenMappings",
+}
+processor_oracle = MODULE.load_oracle_signatures(ROOT)["realm-annotations-processor"]
+assert not (set(processor_oracle) & MODULE.COMPILER_GENERATED_PUBLIC_CLASS_EXCLUSIONS)
 assert MODULE.normalize_javap_output(
     "fixture.Sample",
     'Compiled from "Sample.kt"\npublic final class fixture.Sample {\n\n  public void value();\n}\n',
 ) == "public final class fixture.Sample {\n  public void value();\n}"
 
+kotlin_extensions_build = (ROOT / "realm/kotlin-extensions/build.gradle").read_text(encoding="utf-8")
+assert re.search(r"buildFeatures\s*\{\s*buildConfig\s*=\s*true\s*\}", kotlin_extensions_build)
+
 with tempfile.TemporaryDirectory() as temporary:
     archive = Path(temporary) / "artifact.jar"
     archive.write_bytes(b"fixture")
     assert MODULE.sha256(archive) == hashlib.sha256(b"fixture").hexdigest()
+
+    public_api = Path(temporary) / "public-api.jar"
+    # class_entries only reads the class-file header/access flags, so this
+    # compact fixture distinguishes an ordinary public class from the exact
+    # Kotlin enum-switch holder exclusions.
+    public_class = b"\xca\xfe\xba\xbe\x00\x00\x00\x34\x00\x01\x00\x01"
+    with zipfile.ZipFile(public_api, "w") as bundle:
+        bundle.writestr("fixture/Visible.class", public_class)
+        bundle.writestr("io/realm/processor/ClassMetaData$WhenMappings.class", public_class)
+        bundle.writestr("io/realm/processor/RealmProxyClassGenerator$WhenMappings.class", public_class)
+        bundle.writestr("io/realm/processor/Utils$WhenMappings.class", public_class)
+    _, public_classes = MODULE.class_entries(public_api, Path(temporary) / "public-api")
+    assert public_classes == {"fixture.Visible": 0x0001}
 
     clean_processor = Path(temporary) / "clean-processor.jar"
     with zipfile.ZipFile(clean_processor, "w") as bundle:
