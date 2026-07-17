@@ -23,3 +23,28 @@ sentinels to separate plain and encrypted local Realm files and writes its Andro
 host verifies that PID, force-stops only the fork package, proves it is gone, then runs phase B
 instrumentation. Phase B reopens and validates both sentinels and records a distinct PID; both
 phase files and the PID assertions are included in the checksummed evidence.
+
+## G011 repository modes
+
+The default no-argument command is the original **local** acceptance lane: it uses the
+G008 filesystem stage and remains offline. G011 adds two explicit remote modes without
+changing the apps or their runtime assertions:
+
+- `validated` accepts exactly one HTTPS deployment download URL and a *name* of an
+  environment variable containing the Bearer token. It requires a caller-supplied empty
+  Gradle user home and evidence root. The token is passed to Gradle as a header only and
+  is redacted from command/evidence files.
+- `central` accepts no repository URL or credential and obtains the fork group from
+  Maven Central only. It also requires an empty supplied Gradle home and evidence root.
+
+In all modes `io.github.leminity.realm` is routed to exactly one fork repository in both
+buildscript/plugin and dependency resolution. Google, the external Maven Central entry,
+and the plugin portal explicitly exclude the fork group. JitPack and Maven Local are never
+configured. Remote modes remove the fork build's offline flag only inside the isolated
+home; the immutable official lane remains its established offline Gradle 7.5 lane.
+
+For a no-device command/routing check, use `--dry-run` with an explicit identity tuple;
+it rejects any SDK below 37, page size other than 16384, AVD substitution, or incompatible
+16 KiB properties before it can invoke adb. A real run still performs every existing schema,
+migration, wrong-key, notification, thread, restart, force-stop, no-network, and checksum
+gate.

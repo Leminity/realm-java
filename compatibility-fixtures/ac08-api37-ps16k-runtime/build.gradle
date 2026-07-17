@@ -1,13 +1,30 @@
+import org.gradle.api.credentials.HttpHeaderCredentials
+import org.gradle.authentication.http.HttpHeaderAuthentication
+
 buildscript {
-    def g008Repository = System.getenv('G008_STAGING_REPOSITORY') ?:
+    def g011Mode = System.getenv('G011_REPOSITORY_MODE') ?: 'local'
+    def g011Repository = System.getenv('G008_STAGING_REPOSITORY') ?:
             'file:///mnt/d/workspace/jiran/realm/build/g008-root-final-stage-run1'
     repositories {
-        maven {
-            url = uri(g008Repository)
-            content { includeGroup('io.github.leminity.realm') }
+        if (g011Mode == 'central') {
+            // The fork group has one intentional Central source. The separate external
+            // Central repository below explicitly excludes it to prevent fallback.
+            mavenCentral { content { includeGroup('io.github.leminity.realm') } }
+        } else {
+            maven {
+                url = uri(g011Repository)
+                content { includeGroup('io.github.leminity.realm') }
+                if (g011Mode == 'validated') {
+                    credentials(HttpHeaderCredentials) {
+                        name = 'Authorization'
+                        value = 'Bearer ' + System.getenv('G011_FORK_BEARER')
+                    }
+                    authentication { header(HttpHeaderAuthentication) }
+                }
+            }
         }
-        google()
-        mavenCentral()
+        google { content { excludeGroup('io.github.leminity.realm') } }
+        mavenCentral { content { excludeGroup('io.github.leminity.realm') } }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:9.1.1'
