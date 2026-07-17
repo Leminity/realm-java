@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  provenance-and-gates:
+    name: Provenance and gates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8230315d06ad95c617244d2f265d237a1682d445
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Assert JDK 17
+        run: |
+          java -version 2>&1 | grep -Eiq 'version "17(\.|")'
+
+      - name: Verify source/evidence manifest
+        run: |
+          python3 tools/g011-evidence-manifest.py --verify evidence/provenance/g011-source-evidence-manifest.json
+
+      - name: Manifest regression tests
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 tools/test-g011-evidence-manifest.py
+
+      - name: G009 public API gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 tools/test-verify-g009-ac09-compatibility.py
+
+      - name: G010 scope gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 tools/test-verify-g010-scope.py
+
+      - name: G010 publication/license gate
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: |
+          python3 tools/test-verify-g010-license.py
