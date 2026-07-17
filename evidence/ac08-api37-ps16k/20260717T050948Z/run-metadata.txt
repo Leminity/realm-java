@@ -1,0 +1,3 @@
+run_id=20260717T050948Z
+repository=file:///mnt/d/workspace/jiran/realm/build/g008-root-final-stage-run1
+serial=emulator-5654

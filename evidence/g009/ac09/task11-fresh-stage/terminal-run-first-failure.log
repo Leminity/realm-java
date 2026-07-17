@@ -1,0 +1,1 @@
+AC-09 compatibility verification: FAIL: official realm-annotations-processor public API oracle mismatch: missing=[], added=['io.realm.processor.ClassMetaData$WhenMappings', 'io.realm.processor.RealmProxyClassGenerator$WhenMappings', 'io.realm.processor.Utils$WhenMappings']

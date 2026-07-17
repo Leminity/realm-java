@@ -1,0 +1,4 @@
+===== clear-official-data 2026-07-17T14:11:36+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell pm clear io.realm.ac08.official 
+Success
+[exit=0]

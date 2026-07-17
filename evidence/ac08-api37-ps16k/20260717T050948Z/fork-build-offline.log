@@ -1,0 +1,111 @@
+===== fork-build-offline 2026-07-17T14:10:33+09:00 =====
++ env G008_STAGING_REPOSITORY=file:///mnt/d/workspace/jiran/realm/build/g008-root-final-stage-run1 /mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/gradlew -p /mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/compatibility-fixtures/ac08-api37-ps16k-runtime --offline --no-daemon --console=plain :fork-app:assembleDebug :fork-app:assembleDebugAndroidTest 
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :fork-app:preBuild UP-TO-DATE
+> Task :fork-app:preDebugBuild UP-TO-DATE
+> Task :fork-app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :fork-app:generateDebugBuildConfig
+> Task :fork-app:generateDebugResources
+> Task :fork-app:packageDebugResources
+> Task :fork-app:processDebugNavigationResources
+> Task :fork-app:parseDebugLocalResources
+> Task :fork-app:javaPreCompileDebug
+> Task :fork-app:generateDebugAssets UP-TO-DATE
+> Task :fork-app:mergeDebugAssets
+> Task :fork-app:generateDebugRFile
+> Task :fork-app:compressDebugAssets
+> Task :fork-app:compileDebugKotlin NO-SOURCE
+
+> Task :fork-app:compileDebugJavaWithJavac
+Note: Processing module ForkNPlusOneModule
+Note: Processing class OfficialRecord
+Note: Creating DefaultRealmModule
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :fork-app:processDebugJavaRes
+> Task :fork-app:checkDebugDuplicateClasses
+> Task :fork-app:desugarDebugFileDependencies
+> Task :fork-app:checkDebugAarMetadata
+> Task :fork-app:mapDebugSourceSetPaths
+> Task :fork-app:compileDebugNavigationResources
+> Task :fork-app:mergeLibDexDebug
+> Task :fork-app:mergeDebugJavaResource
+> Task :fork-app:mergeDebugResources
+> Task :fork-app:createDebugCompatibleScreenManifests
+> Task :fork-app:extractDeepLinksDebug
+> Task :fork-app:mergeExtDexDebug
+> Task :fork-app:processDebugMainManifest
+> Task :fork-app:processDebugManifest
+> Task :fork-app:mergeDebugJniLibFolders
+> Task :fork-app:validateSigningDebug
+> Task :fork-app:writeDebugAppMetadata
+> Task :fork-app:writeDebugSigningConfigVersions
+> Task :fork-app:preDebugAndroidTestBuild SKIPPED
+> Task :fork-app:processDebugAndroidTestManifest
+> Task :fork-app:generateDebugAndroidTestBuildConfig
+> Task :fork-app:generateDebugAndroidTestResources
+> Task :fork-app:mergeDebugNativeLibs
+> Task :fork-app:packageDebugAndroidTestResources
+> Task :fork-app:processDebugAndroidTestNavigationResources
+> Task :fork-app:parseDebugAndroidTestLocalResources
+> Task :fork-app:javaPreCompileDebugAndroidTest
+> Task :fork-app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :fork-app:mergeDebugAndroidTestAssets
+> Task :fork-app:generateDebugAndroidTestRFile
+> Task :fork-app:compressDebugAndroidTestAssets
+
+> Task :fork-app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: librealm-jni.so. Run with --info option to learn more.
+
+> Task :fork-app:checkDebugAndroidTestDuplicateClasses
+> Task :fork-app:desugarDebugAndroidTestFileDependencies
+> Task :fork-app:checkDebugAndroidTestAarMetadata
+> Task :fork-app:mapDebugAndroidTestSourceSetPaths
+> Task :fork-app:mergeExtDexDebugAndroidTest
+> Task :fork-app:compileDebugAndroidTestNavigationResources
+> Task :fork-app:mergeLibDexDebugAndroidTest
+> Task :fork-app:mergeDebugAndroidTestResources
+> Task :fork-app:mergeDebugAndroidTestJniLibFolders
+> Task :fork-app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :fork-app:stripDebugAndroidTestDebugSymbols NO-SOURCE
+> Task :fork-app:validateSigningDebugAndroidTest
+> Task :fork-app:writeDebugAndroidTestSigningConfigVersions
+> Task :fork-app:processDebugAndroidTestResources
+> Task :fork-app:processDebugManifestForPackage
+> Task :fork-app:processDebugResources
+> Task :fork-app:debugRealmAccessorsTransformer
+> Task :fork-app:dexBuilderDebug
+> Task :fork-app:mergeProjectDexDebug
+> Task :fork-app:bundleDebugClassesToCompileJar
+> Task :fork-app:compileDebugAndroidTestKotlin NO-SOURCE
+
+> Task :fork-app:compileDebugAndroidTestJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :fork-app:processDebugAndroidTestJavaRes
+> Task :fork-app:mergeDebugAndroidTestJavaResource
+> Task :fork-app:debugAndroidTestRealmAccessorsTransformer
+> Task :fork-app:dexBuilderDebugAndroidTest
+> Task :fork-app:packageDebug
+> Task :fork-app:createDebugApkListingFileRedirect
+> Task :fork-app:assembleDebug
+> Task :fork-app:mergeProjectDexDebugAndroidTest
+> Task :fork-app:packageDebugAndroidTest
+> Task :fork-app:createDebugAndroidTestApkListingFileRedirect
+> Task :fork-app:assembleDebugAndroidTest
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/compatibility-fixtures/ac08-api37-ps16k-runtime/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 52s
+68 actionable tasks: 68 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+[exit=0]

@@ -1,0 +1,5 @@
+===== install-official 2026-07-17T14:11:36+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 install -r -t /mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/compatibility-fixtures/ac08-api37-ps16k-runtime/official-app/build/outputs/apk/debug/official-app-debug.apk 
+Performing Streamed Install
+Success
+[exit=0]

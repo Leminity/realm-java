@@ -1,0 +1,3 @@
+===== phase-a-force-stop 2026-07-17T14:11:38+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell am force-stop io.realm.ac08.fork 
+[exit=0]

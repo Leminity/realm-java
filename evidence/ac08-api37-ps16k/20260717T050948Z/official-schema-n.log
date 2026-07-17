@@ -1,0 +1,26 @@
+===== official-schema-n 2026-07-17T14:11:36+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell am instrument -w -r -e class io.realm.ac08.official.OfficialSchemaFixtureTest io.realm.ac08.official.test/androidx.test.runner.AndroidJUnitRunner 
+INSTRUMENTATION_STATUS: class=io.realm.ac08.official.OfficialSchemaFixtureTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.realm.ac08.official.OfficialSchemaFixtureTest:
+INSTRUMENTATION_STATUS: test=createOfficialSchemaNAndRecordBaselineExceptionCategories
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.official.OfficialSchemaFixtureTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=createOfficialSchemaNAndRecordBaselineExceptionCategories
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.039
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+[exit=0]

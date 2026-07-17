@@ -1,0 +1,4 @@
+===== push-schema 2026-07-17T14:11:37+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 push /tmp/tmp.7KlTFDmwhn/official-schema-n.realm /data/local/tmp/ac08-official-schema-n.realm 
+/tmp/tmp.7KlTFDmwhn/official-schema-n.realm: 1 file pushed, 0 skipped. 293.6 MB/s (16384 bytes in 0.000s)
+[exit=0]

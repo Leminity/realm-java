@@ -1,0 +1,93 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :kotlin-extensions:preBuild UP-TO-DATE
+> Task :kotlin-extensions:preBaseReleaseBuild UP-TO-DATE
+> Task :realm-library:preBuild UP-TO-DATE
+> Task :realm-library:stageBaseReleaseJniHeaderSnapshot UP-TO-DATE
+> Task :realm-library:preBaseReleaseBuild UP-TO-DATE
+> Task :realm-library:writeBaseReleaseAarMetadata UP-TO-DATE
+> Task :kotlin-extensions:checkBaseReleaseAarMetadata UP-TO-DATE
+> Task :kotlin-extensions:mergeBaseReleaseJniLibFolders UP-TO-DATE
+> Task :kotlin-extensions:mergeBaseReleaseNativeLibs NO-SOURCE
+> Task :kotlin-extensions:stripBaseReleaseDebugSymbols NO-SOURCE
+> Task :kotlin-extensions:copyBaseReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :kotlin-extensions:generateBaseReleaseBuildConfig
+> Task :kotlin-extensions:generateBaseReleaseResources UP-TO-DATE
+> Task :kotlin-extensions:packageBaseReleaseResources UP-TO-DATE
+> Task :kotlin-extensions:processBaseReleaseNavigationResources UP-TO-DATE
+> Task :kotlin-extensions:parseBaseReleaseLocalResources UP-TO-DATE
+> Task :kotlin-extensions:generateBaseReleaseRFile UP-TO-DATE
+> Task :realm-annotations-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-annotations-processor:generateVersionClass
+> Task :realm-annotations-processor:compileKotlin UP-TO-DATE
+> Task :realm-annotations-processor:compileJava UP-TO-DATE
+> Task :realm-annotations-processor:processResources UP-TO-DATE
+> Task :realm-annotations-processor:classes UP-TO-DATE
+> Task :realm-annotations-processor:jar UP-TO-DATE
+> Task :realm-library:cleanBaseReleaseJniHeaderValidation
+> Task :realm-library:generateBaseReleaseBuildConfig UP-TO-DATE
+> Task :realm-library:generateBaseReleaseResources UP-TO-DATE
+> Task :realm-library:packageBaseReleaseResources UP-TO-DATE
+> Task :realm-library:processBaseReleaseNavigationResources UP-TO-DATE
+> Task :realm-library:parseBaseReleaseLocalResources UP-TO-DATE
+> Task :realm-library:generateBaseReleaseRFile UP-TO-DATE
+> Task :realm-library:kaptGenerateStubsBaseReleaseKotlin UP-TO-DATE
+> Task :realm-library:kaptBaseReleaseKotlin UP-TO-DATE
+> Task :realm-library:compileBaseReleaseKotlin UP-TO-DATE
+> Task :realm-library:javaPreCompileBaseRelease UP-TO-DATE
+> Task :realm-library:compileBaseReleaseJavaWithJavac
+> Task :realm-library:compileBaseReleaseJavaWithJavac FROM-CACHE
+> Task :realm-library:baseReleaseRealmBuildTransformer UP-TO-DATE
+> Task :realm-library:bundleLibCompileToJarBaseRelease UP-TO-DATE
+> Task :kotlin-extensions:extractBaseReleaseAnnotations
+> Task :kotlin-extensions:extractDeepLinksForAarBaseRelease UP-TO-DATE
+> Task :kotlin-extensions:generateBaseReleaseAssets UP-TO-DATE
+> Task :kotlin-extensions:mergeBaseReleaseAssets UP-TO-DATE
+> Task :kotlin-extensions:javaPreCompileBaseRelease UP-TO-DATE
+> Task :kotlin-extensions:prepareBaseReleaseArtProfile UP-TO-DATE
+> Task :kotlin-extensions:prepareLintJarForPublish UP-TO-DATE
+> Task :kotlin-extensions:processBaseReleaseManifest UP-TO-DATE
+> Task :kotlin-extensions:writeBaseReleaseAarMetadata UP-TO-DATE
+> Task :kotlin-extensions:mapBaseReleaseSourceSetPaths
+> Task :kotlin-extensions:kaptGenerateStubsBaseReleaseKotlin
+> Task :kotlin-extensions:mergeBaseReleaseResources
+> Task :kotlin-extensions:kaptBaseReleaseKotlin SKIPPED
+> Task :realm-library:mapBaseReleaseSourceSetPaths
+> Task :realm-library:compileBaseReleaseLibraryResources
+> Task :kotlin-extensions:verifyBaseReleaseResources
+
+> Task :kotlin-extensions:compileBaseReleaseKotlin
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/realm/kotlin-extensions/src/main/kotlin/io/realm/kotlin/RealmModelExtensions.kt:64:37 Unchecked cast of 'RealmModel!' to 'T (of fun <T : RealmModel> RealmModel.freeze)'.
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/realm/kotlin-extensions/src/main/kotlin/io/realm/kotlin/RealmObjectExtensions.kt:68:85 Unchecked cast of 'Flow<DynamicRealmObject!>!' to 'Flow<T? (of fun <T : RealmModel> T?.toFlow)>'.
+w: file:///mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/realm/kotlin-extensions/src/main/kotlin/io/realm/kotlin/RealmObjectExtensions.kt:126:94 Unchecked cast of 'Flow<ObjectChange<DynamicRealmObject!>!>!' to 'Flow<ObjectChange<T (of fun <T : RealmModel> T?.toChangesetFlow)>?>'.
+
+> Task :kotlin-extensions:compileBaseReleaseJavaWithJavac
+> Task :kotlin-extensions:mergeBaseReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :kotlin-extensions:mergeBaseReleaseConsumerProguardFiles UP-TO-DATE
+> Task :kotlin-extensions:processBaseReleaseJavaRes UP-TO-DATE
+> Task :kotlin-extensions:mergeBaseReleaseJavaResource UP-TO-DATE
+> Task :kotlin-extensions:syncBaseReleaseLibJars
+> Task :kotlin-extensions:bundleBaseReleaseAar
+> Task :kotlin-extensions:assembleBaseRelease
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/realm/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 1m 43s
+52 actionable tasks: 14 executed, 1 from cache, 37 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+assemble exit=0

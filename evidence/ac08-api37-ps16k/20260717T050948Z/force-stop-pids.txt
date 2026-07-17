@@ -1,0 +1,5 @@
+pid_a=11921
+pid_a_matches_live=PASS
+pid_a_absent=PASS
+pid_b=11973
+pid_b_differs=PASS

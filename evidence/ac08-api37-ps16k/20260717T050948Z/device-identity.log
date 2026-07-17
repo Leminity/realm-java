@@ -1,0 +1,4 @@
+===== device-identity 2026-07-17T14:11:35+09:00 =====
++ device_identity 
+SDK=37 PAGE_SIZE=16384 AVD=realm-api37-ps16k-kvm linker_compat=fatal package_compat_disabled=true
+[exit=0]

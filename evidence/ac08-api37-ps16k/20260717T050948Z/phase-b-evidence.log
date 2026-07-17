@@ -1,0 +1,7 @@
+===== phase-b-evidence 2026-07-17T14:11:38+09:00 =====
++ capture_fork_file restart-phase-b.txt /tmp/tmp.7KlTFDmwhn/phase-b.txt 
+[exit=0]
+phase=B
+pid=11973
+plain=plain-phase-a|1712345678000|[8, 0, 8, 16]
+encrypted=encrypted-phase-a|1712345678000|[8, 0, 8, 16]

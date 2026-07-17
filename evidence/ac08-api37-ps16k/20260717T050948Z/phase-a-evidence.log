@@ -1,0 +1,7 @@
+===== phase-a-evidence 2026-07-17T14:11:38+09:00 =====
++ wait_for_fork_file restart-phase-a.txt /tmp/tmp.7KlTFDmwhn/phase-a.txt 
+phase=A
+pid=11921
+plain=plain-phase-a|1712345678000|[8, 0, 8, 16]
+encrypted=encrypted-phase-a|1712345678000|[8, 0, 8, 16]
+[exit=0]

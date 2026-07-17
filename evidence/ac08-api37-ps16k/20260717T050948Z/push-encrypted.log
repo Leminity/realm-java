@@ -1,0 +1,4 @@
+===== push-encrypted 2026-07-17T14:11:37+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 push /mnt/d/workspace/jiran/realm/compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/official-10.19.0-encrypted.realm /data/local/tmp/ac08-official-encrypted.realm 
+/mnt/d/workspace/jiran/realm/compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle/official-10.19.0-encrypted.realm: 1 file pushed, 0 skipped. 0.6 MB/s (8192 bytes in 0.013s)
+[exit=0]

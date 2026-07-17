@@ -1,0 +1,2 @@
+stage_root=/mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/build/task11-20260717T011000Z-signed
+fork_repository=/mnt/d/workspace/jiran/realm/.omx/team/execute-only-ultragoa-6fc3cb75/worktrees/worker-3/build/task11-20260717T011000Z-signed/repository/io/github/leminity/realm
