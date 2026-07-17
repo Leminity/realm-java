@@ -210,7 +210,18 @@ class ManifestTests(unittest.TestCase):
         runtime_index = workflow.index("--mode runtime")
         self.assertGreater(runtime_index, workflow.index("G011 AC08 local gate"))
         self.assertGreater(runtime_index, workflow.index("G010 publication and license gate"))
+        self.assertGreater(runtime_index, workflow.index("Portal and protected-release unit gate"))
         self.assertGreater(workflow.index("Upload complete G011 evidence"), runtime_index)
+        upload_step = workflow[workflow.index("Upload complete G011 evidence") :]
+        for required_path in (
+            "${{ env.G011_EVIDENCE_ROOT }}",
+            "${{ env.G011_RUNTIME_MANIFEST }}",
+            "${{ env.G011_RUNTIME_SHA }}",
+            "if-no-files-found: error",
+        ):
+            self.assertIn(required_path, upload_step)
+        self.assertIn('tee "$G011_EVIDENCE_ROOT/g008/unit.log"', workflow)
+        self.assertIn('tee "$G011_EVIDENCE_ROOT/provenance/manifest-unit.log"', workflow)
         self.assertEqual(workflow.count("G011 AC08 local gate"), 1)
 
 

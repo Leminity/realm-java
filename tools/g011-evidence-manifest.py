@@ -77,6 +77,8 @@ GATE_PATHS = (
 RUNTIME_REQUIRED_EXACT = (
     "toolchain/verification.txt",
     "device/preflight.txt",
+    "provenance/baseline-verify.log",
+    "provenance/manifest-unit.log",
     "g003/gate.log",
     "g004/gate.log",
     "g005/gate.log",
@@ -84,14 +86,19 @@ RUNTIME_REQUIRED_EXACT = (
     "g008/publication-verify.log",
     "g008/publication-manifest.json",
     "g008/maven-central-bundle.zip",
+    "g008/unit.log",
     "consumer/result.txt",
     "native/result.txt",
+    "g009/official-resolver.log",
     "g009/report.json",
+    "g009/unit.log",
     "g010/scope-report.json",
+    "g010/scope-unit.log",
     "g010/license-report.json",
+    "g010/license-unit.log",
     "portal/unit.log",
 )
-RUNTIME_REQUIRED_PREFIXES = ("ac08/", "g008/staging/")
+RUNTIME_REQUIRED_PREFIXES = ("g003/matrix/", "g005/test-results/", "ac08/", "g008/staging/")
 
 
 class ManifestError(RuntimeError):

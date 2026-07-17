@@ -67,10 +67,13 @@ jobs:
           PYTHONDONTWRITEBYTECODE: "1"
         run: |
           set -euo pipefail
+          mkdir -p "$G011_EVIDENCE_ROOT/provenance"
           python3 tools/g011-evidence-manifest.py \
             --mode baseline \
-            --verify evidence/provenance/g011-source-evidence-manifest.json
-          python3 tools/test-g011-evidence-manifest.py
+            --verify evidence/provenance/g011-source-evidence-manifest.json \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/provenance/baseline-verify.log"
+          python3 tools/test-g011-evidence-manifest.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/provenance/manifest-unit.log"
 
       - name: Fail closed on API37 / 16KiB runner identity
         shell: bash
@@ -174,7 +177,10 @@ jobs:
       - name: G008 regression gate
         env:
           PYTHONDONTWRITEBYTECODE: "1"
-        run: python3 tools/test-g008-publication.py
+        run: |
+          set -euo pipefail
+          python3 tools/test-g008-publication.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g008/unit.log"
 
       - name: G009 public API and resource gate
         env:
