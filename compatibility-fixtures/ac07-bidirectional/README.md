@@ -47,3 +47,24 @@ two transports to the same API-37 / 16 KiB device. The runner rejects the
 second transport and holds `/tmp/realm-g009-device.lock` from the first app
 install through reverse-reader instrumentation, so it cannot collide with
 another compatibility lane.
+
+## Encrypted cross-page-size recovery
+
+The preserved first failure showed that the immutable 8 KiB encrypted oracle
+(`792abb7c…`) could not be opened on the API-37 / 16 KiB device even by the
+isolated official `io.realm:realm-android-library:10.19.0` reader, with the
+manifest-matched 64-byte key. A newly-created encrypted Realm did open and
+reopen with the fork. This isolates the failure to reading an encrypted file
+created with a smaller system page size, rather than to the key, the oracle
+copy, or ordinary fork encryption.
+
+The required Core change is a narrow backport of upstream
+[`c97091234` (RCORE-1969/#7535)](https://github.com/realm/realm-core/commit/c97091234d40efaaaf7d8d8349eb3c97012f6c9b),
+recorded in the Core submodule commit `d7b52ccb`. It preserves the fixed 4 KiB
+encrypted on-disk block layout while allowing an encrypted file's mapping and
+logical size to be rounded for the reader's page size. The upstream regression
+`EncryptedFile_Portablility` writes at 4 KiB then reads at 8 KiB and 16 KiB;
+it is part of the backport and must pass before the device matrix is accepted.
+No oracle, encryption key, public API, file format, API level, or toolchain is
+changed. Roll back this recovery by reverting the parent gitlink commit and
+the `d7b52ccb` Core commit together.
