@@ -46,8 +46,19 @@ kotlin_extensions_build = (ROOT / "realm/kotlin-extensions/build.gradle").read_t
 assert re.search(r"buildFeatures\s*\{\s*buildConfig\s*=\s*true\s*\}", kotlin_extensions_build)
 
 with tempfile.TemporaryDirectory() as temporary:
-    archive = Path(temporary) / "artifact.jar"
+    repository_root = Path(temporary) / "repository"
+    archive = (
+        repository_root
+        / MODULE.FORK_GROUP_PATH
+        / "realm-gradle-plugin"
+        / MODULE.FORK_VERSION
+        / f"realm-gradle-plugin-{MODULE.FORK_VERSION}.jar"
+    )
+    archive.parent.mkdir(parents=True)
     archive.write_bytes(b"fixture")
+    assert MODULE.artifact_file(
+        repository_root, "realm-gradle-plugin", MODULE.FORK_VERSION, ".jar"
+    ) == archive
     assert MODULE.sha256(archive) == hashlib.sha256(b"fixture").hexdigest()
 
     public_api = Path(temporary) / "public-api.jar"

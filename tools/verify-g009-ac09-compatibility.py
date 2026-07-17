@@ -24,6 +24,7 @@ from pathlib import Path
 BASELINE_TAG = "v10.19.0"
 OFFICIAL_VERSION = "10.19.0"
 FORK_VERSION = "10.19.0-agp9.1"
+FORK_GROUP_PATH = Path("io/github/leminity/realm")
 ARTIFACTS = {
     "realm-gradle-plugin": ".jar",
     "realm-transformer": ".jar",
@@ -114,8 +115,8 @@ def is_unsupported(class_name: str) -> bool:
     return class_name.startswith(UNSUPPORTED_PREFIXES)
 
 
-def artifact_file(root: Path, artifact: str, version: str, suffix: str) -> Path:
-    path = root / artifact / version / f"{artifact}-{version}{suffix}"
+def artifact_file(repository_root: Path, artifact: str, version: str, suffix: str) -> Path:
+    path = repository_root / FORK_GROUP_PATH / artifact / version / f"{artifact}-{version}{suffix}"
     if not path.is_file():
         fail(f"missing {artifact} artifact: {path}")
     return path
@@ -562,8 +563,8 @@ def main() -> int:
     parser.add_argument(
         "--fork-repository",
         type=Path,
-        default=Path("/mnt/d/workspace/jiran/realm/build/g008-root-final-stage-run1/io/github/leminity/realm"),
-        help="G008 staging repository; never resolve a remote/JitPack substitute",
+        default=Path(__file__).resolve().parents[1] / "build/g008-root-final-stage-run1",
+        help="G008 Maven repository root; never resolve a remote/JitPack substitute",
     )
     parser.add_argument("--output-dir", type=Path, default=None)
     args = parser.parse_args()
