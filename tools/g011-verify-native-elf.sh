@@ -53,7 +53,21 @@ if [[ -z $llvm_readelf ]]; then
 fi
 [[ -x $llvm_readelf ]] || { printf 'missing executable llvm-readelf: %s\n' "$llvm_readelf" >&2; exit 1; }
 
-mkdir -p "$evidence/raw"
+prepare_fresh_evidence() {
+  local directory="$1"
+  if [[ -e $directory && ! -d $directory ]]; then
+    printf 'evidence path is not a directory: %s\n' "$directory" >&2
+    exit 1
+  fi
+  if [[ -d $directory ]] && find "$directory" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
+    printf 'evidence directory must be empty: %s\n' "$directory" >&2
+    exit 1
+  fi
+  mkdir -p "$directory"
+}
+
+prepare_fresh_evidence "$evidence"
+mkdir "$evidence/raw"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 if [[ -n $bundle ]]; then
@@ -123,9 +137,23 @@ if [[ $status -eq 0 ]]; then
 else
   printf 'RESULT=FAIL\n' >> "$report"
 fi
-(
-  cd "$evidence"
-  find . -type f ! -name SHA256SUMS -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS
-  sha256sum -c SHA256SUMS > checksum-verify.log
-)
+write_checksums() {
+  local manifest_tmp="$evidence/.SHA256SUMS.tmp"
+  local verify_tmp="$evidence/.checksum-verify.tmp"
+  (
+    cd "$evidence"
+    LC_ALL=C find . -type f \
+      ! -name SHA256SUMS ! -name checksum-verify.log \
+      ! -name .SHA256SUMS.tmp ! -name .checksum-verify.tmp \
+      -printf '%P\0' | LC_ALL=C sort -z | xargs -0 sha256sum
+  ) > "$manifest_tmp"
+  mv -f "$manifest_tmp" "$evidence/SHA256SUMS"
+  if (cd "$evidence" && sha256sum -c SHA256SUMS) > "$verify_tmp"; then
+    mv -f "$verify_tmp" "$evidence/checksum-verify.log"
+  else
+    mv -f "$verify_tmp" "$evidence/checksum-verify.log"
+    return 1
+  fi
+}
+write_checksums
 exit "$status"

@@ -65,7 +65,19 @@ case "$mode" in
     ;;
 esac
 
-mkdir -p "$gradle_user_home" "$evidence"
+prepare_fresh_evidence() {
+  local directory="$1"
+  if [[ -e $directory && ! -d $directory ]]; then
+    fail "evidence path is not a directory: $directory"
+  fi
+  if [[ -d $directory ]] && find "$directory" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
+    fail "evidence directory must be empty: $directory"
+  fi
+  mkdir -p "$directory"
+}
+
+prepare_fresh_evidence "$evidence"
+mkdir -p "$gradle_user_home"
 [[ -d $gradle_user_home && -d $evidence ]] || fail 'cannot create caller-supplied Gradle home or evidence directory'
 if find "$gradle_user_home" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
   fail "Gradle user home must be empty: $gradle_user_home"
@@ -202,9 +214,23 @@ else
   set -e
 fi
 printf 'gradle_exit=%s\n' "$status" > "$evidence/result.txt"
-(
-  cd "$evidence"
-  find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\0' | sort -z | xargs -0 sha256sum > SHA256SUMS
-  sha256sum -c SHA256SUMS > checksum-verify.log
-)
+write_checksums() {
+  local manifest_tmp="$evidence/.SHA256SUMS.tmp"
+  local verify_tmp="$evidence/.checksum-verify.tmp"
+  (
+    cd "$evidence"
+    LC_ALL=C find . -maxdepth 1 -type f \
+      ! -name SHA256SUMS ! -name checksum-verify.log \
+      ! -name .SHA256SUMS.tmp ! -name .checksum-verify.tmp \
+      -printf '%f\0' | LC_ALL=C sort -z | xargs -0 sha256sum
+  ) > "$manifest_tmp"
+  mv -f "$manifest_tmp" "$evidence/SHA256SUMS"
+  if (cd "$evidence" && sha256sum -c SHA256SUMS) > "$verify_tmp"; then
+    mv -f "$verify_tmp" "$evidence/checksum-verify.log"
+  else
+    mv -f "$verify_tmp" "$evidence/checksum-verify.log"
+    return 1
+  fi
+}
+write_checksums
 [[ $status -eq 0 ]] || exit "$status"

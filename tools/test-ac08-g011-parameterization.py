@@ -44,6 +44,8 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
             self.assertNotIn("--offline", plan)
             self.assertNotIn(secret, all_text)
             self.assertTrue((evidence / "SHA256SUMS").is_file())
+            checksum = subprocess.run(["sha256sum", "-c", "SHA256SUMS"], cwd=evidence, text=True, capture_output=True)
+            self.assertEqual(checksum.returncode, 0, checksum.stdout + checksum.stderr)
 
     def test_rejects_4k_or_lower_api_and_central_custom_url(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -63,6 +65,22 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
             self.assertIn("HttpHeaderCredentials", text)
             self.assertIn("mavenCentral { content { includeGroup('io.github.leminity.realm') } }", text)
         self.assertIn("gradlePluginPortal { content { excludeGroup('io.github.leminity.realm') } }", settings)
+
+
+    def test_rejects_nonempty_run_id_evidence_before_writing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = pathlib.Path(tmp)
+            evidence_root = tmp / "evidence"
+            collision = evidence_root / "reused-run"
+            collision.mkdir(parents=True)
+            stale = collision / "prior.log"
+            stale.write_text("keep")
+            result = self.run_script(
+                "--mode", "central", "--gradle-user-home", str(tmp / "home"),
+                "--evidence-dir", str(evidence_root), "--run-id", "reused-run", "--dry-run",
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(stale.read_text(), "keep")
 
 
 if __name__ == "__main__":

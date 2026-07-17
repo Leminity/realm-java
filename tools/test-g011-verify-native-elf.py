@@ -42,6 +42,8 @@ class G011NativeElfTests(unittest.TestCase):
             self.assertIn("ABI_SET=PASS", report)
             self.assertIn("RESULT=PASS", report)
             self.assertTrue((tmp / "pass/SHA256SUMS").is_file())
+            checksum = subprocess.run(["sha256sum", "-c", "SHA256SUMS"], cwd=tmp / "pass", text=True, capture_output=True)
+            self.assertEqual(checksum.returncode, 0, checksum.stdout + checksum.stderr)
             failed = self.invoke("--aar", str(aar), "--llvm-readelf", str(readelf), "--evidence-dir", str(tmp / "fail"), env={"G011_TEST_ALIGN": "0x1000"})
             self.assertNotEqual(failed.returncode, 0)
             self.assertIn("RESULT=FAIL", (tmp / "fail/report.txt").read_text())
@@ -64,6 +66,22 @@ class G011NativeElfTests(unittest.TestCase):
             result = self.invoke("--aar", str(forbidden), "--llvm-readelf", str(readelf), "--evidence-dir", str(tmp / "x86"))
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("x86 is forbidden", (tmp / "x86/report.txt").read_text())
+
+
+    def test_rejects_nonempty_evidence_directory_before_writing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = pathlib.Path(tmp)
+            aar = tmp / "realm-android-library.aar"
+            readelf = tmp / "llvm-readelf"
+            evidence = tmp / "evidence"
+            make_aar(aar)
+            make_readelf(readelf)
+            evidence.mkdir()
+            stale = evidence / "prior.txt"
+            stale.write_text("do not replace")
+            result = self.invoke("--aar", str(aar), "--llvm-readelf", str(readelf), "--evidence-dir", str(evidence))
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(stale.read_text(), "do not replace")
 
 
 if __name__ == "__main__":

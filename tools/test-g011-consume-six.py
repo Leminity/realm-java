@@ -41,6 +41,8 @@ class G011ConsumeSixTests(unittest.TestCase):
             self.assertNotIn(secret, "\n".join(p.read_text(errors="replace") for p in evidence.rglob("*") if p.is_file()))
             self.assertTrue((evidence / "SHA256SUMS").is_file())
             self.assertTrue((evidence / "checksum-verify.log").is_file())
+            checksum = subprocess.run(["sha256sum", "-c", "SHA256SUMS"], cwd=evidence, text=True, capture_output=True)
+            self.assertEqual(checksum.returncode, 0, checksum.stdout + checksum.stderr)
 
     def test_validated_rejects_missing_secret_and_non_deployment_url(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -73,6 +75,21 @@ class G011ConsumeSixTests(unittest.TestCase):
             self.assertEqual(passing.returncode, 0, passing.stderr)
             settings = (root / "evidence2/settings.gradle.redacted").read_text()
             self.assertIn("mavenCentral { content { includeGroup('io.github.leminity.realm') } }", settings)
+
+
+    def test_rejects_nonempty_evidence_directory_before_writing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            evidence = root / "evidence"
+            evidence.mkdir()
+            stale = evidence / "stale.txt"
+            stale.write_text("preserve me")
+            result = self.run_script(
+                "--mode", "central", "--gradle-user-home", str(root / "home"),
+                "--evidence-dir", str(evidence), "--dry-run",
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertEqual(stale.read_text(), "preserve me")
 
 
 if __name__ == "__main__":

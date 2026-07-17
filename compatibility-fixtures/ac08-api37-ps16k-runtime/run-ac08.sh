@@ -132,12 +132,33 @@ run() {
     exit "$status"
   } 2>&1 | tee "$EVIDENCE/${name}.log"
 }
+prepare_fresh_evidence() {
+  local directory="$1"
+  if [[ -e $directory && ! -d $directory ]]; then
+    fail "evidence path is not a directory: $directory"
+  fi
+  if [[ -d $directory ]] && find "$directory" -mindepth 1 -maxdepth 1 -print -quit | grep -q .; then
+    fail "evidence directory/run ID already contains evidence: $directory"
+  fi
+  mkdir -p "$directory"
+}
 write_checksums() {
+  local manifest_tmp="$EVIDENCE/.SHA256SUMS.tmp"
+  local verify_tmp="$EVIDENCE/.checksum-verify.tmp"
   (
     cd "$EVIDENCE"
-    find . -maxdepth 1 -type f ! -name SHA256SUMS -printf '%f\0' | sort -z | xargs -0 sha256sum > SHA256SUMS
-    sha256sum -c SHA256SUMS > checksum-verify.log
-  )
+    LC_ALL=C find . -maxdepth 1 -type f \
+      ! -name SHA256SUMS ! -name checksum-verify.log \
+      ! -name .SHA256SUMS.tmp ! -name .checksum-verify.tmp \
+      -printf '%f\0' | LC_ALL=C sort -z | xargs -0 sha256sum
+  ) > "$manifest_tmp"
+  mv -f "$manifest_tmp" "$EVIDENCE/SHA256SUMS"
+  if (cd "$EVIDENCE" && sha256sum -c SHA256SUMS) > "$verify_tmp"; then
+    mv -f "$verify_tmp" "$EVIDENCE/checksum-verify.log"
+  else
+    mv -f "$verify_tmp" "$EVIDENCE/checksum-verify.log"
+    return 1
+  fi
 }
 validate_device_identity_values() {
   local sdk=$1 page=$2 avd=$3 linker=$4 compatibility=$5
@@ -180,7 +201,7 @@ device_identity() {
   printf 'SDK=%s PAGE_SIZE=%s AVD=%s linker_compat=%s package_compat_disabled=%s\n' "$sdk" "$page" "$avd" "$linker" "$compatibility"
 }
 
-mkdir -p "$EVIDENCE"
+prepare_fresh_evidence "$EVIDENCE"
 {
   printf 'run_id=%s\nmode=%s\nrepository=%s\nserial=%s\nexpected_avd=%s\n' "$RUN_ID" "$MODE" "$FORK_REPOSITORY_URL" "$SERIAL" "$EXPECTED_AVD"
   [[ $MODE != local ]] && printf 'gradle_user_home=%s\n' "$GRADLE_USER_HOME"
