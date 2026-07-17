@@ -9,6 +9,18 @@
 Realm is a mobile database that runs directly inside phones, tablets or wearables.
 This repository holds the source code for the Java version of Realm, which currently runs only on Android.
 
+## Leminity maintenance fork (G010)
+
+This is an **unofficial Leminity maintenance fork** of upstream Realm Java. The reproducible
+fork/release contract, provenance, compatibility boundaries, and local-only verification
+commands are documented in [`docs/release/G010-fork-release.md`](docs/release/G010-fork-release.md).
+The fork is versioned as `10.19.0-agp9.1`, based on upstream tag `v10.19.0` plus integrated
+revision `0e8bddf0a46827a7336a6a13406df8e35834db25`; its Realm Core provenance is
+`d7b52ccbada0283527db36143cfeab18692b4ed0`.
+
+The supported surface is the base local database only. Sync and ObjectServer integrations are
+unsupported and excluded from this fork's release contract.
+
 ## Realm Kotlin
 
 The [Realm Kotlin SDK](https://github.com/realm/realm-kotlin) is now GA and can be used for both Android and Kotlin Multiplatform. While we are still adding features, please consider using Realm Kotlin for any new project, and let us know if you miss anything there!
