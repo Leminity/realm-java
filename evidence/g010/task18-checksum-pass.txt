@@ -1,0 +1,5 @@
+result=PASS
+manifest_count=6
+corrected_manifest=evidence/g010/task14-scope-report.json.sha256
+corrected_target=evidence/g010/task14-scope-report.json
+corrected_sha256=27f2e77a60b4b49584cd4901fcb157823031cec7ba62c8a5043abb0ba9587971

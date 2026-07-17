@@ -1,0 +1,5 @@
+result=FAIL
+failed_manifest=evidence/g010/task14-scope-report.json.sha256
+expected_sha256=9b5f2e1e56733ba83eaa2f6f30e9220f623fc2a2bcf79d7aa4cc2f56aa0048c6
+actual_sha256=27f2e77a60b4b49584cd4901fcb157823031cec7ba62c8a5043abb0ba9587971
+target=evidence/g010/task14-scope-report.json

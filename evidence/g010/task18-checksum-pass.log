@@ -1,0 +1,26 @@
+command=sha256sum -c for every committed evidence/g010/*.sha256 from worktree root
+result=PASS
+manifest_count=6
+### evidence/g010/task14-scope-ac15-manifest.sha256
+evidence/g010/task14-scope-ac15-report.json: OK
+evidence/g010/task14-scope-ac15-failure.txt: OK
+evidence/g010/task14-scope-ac15-failure.log: OK
+### evidence/g010/task14-scope-manifest.sha256
+evidence/g010/task14-scope-report.json: OK
+evidence/g010/task14-scope-first-failure.txt: OK
+evidence/g010/task14-scope-first-failure.log: OK
+### evidence/g010/task14-scope-narrowed-manifest.sha256
+evidence/g010/task14-scope-narrowed-report.json: OK
+evidence/g010/task14-scope-narrowed-failure.txt: OK
+evidence/g010/task14-scope-narrowed-failure.log: OK
+### evidence/g010/task14-scope-report.json.sha256
+evidence/g010/task14-scope-report.json: OK
+### evidence/g010/task17-evidence-manifest.sha256
+evidence/g010/task17-scope-pass-report.json: OK
+evidence/g010/task17-scope-pass-summary.txt: OK
+evidence/g010/task17-root-supported-dry-run.log: OK
+evidence/g010/task17-g003-preexisting.txt: OK
+evidence/g010/task17-regression-summary.txt: OK
+### evidence/g010/task17-scope-pass-manifest.sha256
+evidence/g010/task17-scope-pass-report.json: OK
+evidence/g010/task17-scope-pass-summary.txt: OK
