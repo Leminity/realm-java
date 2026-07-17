@@ -129,6 +129,10 @@ verify_java() {
 
 verify_static() {
   local script wrapper
+  local -a realm_gradle_scripts=(
+    realm/realm-library/build.gradle
+    realm/kotlin-extensions/build.gradle
+  )
   cd "$root"
 
   require_line "GRADLE_BUILD_TOOLS=$EXPECTED_AGP" dependencies.list
@@ -149,14 +153,59 @@ verify_static() {
     fi
   done
 
-  if grep -REn --include='*.gradle' --include='gradle.properties' \
+  if grep -En \
       'android\.(newDsl|builtInKotlin)[[:space:]]*=[[:space:]]*false' \
-      build.gradle gradle.properties realm realm-annotations realm-transformer \
-      library-build-transformer gradle-plugin >/dev/null; then
+      build.gradle gradle.properties "${SUPPORTED_BUILD_SCRIPTS[@]}" >/dev/null; then
     fail 'legacy AGP opt-out is forbidden'
   fi
 
-  if grep -REn --include='*.gradle' -- 'kotlin-android' realm >/dev/null; then
+  # Migration comments may name the removed plugin, but only executable Gradle
+  # content can violate the AGP built-in Kotlin requirement. Check the two
+  # supported Android module scripts without traversing the nested Core tree.
+  for script in "${realm_gradle_scripts[@]}"; do
+    [[ -f "$script" ]] || fail "missing supported Android build script: $script"
+  done
+  if awk '
+    {
+      source = $0
+      code = ""
+      while (length(source) > 0) {
+        if (in_block_comment) {
+          block_end = index(source, "*/")
+          if (!block_end) {
+            source = ""
+            break
+          }
+          source = substr(source, block_end + 2)
+          in_block_comment = 0
+          continue
+        }
+
+        block_start = index(source, "/*")
+        line_comment = index(source, "//")
+        if (line_comment && (!block_start || line_comment < block_start)) {
+          code = code substr(source, 1, line_comment - 1)
+          source = ""
+          break
+        }
+        if (block_start) {
+          code = code substr(source, 1, block_start - 1)
+          source = substr(source, block_start + 2)
+          in_block_comment = 1
+          continue
+        }
+
+        code = code source
+        source = ""
+      }
+
+      if (code ~ /(^|[^[:alnum:]_-])kotlin-android([^[:alnum:]_-]|$)/) {
+        printf "%s:%d:%s\\n", FILENAME, FNR, code
+        found = 1
+      }
+    }
+    END { exit(found ? 0 : 1) }
+  ' "${realm_gradle_scripts[@]}" >/dev/null; then
     fail 'Android modules must use AGP built-in Kotlin, not kotlin-android'
   fi
 
@@ -164,9 +213,11 @@ verify_static() {
     fail "expected compileSdk $EXPECTED_COMPILE_TARGET_SDK in realm/build.gradle"
   grep -Eq "minSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_MIN_SDK" realm/build.gradle || \
     fail "expected minSdk $EXPECTED_MIN_SDK in realm/build.gradle"
-  grep -REq --include='*.gradle' \
-      "targetSdk(Version)?[[:space:]]+rootProject(\.ext)?\.compileSdkVersion|targetSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_COMPILE_TARGET_SDK" \
-      realm/realm-library realm/kotlin-extensions || \
+  grep -Eq "targetSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_COMPILE_TARGET_SDK" realm/build.gradle || \
+    fail "expected targetSdk $EXPECTED_COMPILE_TARGET_SDK in realm/build.gradle"
+  grep -Eq \
+      "targetSdk(Version)?[[:space:]]+rootProject(\.ext)?\.(compileSdkVersion|targetSdkVersion)|targetSdk(Version)?[[:space:]]*=[[:space:]]*$EXPECTED_COMPILE_TARGET_SDK" \
+      realm/realm-library/build.gradle realm/kotlin-extensions/build.gradle || \
     fail "expected targetSdk $EXPECTED_COMPILE_TARGET_SDK for supported Android modules"
 
   if grep -REn --include='*.gradle' --include='*.kt' --include='*.java' \

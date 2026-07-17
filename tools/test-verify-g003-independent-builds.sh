@@ -32,6 +32,61 @@ for forbidden in \
   fi
 done
 
+# Comments documenting the migration must not trigger the Kotlin-plugin gate,
+# but an actual plugin application still must. Use an archived fixture so this
+# exercises the canonical verifier against a complete static source tree.
+comment_fixture_root="$temp_dir/comment-fixture-root"
+mkdir -p "$comment_fixture_root"
+git -C "$root" archive --format=tar HEAD | tar -xf - -C "$comment_fixture_root"
+cp "$verifier" "$comment_fixture_root/tools/verify-g003-independent-builds.sh"
+chmod +x "$comment_fixture_root/tools/verify-g003-independent-builds.sh"
+cat >> "$comment_fixture_root/realm/realm-library/build.gradle" <<'COMMENT_FIXTURE'
+
+// Kotlin migration documentation may mention kotlin-android.
+/* This block-comment fixture also mentions kotlin-android. */
+COMMENT_FIXTURE
+"$comment_fixture_root/tools/verify-g003-independent-builds.sh" > "$temp_dir/comment-fixture.log"
+grep -Fqx 'G003 static independent-build verification: PASS' "$temp_dir/comment-fixture.log"
+
+# Supported modules may use either root-project property form, but the root
+# targetSdkVersion must remain pinned to the expected API level.
+target_fixture_root="$temp_dir/target-fixture-root"
+cp -a "$comment_fixture_root" "$target_fixture_root"
+sed -i 's/rootProject\.ext\.targetSdkVersion/rootProject.targetSdkVersion/g' \
+  "$target_fixture_root/realm/realm-library/build.gradle" \
+  "$target_fixture_root/realm/kotlin-extensions/build.gradle"
+"$target_fixture_root/tools/verify-g003-independent-builds.sh" > "$temp_dir/target-fixture.log"
+grep -Fqx 'G003 static independent-build verification: PASS' "$temp_dir/target-fixture.log"
+
+sed -i 's/project\.ext\.targetSdkVersion = 37/project.ext.targetSdkVersion = 36/' \
+  "$target_fixture_root/realm/build.gradle"
+if "$target_fixture_root/tools/verify-g003-independent-builds.sh" \
+    > "$temp_dir/wrong-root-target-fixture.log" 2>&1; then
+  printf 'wrong root targetSdkVersion was accepted\n' >&2
+  exit 1
+fi
+grep -Fqx 'F-G003-001: expected targetSdk 37 in realm/build.gradle' \
+  "$temp_dir/wrong-root-target-fixture.log"
+
+sed -i '/project\.ext\.targetSdkVersion[[:space:]]*=/d' \
+  "$target_fixture_root/realm/build.gradle"
+if "$target_fixture_root/tools/verify-g003-independent-builds.sh" \
+    > "$temp_dir/missing-root-target-fixture.log" 2>&1; then
+  printf 'missing root targetSdkVersion was accepted\n' >&2
+  exit 1
+fi
+grep -Fqx 'F-G003-001: expected targetSdk 37 in realm/build.gradle' \
+  "$temp_dir/missing-root-target-fixture.log"
+
+printf "\napply plugin: 'kotlin-android'\n" >> "$comment_fixture_root/realm/realm-library/build.gradle"
+if "$comment_fixture_root/tools/verify-g003-independent-builds.sh" \
+    > "$temp_dir/real-plugin-fixture.log" 2>&1; then
+  printf 'real kotlin-android plugin application was accepted\n' >&2
+  exit 1
+fi
+grep -Fqx 'F-G003-001: Android modules must use AGP built-in Kotlin, not kotlin-android' \
+  "$temp_dir/real-plugin-fixture.log"
+
 # Exercise the full --run control flow with local fake wrappers. This crosses
 # every run_gradle return without invoking Gradle or using the network, and
 # protects against function-local cleanup traps leaking into later calls.
