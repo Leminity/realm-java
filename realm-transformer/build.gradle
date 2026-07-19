@@ -99,6 +99,10 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+tasks.named('sourcesJar') {
+    dependsOn generateVersionClass
+}
+
 compileKotlin {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11
