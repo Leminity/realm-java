@@ -9,10 +9,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.SET_DEBUG_APP"/>
 
-    <uses-sdk
-        android:minSdkVersion="16"
-        android:targetSdkVersion="29"/>
-
     <application
         android:debuggable="true"
         android:largeHeap="true"
