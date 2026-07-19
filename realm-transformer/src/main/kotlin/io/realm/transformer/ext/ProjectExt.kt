@@ -16,7 +16,9 @@
 
 package io.realm.transformer.ext
 
-import com.android.build.gradle.BaseExtension
+import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.CommonExtension
+import com.android.build.api.variant.AndroidComponents
 import org.gradle.api.Project
 import java.io.File
 
@@ -36,14 +38,19 @@ fun Project.getAppId(): String {
  * Returns the `targetSdk` property for this project if it is available.
  */
 fun Project.getTargetSdk(): String {
-    return getAndroidExtension(this).defaultConfig.targetSdkVersion?.apiString ?: "unknown"
+    val androidExtension = getAndroidExtension(this)
+    return if (androidExtension is ApplicationExtension) {
+        androidExtension.defaultConfig.targetSdk?.toString() ?: "unknown"
+    } else {
+        "unknown"
+    }
 }
 
 /**
  * Returns the `minSdk` property for this project if it is available.
  */
 fun Project.getMinSdk(): String {
-    return getAndroidExtension(this).defaultConfig.minSdkVersion?.apiString ?: "unknown"
+    return getAndroidExtension(this).defaultConfig.minSdk?.toString() ?: "unknown"
 }
 
 /**
@@ -77,13 +84,17 @@ fun Project.getAgpVersion(): String {
  * Returns the `bootClasspath` for this project
  */
 fun Project.getBootClasspath(): List<File> {
-    return getAndroidExtension(this).bootClasspath
+    return getAndroidComponents(this).sdkComponents.bootClasspath.get().map { it.asFile }
 }
 
-private fun getAndroidExtension(project: Project): BaseExtension {
+private fun getAndroidExtension(project: Project): CommonExtension {
     // This will always be present, otherwise the android build would not be able to
     // trigger the transformer code in the first place.
-    return project.extensions.getByName("android") as BaseExtension
+    return project.extensions.getByType(CommonExtension::class.java)
+}
+
+private fun getAndroidComponents(project: Project): AndroidComponents {
+    return project.extensions.getByName("androidComponents") as AndroidComponents
 }
 
 fun Project.areIncrementalBuildsDisabled() =
