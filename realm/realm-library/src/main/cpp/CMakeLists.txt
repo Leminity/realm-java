@@ -105,6 +105,15 @@ endif()
 if(REALM_JAVA_BUILD_CORE_FROM_SOURCE OR NOT REALM_ENABLE_SYNC)
     message(STATUS "Building Realm Core from source...")
 
+    # NDK r29's Clang diagnoses the bundled S2 std::is_pod compatibility
+    # specializations as invalid. Limit the compatibility flag to that
+    # compiler generation and the source-built Core/native subtree.
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang"
+        AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 21
+        AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 22)
+        add_compile_options(-Wno-invalid-specialization)
+    endif()
+
     set(REALM_BUILD_LIB_ONLY ON)
     add_subdirectory(realm-core EXCLUDE_FROM_ALL)
 else()
