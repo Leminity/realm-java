@@ -80,7 +80,7 @@ compileKotlin {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8
         apiVersion = "2.0"
-        freeCompilerArgs += ["-XXLanguage:+InlineClasses"]
+        freeCompilerArgs += ["-XXLanguage:+InlineClasses", "-Xmetadata-version=1.6.0"]
     }
 }
 

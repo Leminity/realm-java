@@ -116,6 +116,14 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
     }
 }
 
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile)
+        .matching { it.name == 'compileBaseReleaseKotlin' }
+        .configureEach {
+    kotlinOptions {
+        freeCompilerArgs += ["-Xmetadata-version=1.6.0"]
+    }
+}
+
 task sourcesJar(type: Jar) {
     from android.sourceSets.objectServer.java.srcDirs
     from android.sourceSets.main.java.srcDirs
