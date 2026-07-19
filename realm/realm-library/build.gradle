@@ -26,6 +26,7 @@ kapt {
 }
 
 android {
+    namespace "io.realm"
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
     buildFeatures {
@@ -436,7 +437,7 @@ project.afterEvaluate {
         if(variant.name == "objectServerRelease") {
             def javaCompile = variant.javaCompileProvider.get()
             javadoc.classpath += files(
-                    javaCompile.destinationDir, // All intermediate Realm compiled classes
+                    javaCompile.destinationDirectory, // All intermediate Realm compiled classes
                     javaCompile.classpath.files // Dependencies
             )
         }
