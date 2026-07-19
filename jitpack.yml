@@ -1,5 +1,15 @@
 jdk:
   - openjdk17
 
+before_install:
+  - curl --fail --location --silent --show-error --retry 3 --output /tmp/cmake-3.27.7-linux-x86_64.tar.gz https://github.com/Kitware/CMake/releases/download/v3.27.7/cmake-3.27.7-linux-x86_64.tar.gz
+  - echo "a8c92ecb139bcc7a1f92a8108179bd1d021bdb158a5ee759cba6d60010b83ae9  /tmp/cmake-3.27.7-linux-x86_64.tar.gz" | sha256sum --check -
+  - mkdir -p "${ANDROID_HOME}/cmake/3.27.7" && tar -xzf /tmp/cmake-3.27.7-linux-x86_64.tar.gz --strip-components=1 -C "${ANDROID_HOME}/cmake/3.27.7"
+  - curl --fail --location --silent --show-error --retry 3 --output /tmp/ninja-1.12.1-linux.zip https://github.com/ninja-build/ninja/releases/download/v1.12.1/ninja-linux.zip
+  - echo "6f98805688d19672bd699fbbfa2c2cf0fc054ac3df1f0e6a47664d963d530255  /tmp/ninja-1.12.1-linux.zip" | sha256sum --check -
+  - (cd "${ANDROID_HOME}/cmake/3.27.7/bin" && jar xf /tmp/ninja-1.12.1-linux.zip && chmod +x ninja)
+  - '"${ANDROID_HOME}/cmake/3.27.7/bin/cmake" --version'
+  - '"${ANDROID_HOME}/cmake/3.27.7/bin/ninja" --version'
+
 install:
   - ./gradlew --no-daemon clean publishLocalOnlyDistribution verifyPublishedContract -PforkRepositoryUrl=file://${HOME}/.m2/repository -PforkVersion=${VERSION}
