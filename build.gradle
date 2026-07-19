@@ -30,7 +30,7 @@ def getPropertyValueOrThrow(String propertyName) {
 // child projects.
 def copyProperties = {
     if (project.hasProperty('buildTargetABIs')) {
-        // Valid options: armeabi-v7a, arm64-v8a, x86, x86_64
+        // Valid options: armeabi-v7a, arm64-v8a, x86_64
         startParameter.projectProperties += [buildTargetABIs: project.getProperty('buildTargetABIs')]
     }
     if (project.hasProperty('coreSourcePath')) {
