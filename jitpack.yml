@@ -1,0 +1,5 @@
+jdk:
+  - openjdk17
+
+install:
+  - ./gradlew --no-daemon clean publishLocalOnlyDistribution verifyPublishedContract -PforkRepositoryUrl=file://${HOME}/.m2/repository -PforkVersion=${VERSION}
