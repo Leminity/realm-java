@@ -1,7 +1,8 @@
 import java.security.MessageDigest
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.android.legacy-kapt'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'com.github.spotbugs-base'
 apply plugin: 'pmd'
 apply plugin: 'checkstyle'
@@ -9,6 +10,10 @@ apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'de.undercouch.download'
 // FIXME: https://github.com/realm/realm-java/issues/7551
 //apply plugin: 'net.ltgt.errorprone'
+
+base {
+    archivesName = "realm-android-library"
+}
 
 def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../../dependencies.list"))
@@ -23,12 +28,14 @@ kapt {
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
+    buildFeatures {
+        buildConfig true
+    }
 
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.compileSdkVersion
         versionName version
-        project.archivesBaseName = "realm-android-library"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         externalNativeBuild {
@@ -240,7 +247,7 @@ dependencies {
 task sourcesJar(type: Jar) {
     from android.sourceSets.objectServer.java.srcDirs
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {
@@ -278,7 +285,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
@@ -297,10 +304,8 @@ task spotbugsMain(type: com.github.spotbugs.snom.SpotBugsTask) {
     group = 'verification'
     classes = fileTree("build/intermediates/javac/")
 
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
+    reports.maybeCreate('xml').enabled = false
+    reports.maybeCreate('html').enabled = true
 }
 
 task pmd(type: Pmd) {
@@ -312,8 +317,8 @@ task pmd(type: Pmd) {
     ruleSets = []
 
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml.required.set(false)
+        html.required.set(true)
     }
 }
 
@@ -331,8 +336,8 @@ task checkstyle(type: Checkstyle) {
     classpath = files()
 
     reports {
-        xml.enabled = false
-        html.enabled = true
+        xml.required.set(false)
+        html.required.set(true)
     }
 }
 

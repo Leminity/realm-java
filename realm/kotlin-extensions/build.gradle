@@ -1,7 +1,12 @@
 apply plugin: 'com.android.library'
-apply plugin: 'com.android.legacy-kapt'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'de.undercouch.download'
 apply plugin: 'org.jetbrains.dokka'
+
+base {
+    archivesName = "realm-kotlin-extensions"
+}
 
 // TODO How many of these work on Kotlin?
 //apply plugin: 'findbugs'
@@ -14,6 +19,7 @@ def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../../dependencies.list"))
 
 android {
+    namespace "io.realm.kotlin"
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
     defaultConfig {
@@ -21,8 +27,6 @@ android {
         targetSdkVersion rootProject.compileSdkVersion
         versionName version
         multiDexEnabled true
-        project.archivesBaseName = "realm-kotlin-extensions"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -115,7 +119,7 @@ tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
 task sourcesJar(type: Jar) {
     from android.sourceSets.objectServer.java.srcDirs
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
+    archiveClassifier = 'sources'
 }
 
 tasks.dokkaHtml.configure {
@@ -123,7 +127,7 @@ tasks.dokkaHtml.configure {
 }
 
 task javadocJar(type: Jar, dependsOn: dokkaHtml) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from "$buildDir/dokka"
 }
 
