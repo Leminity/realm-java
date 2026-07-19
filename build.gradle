@@ -3,7 +3,6 @@ buildscript {
     properties.load(new FileInputStream("${projectDir}/dependencies.list"))
 
     repositories {
-        jcenter()
         maven {
             url "https://plugins.gradle.org/m2/"
         }
@@ -67,14 +66,14 @@ def copyProperties = {
 task assembleAnnotations(type:GradleBuild) {
     group = 'Build'
     description = 'Assemble the Realm annotations'
-    buildFile = file('realm-annotations/build.gradle')
+    dir = file('realm-annotations')
     tasks = ['assemble']
 }
 
 task installAnnotations(type:GradleBuild) {
     group = 'Install'
     description = 'Install the jar realm-annotations into mavenLocal()'
-    buildFile = file('realm-annotations/build.gradle')
+    dir = file('realm-annotations')
     tasks = ['publishToMavenLocal']
 }
 
@@ -82,7 +81,7 @@ task assembleTransformer(type:GradleBuild) {
     group = 'Build'
     description = 'Assemble the Realm transformer'
     dependsOn installAnnotations
-    buildFile = file('realm-transformer/build.gradle')
+    dir = file('realm-transformer')
     tasks = ['assemble']
 }
 
@@ -90,14 +89,14 @@ task installTransformer(type:GradleBuild) {
     group = 'Install'
     description = 'Install the jar realm-transformer into mavenLocal()'
     dependsOn installAnnotations
-    buildFile = file('realm-transformer/build.gradle')
+    dir = file('realm-transformer')
     tasks = ['publishToMavenLocal']
 }
 
 task installBuildTransformer(type:GradleBuild) {
     group = 'Install'
     description = 'Install the jar realm-library-build-transformer into mavenLocal()'
-    buildFile = file('library-build-transformer/build.gradle')
+    dir = file('library-build-transformer')
     tasks = ['publishToMavenLocal']
 }
 
@@ -107,7 +106,7 @@ task assembleRealm(type:GradleBuild) {
     dependsOn installAnnotations
     dependsOn installTransformer
     dependsOn installBuildTransformer
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['assemble', 'javadocJar', 'sourcesJar']
     configure copyProperties
 }
@@ -115,7 +114,7 @@ task assembleRealm(type:GradleBuild) {
 task checkExamples(type:GradleBuild) {
     group = 'Test'
     description = 'Run the JVM tests and checks the examples'
-    buildFile = file('examples/build.gradle')
+    dir = file('examples')
     tasks = ['check']
     configure copyProperties
 }
@@ -123,7 +122,7 @@ task checkExamples(type:GradleBuild) {
 task checkRealm(type:GradleBuild) {
     group = 'Test'
     description = 'Run the JVM tests and checks Realm project'
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['check']
     configure copyProperties
 }
@@ -139,7 +138,7 @@ task assembleUnitTests(type:GradleBuild) {
     group = 'Build'
     description = 'Assemble Android unit tests of the Realm project'
     dependsOn installTransformer
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['assembleAndroidTest']
     configure copyProperties
 }
@@ -148,7 +147,7 @@ task connectedUnitTests(type:GradleBuild) {
     group = 'Test'
     description = 'Run the Android unit tests of the Realm project'
     dependsOn installTransformer
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['connectedAndroidTest']
     configure copyProperties
 }
@@ -157,7 +156,7 @@ task assembleBenchmarks(type:GradleBuild) {
     group = 'Build'
     description = 'Assemble benchmark tests for the library '
     dependsOn installTransformer
-    buildFile = file('library-benchmarks/build.gradle')
+    dir = file('library-benchmarks')
     tasks = ['assembleAndroidTest']
     configure copyProperties
 }
@@ -166,7 +165,7 @@ task connectedBenchmarks(type:GradleBuild) {
     group = 'Test'
     description = 'Run all the benchmark tests for the library '
     dependsOn installTransformer
-    buildFile = file('library-benchmarks/build.gradle')
+    dir = file('library-benchmarks')
     tasks = ['connectedAndroidTest']
     configure copyProperties
 }
@@ -176,7 +175,7 @@ task installRealm(type:GradleBuild) {
     description = 'Install the artifacts of Realm libraries into mavenLocal()'
     dependsOn installTransformer
     dependsOn installBuildTransformer
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['publishToMavenLocal']
     configure copyProperties
 }
@@ -186,7 +185,7 @@ task assembleGradlePlugin(type:GradleBuild) {
     description = 'Assemble the Realm Gradle plugin'
     dependsOn installRealm
     dependsOn installTransformer
-    buildFile = file('gradle-plugin/build.gradle')
+    dir = file('gradle-plugin')
     tasks = ['assemble']
 }
 
@@ -195,7 +194,7 @@ task installGradlePlugin(type:GradleBuild) {
     group = 'Install'
     dependsOn installRealm
     dependsOn installTransformer
-    buildFile = file('gradle-plugin/build.gradle')
+    dir = file('gradle-plugin')
     tasks = ['publishToMavenLocal']
 }
 
@@ -211,7 +210,7 @@ task assembleExamples(type:GradleBuild) {
     dependsOn installRealm
     group = 'Build'
     description = 'Assemble the Realm examples'
-    buildFile = file('examples/build.gradle')
+    dir = file('examples')
     tasks = ['assemble']
 }
 
@@ -220,14 +219,14 @@ task monkeyExamples(type:GradleBuild) {
     dependsOn installRealm
     group = 'Build'
     description = 'Run the monkey tests on the Realm examples'
-    buildFile = file('examples/build.gradle')
+    dir = file('examples')
     tasks = ['monkeyRelease']
 }
 
 task javadoc(type:GradleBuild) {
     description = 'Generate the Javadoc Jar for the Realm project'
     group = 'Docs'
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['javadocJar']
     configure copyProperties
 }
@@ -263,7 +262,7 @@ task uploadJavadoc {
 task sourcesJar(type:GradleBuild) {
     description = 'Generate the sources Jar for the Realm project'
     group = 'Docs'
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['sourcesJar']
     configure copyProperties
 }
@@ -278,8 +277,8 @@ task distributionJniUnstrippedPackage(type:Zip) {
     description = 'Generate native libs package with debug symbols'
 
     group = 'Artifact'
-    archiveName = "realm-java-jni-libs-unstripped-${currentVersion}.zip"
-    destinationDir = file("${buildDir}/outputs/distribution")
+    archiveFileName = "realm-java-jni-libs-unstripped-${currentVersion}.zip"
+    destinationDirectory = file("${buildDir}/outputs/distribution")
 
     from("realm/realm-library/build/outputs/jniLibs-unstripped") {
         include '**/*.so'
@@ -289,7 +288,7 @@ task distributionJniUnstrippedPackage(type:Zip) {
 task cleanRealm(type:GradleBuild) {
     description = 'Clean the Realm project'
     group = 'Clean'
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['clean']
     configure copyProperties
 }
@@ -297,14 +296,14 @@ task cleanRealm(type:GradleBuild) {
 task cleanGradlePlugin(type:GradleBuild) {
     description = 'Clean the Realm Gradle plugin project'
     group = 'Clean'
-    buildFile = file('gradle-plugin/build.gradle')
+    dir = file('gradle-plugin')
     tasks = ['clean']
 }
 
 task cleanExamples(type:GradleBuild) {
     description = 'Clean the Realm examples'
     group = 'Clean'
-    buildFile = file('examples/build.gradle')
+    dir = file('examples')
     tasks = ['clean']
 }
 
@@ -392,7 +391,7 @@ task distribute {
 task mavenCentralRealm(type: GradleBuild) {
     description = 'Publish the Realm AAR and AP to Maven Central'
     group = 'Publishing'
-    buildFile = file('realm/build.gradle')
+    dir = file('realm')
     tasks = ['publishToSonatype']
     startParameter.projectProperties = gradle.startParameter.projectProperties
     configure copyProperties
@@ -401,7 +400,7 @@ task mavenCentralRealm(type: GradleBuild) {
 task mavenCentralAnnotations(type: GradleBuild) {
     description = 'Publish the Realm Annotations to Maven Central'
     group = 'Publishing'
-    buildFile = file('realm-annotations/build.gradle')
+    dir = file('realm-annotations')
     tasks = ['publishToSonatype']
     startParameter.projectProperties = gradle.startParameter.projectProperties
     configure copyProperties
@@ -410,7 +409,7 @@ task mavenCentralAnnotations(type: GradleBuild) {
 task mavenCentralGradlePlugin(type: GradleBuild) {
     description = 'Publish the Realm Gradle Plugin to Maven Central'
     group = 'Publishing'
-    buildFile = file('gradle-plugin/build.gradle')
+    dir = file('gradle-plugin')
     tasks = ['publishToSonatype']
     startParameter.projectProperties = gradle.startParameter.projectProperties
     configure copyProperties
@@ -419,7 +418,7 @@ task mavenCentralGradlePlugin(type: GradleBuild) {
 task mavenCentralTransformer(type: GradleBuild) {
     description = 'Publish the Realm Transformer to Maven Central'
     group = 'Publishing'
-    buildFile = file('realm-transformer/build.gradle')
+    dir = file('realm-transformer')
     tasks = ['publishToSonatype']
     startParameter.projectProperties = gradle.startParameter.projectProperties
     configure copyProperties
