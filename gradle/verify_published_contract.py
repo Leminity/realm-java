@@ -108,6 +108,7 @@ def inspect_coordinate(repository: Path, group: str, version: str, expected: dic
         errors.append(f"POM fork edges {sorted(pom_edges)} != {sorted(expected_edges)}")
 
     metadata_edges: set[str] = set()
+    module_variant_usages: list[str] = []
     if module.is_file():
         metadata = json.loads(module.read_text())
         component = metadata.get("component", {})
@@ -130,6 +131,51 @@ def inspect_coordinate(repository: Path, group: str, version: str, expected: dic
             for dependency in variant.get("dependencies", [])
         ):
             errors.append("io.realm Gradle module metadata leakage")
+        module_variant_usages = sorted(
+            {
+                variant.get("attributes", {}).get("org.gradle.usage")
+                for variant in metadata.get("variants", [])
+                if variant.get("attributes", {}).get("org.gradle.usage")
+            }
+        )
+        if expected["extension"] == "aar":
+            required_usages = {"java-api", "java-runtime"}
+            missing_usages = required_usages.difference(module_variant_usages)
+            if missing_usages:
+                errors.append(
+                    f"AAR module usages missing {sorted(missing_usages)}; "
+                    f"published {module_variant_usages}"
+                )
+            for usage in sorted(required_usages):
+                usage_variants = [
+                    variant
+                    for variant in metadata.get("variants", [])
+                    if variant.get("attributes", {}).get("org.gradle.usage") == usage
+                ]
+                if len(usage_variants) != 1:
+                    errors.append(
+                        f"AAR module usage {usage} has {len(usage_variants)} variants, expected 1"
+                    )
+                    continue
+                variant = usage_variants[0]
+                if variant.get("attributes", {}).get("org.gradle.libraryelements") != "aar":
+                    errors.append(f"AAR module usage {usage} does not advertise libraryelements=aar")
+                variant_edges = {
+                    dependency.get("module")
+                    for dependency in variant.get("dependencies", [])
+                    if dependency.get("group") == group
+                }
+                if variant_edges != expected_edges:
+                    errors.append(
+                        f"AAR module usage {usage} fork edges "
+                        f"{sorted(variant_edges)} != {sorted(expected_edges)}"
+                    )
+                files = variant.get("files", [])
+                if not any(
+                    item.get("name") == main.name and item.get("url") == main.name
+                    for item in files
+                ):
+                    errors.append(f"AAR module usage {usage} does not publish {main.name}")
 
     if main.is_file():
         try:
@@ -154,6 +200,7 @@ def inspect_coordinate(repository: Path, group: str, version: str, expected: dic
         "expected_edges": sorted(expected_edges),
         "pom_edges": sorted(pom_edges),
         "module_edges": sorted(metadata_edges),
+        "module_variant_usages": module_variant_usages,
         "files": files,
         "errors": errors,
         "pass": not errors,

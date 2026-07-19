@@ -100,6 +100,29 @@ if (config.aarFile) {
                         version: [requires: forkVersionName]
                 ]
             }
+            def publishedFile = [
+                    name: publishedAarName,
+                    url: publishedAarName,
+                    size: aarFile.length(),
+                    sha512: digest(aarFile, 'SHA-512'),
+                    sha256: digest(aarFile, 'SHA-256'),
+                    sha1: digest(aarFile, 'SHA-1'),
+                    md5: digest(aarFile, 'MD5')
+            ]
+            def variant = { String name, String usage ->
+                [
+                        name: name,
+                        attributes: [
+                                'org.gradle.category': 'library',
+                                'org.gradle.dependency.bundling': 'external',
+                                'org.gradle.libraryelements': 'aar',
+                                'org.gradle.status': 'release',
+                                'org.gradle.usage': usage
+                        ],
+                        dependencies: dependencyEntries,
+                        files: [publishedFile]
+                ]
+            }
             def metadata = [
                     formatVersion: '1.1',
                     component: [
@@ -109,26 +132,10 @@ if (config.aarFile) {
                             attributes: ['org.gradle.status': 'release']
                     ],
                     createdBy: [gradle: [version: gradle.gradleVersion]],
-                    variants: [[
-                            name: 'releaseRuntimeElements',
-                            attributes: [
-                                    'org.gradle.category': 'library',
-                                    'org.gradle.dependency.bundling': 'external',
-                                    'org.gradle.libraryelements': 'aar',
-                                    'org.gradle.status': 'release',
-                                    'org.gradle.usage': 'java-runtime'
-                            ],
-                            dependencies: dependencyEntries,
-                            files: [[
-                                    name: publishedAarName,
-                                    url: publishedAarName,
-                                    size: aarFile.length(),
-                                    sha512: digest(aarFile, 'SHA-512'),
-                                    sha256: digest(aarFile, 'SHA-256'),
-                                    sha1: digest(aarFile, 'SHA-1'),
-                                    md5: digest(aarFile, 'MD5')
-                            ]]
-                    ]]
+                    variants: [
+                            variant('releaseApiElements', 'java-api'),
+                            variant('releaseRuntimeElements', 'java-runtime')
+                    ]
             ]
             output.text = JsonOutput.prettyPrint(JsonOutput.toJson(metadata)) + System.lineSeparator()
         }
