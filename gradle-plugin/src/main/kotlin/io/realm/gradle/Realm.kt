@@ -45,26 +45,26 @@ open class Realm : Plugin<Project> {
 
         project.dependencies.add(
             dependencyConfigurationName,
-            "io.realm:realm-annotations:${Version.VERSION}"
+            "${Version.GROUP}:realm-annotations:${Version.VERSION}"
         )
         if (isKotlinProject) {
             project.dependencies.add(
                 "kapt",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
+                "${Version.GROUP}:realm-annotations-processor:${Version.VERSION}"
             )
             project.dependencies.add(
                 "kaptAndroidTest",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
+                "${Version.GROUP}:realm-annotations-processor:${Version.VERSION}"
             )
         } else {
             assert(hasAnnotationProcessorConfiguration)
             project.dependencies.add(
                 "annotationProcessor",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
+                "${Version.GROUP}:realm-annotations-processor:${Version.VERSION}"
             )
             project.dependencies.add(
                 "androidTestAnnotationProcessor",
-                "io.realm:realm-annotations-processor:${Version.VERSION}"
+                "${Version.GROUP}:realm-annotations-processor:${Version.VERSION}"
             )
         }
 
@@ -133,7 +133,7 @@ open class Realm : Plugin<Project> {
                 project.configurations.getByName(dependencyConfigurationName).dependencies.iterator()
             while (iterator.hasNext()) {
                 val item = iterator.next()
-                if (item.group == "io.realm") {
+                if (item.group == Version.GROUP) {
                     if (item.name.startsWith("realm-android-library")) {
                         iterator.remove()
                     }
@@ -148,7 +148,7 @@ open class Realm : Plugin<Project> {
                 "realm-android-library${if (syncEnabled) "-object-server" else ""}"
             project.dependencies.add(
                 dependencyConfigurationName,
-                "io.realm:${syncArtifactName}:${Version.VERSION}"
+                "${Version.GROUP}:${syncArtifactName}:${Version.VERSION}"
             )
 
             if (kotlinExtensionsEnabled) {
@@ -156,7 +156,7 @@ open class Realm : Plugin<Project> {
                     "realm-android-kotlin-extensions${if (syncEnabled) "-object-server" else ""}"
                 project.dependencies.add(
                     dependencyConfigurationName,
-                    "io.realm:${kotlinExtArtifactName}:${Version.VERSION}"
+                    "${Version.GROUP}:${kotlinExtArtifactName}:${Version.VERSION}"
                 )
             }
         }

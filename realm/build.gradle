@@ -1,11 +1,19 @@
 buildscript {
     def projectDependencies = new Properties()
     projectDependencies.load(new FileInputStream("${rootDir}/../dependencies.list"))
+    def forkRepositoryUrl = gradle.startParameter.projectProperties.get('forkRepositoryUrl')
+    def distributionGroup = gradle.startParameter.projectProperties.get('forkGroup') ?: 'io.realm'
+    def distributionVersion = gradle.startParameter.projectProperties.get('forkVersion') ?: file('../version.txt').text.trim()
     ext.kotlin_version = projectDependencies.get('KOTLIN')
     ext.coroutines_android_version = projectDependencies.get('KOTLIN_COROUTINES')
     ext.dokka_version = '1.5.0'
     repositories {
-        mavenLocal()
+        if (forkRepositoryUrl) {
+            maven { url uri(forkRepositoryUrl) }
+        }
+        if (!forkRepositoryUrl) {
+            mavenLocal()
+        }
         google()
         mavenCentral()
         maven { url 'https://jitpack.io' }
@@ -18,8 +26,8 @@ buildscript {
         classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
         classpath 'com.github.skhatri:gradle-s3-plugin:1.0.4'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.2'
-        classpath "io.realm:realm-transformer:${file('../version.txt').text.trim()}"
-        classpath "io.realm:realm-library-build-transformer:${file('../version.txt').text.trim()}"
+        classpath "${distributionGroup}:realm-transformer:${distributionVersion}"
+        classpath "${distributionGroup}:realm-library-build-transformer:${distributionVersion}"
         classpath 'net.ltgt.gradle:gradle-errorprone-plugin:2.0.2'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
@@ -37,10 +45,15 @@ allprojects {
     project.ext.minSdkVersion = 21
     project.ext.compileSdkVersion = 37
     project.ext.buildToolsVersion = projectDependencies.get("ANDROID_BUILD_TOOLS")
-    group = 'io.realm'
-    version = file("${rootDir}/../version.txt").text.trim()
+    group = project.findProperty('forkGroup') ?: 'io.realm'
+    version = project.findProperty('forkVersion') ?: file("${rootDir}/../version.txt").text.trim()
     repositories {
-        mavenLocal()
+        if (project.hasProperty('forkRepositoryUrl')) {
+            maven { url uri(project.property('forkRepositoryUrl')) }
+        }
+        if (!project.hasProperty('forkRepositoryUrl')) {
+            mavenLocal()
+        }
         google()
         mavenCentral()
     }
@@ -57,4 +70,18 @@ if (JavaVersion.current().isJava8Compatible()) {
 
 if (project.hasProperty('enableMavenCentralPublishing')) {
     apply from: "${rootDir}/../mavencentral-publish.gradle"
+}
+
+if (project.hasProperty('forkRepositoryUrl')) {
+    gradle.projectsEvaluated {
+        def realmLibraryPublication = project(':realm-library').tasks.getByName(
+                'publishBasePublicationPublicationToForkRepository')
+        def annotationsProcessorPublication = project(':realm-annotations-processor').tasks.getByName(
+                'publishBasePublicationPublicationToForkRepository')
+        def kotlinExtensionsPublication = project(':kotlin-extensions').tasks.getByName(
+                'publishBasePublicationPublicationToForkRepository')
+
+        annotationsProcessorPublication.mustRunAfter(realmLibraryPublication)
+        kotlinExtensionsPublication.mustRunAfter(annotationsProcessorPublication)
+    }
 }

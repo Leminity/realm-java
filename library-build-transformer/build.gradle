@@ -15,8 +15,11 @@ buildscript {
     }
 }
 
-group = 'io.realm'
-version = file("${projectDir}/../version.txt").text.trim()
+def distributionGroup = project.findProperty('forkGroup') ?: 'io.realm'
+def distributionVersion = project.findProperty('forkVersion') ?: file("${projectDir}/../version.txt").text.trim()
+
+group = distributionGroup
+version = distributionVersion
 
 apply plugin: 'kotlin'
 apply plugin: 'java'
@@ -99,3 +102,10 @@ publishing {
         }
     }
 }
+
+ext.forkPublicationConfig = [
+        publicationName: 'realmPublication',
+        artifactId: 'realm-library-build-transformer',
+        dependencies: []
+]
+apply from: "${rootDir}/../fork-publication.gradle"

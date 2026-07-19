@@ -19,8 +19,11 @@ apply plugin: 'kotlin'
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-group = 'io.realm'
-version = file("${projectDir}/../version.txt").text.trim()
+def distributionGroup = project.findProperty('forkGroup') ?: 'io.realm'
+def distributionVersion = project.findProperty('forkVersion') ?: file("${projectDir}/../version.txt").text.trim()
+
+group = distributionGroup
+version = distributionVersion
 
 def properties = new Properties()
 properties.load(new FileInputStream("${projectDir}/../dependencies.list"))
@@ -28,7 +31,9 @@ properties.load(new FileInputStream("${projectDir}/../dependencies.list"))
 def coreVersion = properties.getProperty('REALM_CORE')
 
 repositories {
-    mavenLocal()
+    if (!project.hasProperty('forkRepositoryUrl')) {
+        mavenLocal()
+    }
     google()
     mavenCentral()
 }
@@ -48,7 +53,7 @@ sourceSets {
 
 dependencies {
     implementation gradleApi()
-    implementation "io.realm:realm-annotations:${version}"
+    implementation "${distributionGroup}:realm-annotations:${distributionVersion}"
     compileOnly "com.android.tools.build:gradle:${properties.get("GRADLE_BUILD_TOOLS")}"
     implementation 'org.javassist:javassist:3.25.0-GA'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlin_version}"
@@ -91,6 +96,13 @@ publishing {
         }
     }
 }
+
+ext.forkPublicationConfig = [
+        publicationName: 'realmPublication',
+        artifactId: 'realm-transformer',
+        dependencies: ['realm-annotations']
+]
+apply from: "${rootDir}/../fork-publication.gradle"
 
 java {
     withSourcesJar()

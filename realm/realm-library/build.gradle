@@ -215,7 +215,7 @@ dependencies {
     testImplementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     testImplementation "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
 
-    api "io.realm:realm-annotations:${version}"
+    api "${project.group}:realm-annotations:${project.version}"
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'com.getkeepsafe.relinker:relinker:1.4.3'
     api "org.mongodb:bson:${properties.getProperty('BSON_DEPENDENCY')}"
@@ -350,9 +350,15 @@ publishing {
             groupId 'io.realm'
             artifactId 'realm-android-library'
             version project.version
-            artifact file("${rootDir}/realm-library/build/outputs/aar/realm-android-library-base-release.aar")
-            artifact sourcesJar
-            artifact javadocJar
+            artifact (file("${rootDir}/realm-library/build/outputs/aar/realm-android-library-base-release.aar")) {
+                if (project.hasProperty('forkRepositoryUrl')) {
+                    builtBy { project.tasks.named('assembleBaseRelease').get() }
+                }
+            }
+            if (!project.hasProperty('forkRepositoryUrl')) {
+                artifact sourcesJar
+                artifact javadocJar
+            }
             populatePom(
                     it,
                     'realm-android-library',
@@ -377,6 +383,15 @@ publishing {
         }
     }
 }
+
+ext.forkPublicationConfig = [
+        publicationName: 'basePublication',
+        artifactId: 'realm-android-library',
+        dependencies: ['realm-annotations'],
+        aarFile: file("${rootDir}/realm-library/build/outputs/aar/realm-android-library-base-release.aar"),
+        builtBy: { project.tasks.named('assembleBaseRelease').get() }
+]
+apply from: "${rootDir}/../fork-publication.gradle"
 
 artifacts {
     archives javadocJar

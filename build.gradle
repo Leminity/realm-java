@@ -214,6 +214,124 @@ task assembleExamples(type:GradleBuild) {
     tasks = ['assemble']
 }
 
+def forkGroupId = 'com.github.leminity.realm-java'
+def forkArtifactExtensions = [
+        'realm-annotations': 'jar',
+        'realm-transformer': 'jar',
+        'realm-library-build-transformer': 'jar',
+        'realm-android-library': 'aar',
+        'realm-annotations-processor': 'jar',
+        'realm-android-kotlin-extensions': 'aar',
+        'realm-gradle-plugin': 'jar'
+]
+def forkStageProperties = { GradleBuild build ->
+    if (!project.hasProperty('forkRepositoryUrl')) {
+        throw new GradleException('forkRepositoryUrl is required')
+    }
+    if (!project.hasProperty('forkVersion')) {
+        throw new GradleException('forkVersion is required')
+    }
+    def properties = new LinkedHashMap<String, String>()
+    properties.putAll(gradle.startParameter.projectProperties)
+    properties.put('forkGroup', forkGroupId)
+    properties.put('forkRepositoryUrl', project.property('forkRepositoryUrl').toString())
+    properties.put('forkVersion', project.property('forkVersion').toString())
+    build.startParameter.projectProperties = properties
+}
+
+task publishForkAnnotations(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Stage 1: publish Local-only Realm annotations.'
+    dir = file('realm-annotations')
+    tasks = ['publishRealmPublicationPublicationToForkRepository']
+    doFirst { forkStageProperties(delegate as GradleBuild) }
+}
+
+task publishForkTransformer(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Stage 2.1: publish the Realm transformer.'
+    dependsOn publishForkAnnotations
+    dir = file('realm-transformer')
+    tasks = ['publishRealmPublicationPublicationToForkRepository']
+    doFirst { forkStageProperties(delegate as GradleBuild) }
+}
+
+task publishForkBuildTransformer(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Stage 2.2: publish the Realm library build transformer.'
+    dependsOn publishForkTransformer
+    dir = file('library-build-transformer')
+    tasks = ['publishRealmPublicationPublicationToForkRepository']
+    doFirst { forkStageProperties(delegate as GradleBuild) }
+}
+
+task publishForkRealmModules(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Stages 3.1-3.3: publish the ordered Local-only Realm Android modules in one nested build.'
+    dependsOn publishForkBuildTransformer
+    dir = file('realm')
+    tasks = [
+            ':realm-library:publishBasePublicationPublicationToForkRepository',
+            ':realm-annotations-processor:publishBasePublicationPublicationToForkRepository',
+            ':kotlin-extensions:publishBasePublicationPublicationToForkRepository'
+    ]
+    doFirst { forkStageProperties(delegate as GradleBuild) }
+}
+
+task publishForkGradlePlugin(type: GradleBuild) {
+    group = 'Publishing'
+    description = 'Stage 4: publish the Realm Gradle plugin.'
+    dependsOn publishForkRealmModules
+    dir = file('gradle-plugin')
+    tasks = ['publishRealmPublicationPublicationToForkRepository']
+    doFirst { forkStageProperties(delegate as GradleBuild) }
+}
+
+task publishLocalOnlyDistribution {
+    group = 'Publishing'
+    description = 'Publish the authoritative seven-artifact Local-only distribution in stage order.'
+    dependsOn publishForkGradlePlugin
+}
+
+def publicationEvidence = file('.omx/evidence/realm-java-android17/publication-contract.json')
+def expectedPublicationFiles = providers.gradleProperty('forkRepositoryUrl').zip(
+        providers.gradleProperty('forkVersion')) { repositoryUrl, forkVersion ->
+    URI uri = URI.create(repositoryUrl)
+    if (uri.scheme != null && uri.scheme != 'file') {
+        throw new GradleException("forkRepositoryUrl must be a file URI: ${repositoryUrl}")
+    }
+    File repository = uri.scheme == 'file' ? new File(uri) : file(repositoryUrl)
+    forkArtifactExtensions.collectMany { artifactId, extension ->
+        File directory = new File(repository,
+                "${forkGroupId.replace('.', '/')}/${artifactId}/${forkVersion}")
+        [
+                new File(directory, "${artifactId}-${forkVersion}.${extension}"),
+                new File(directory, "${artifactId}-${forkVersion}.pom"),
+                new File(directory, "${artifactId}-${forkVersion}.module")
+        ]
+    }
+}
+
+task verifyPublishedContract(type: Exec) {
+    group = 'Verification'
+    description = 'Atomically verify all seven fork coordinates, edges, metadata, stages, and checksums.'
+    dependsOn publishLocalOnlyDistribution
+    inputs.files(expectedPublicationFiles)
+    inputs.file(file('gradle/verify_published_contract.py'))
+    outputs.file(publicationEvidence)
+    doFirst {
+        publicationEvidence.parentFile.mkdirs()
+        commandLine(
+                'python3',
+                file('gradle/verify_published_contract.py'),
+                '--repository', project.property('forkRepositoryUrl').toString(),
+                '--group', forkGroupId,
+                '--version', project.property('forkVersion').toString(),
+                '--output', publicationEvidence
+        )
+    }
+}
+
 task monkeyExamples(type:GradleBuild) {
     dependsOn installGradlePlugin
     dependsOn installRealm
@@ -313,13 +431,47 @@ task cleanLocalMavenRepos(type:Delete) {
     delete "${System.env.HOME}/.m2/repository/io/realm"
 }
 
+task cleanForkPublicationOutputs(type: Delete) {
+    description = 'Remove every staged Local-only build/native output and only this fork version from the target repository.'
+    group = 'Clean'
+    delete(
+            buildDir,
+            file('realm-annotations/build'),
+            file('realm-transformer/build'),
+            file('library-build-transformer/build'),
+            file('realm/realm-library/build'),
+            file('realm/realm-library/.cxx'),
+            file('realm/realm-annotations-processor/build'),
+            file('realm/kotlin-extensions/build'),
+            file('gradle-plugin/build'),
+            publicationEvidence
+    )
+    if (project.hasProperty('forkRepositoryUrl') && project.hasProperty('forkVersion')) {
+        URI uri = URI.create(project.property('forkRepositoryUrl').toString())
+        if (uri.scheme != null && uri.scheme != 'file') {
+            throw new GradleException("forkRepositoryUrl must be a file URI: ${uri}")
+        }
+        File repository = uri.scheme == 'file' ? new File(uri) : file(uri.toString())
+        String forkVersion = project.property('forkVersion').toString()
+        forkArtifactExtensions.keySet().each { artifactId ->
+            delete new File(repository,
+                    "${forkGroupId.replace('.', '/')}/${artifactId}/${forkVersion}")
+        }
+    }
+}
+
 task clean {
     description = 'Perform all the other clean tasks'
     group = 'Clean'
-    cleanLocalMavenRepos.dependsOn cleanRealm
-    cleanLocalMavenRepos.dependsOn cleanGradlePlugin
-    cleanLocalMavenRepos.dependsOn cleanExamples
-    dependsOn cleanLocalMavenRepos
+    if (project.hasProperty('forkRepositoryUrl')) {
+        description = 'Clean all Local-only publication outputs without configuring excluded examples or Maven Local.'
+        dependsOn cleanForkPublicationOutputs
+    } else {
+        cleanLocalMavenRepos.dependsOn cleanRealm
+        cleanLocalMavenRepos.dependsOn cleanGradlePlugin
+        cleanLocalMavenRepos.dependsOn cleanExamples
+        dependsOn cleanLocalMavenRepos
+    }
 }
 
 task manualClean {

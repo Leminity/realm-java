@@ -16,8 +16,11 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'maven-publish'
 
-group = 'io.realm'
-version = file("${projectDir}/../version.txt").text.trim()
+def distributionGroup = project.findProperty('forkGroup') ?: 'io.realm'
+def distributionVersion = project.findProperty('forkVersion') ?: file("${projectDir}/../version.txt").text.trim()
+
+group = distributionGroup
+version = distributionVersion
 
 apply from: "${rootDir}/../mavencentral-publications.gradle"
 if (project.hasProperty('enableMavenCentralPublishing')) {
@@ -38,6 +41,13 @@ publishing {
         }
     }
 }
+
+ext.forkPublicationConfig = [
+        publicationName: 'realmPublication',
+        artifactId: 'realm-annotations',
+        dependencies: []
+]
+apply from: "${rootDir}/../fork-publication.gradle"
 
 java {
     withSourcesJar()

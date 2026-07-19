@@ -7,9 +7,15 @@ buildscript {
     properties.load(new FileInputStream("${rootDir}/../dependencies.list"))
     ext.kotlin_version = properties.get('KOTLIN')
     repositories {
-        jcenter()
+        mavenCentral()
         maven {
             url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            url "https://releases.jfrog.io/artifactory/oss-release-local/"
+            content {
+                includeGroup 'org.jfrog.buildinfo'
+            }
         }
     }
     dependencies {
@@ -30,16 +36,18 @@ props.each { key, val ->
 }
 
 repositories {
-    mavenLocal()
+    if (!project.hasProperty('forkRepositoryUrl')) {
+        mavenLocal()
+    }
     google()
-    jcenter()
+    mavenCentral()
 }
 
-sourceCompatibility = 11
-targetCompatibility = 11
+def distributionGroup = project.findProperty('forkGroup') ?: 'io.realm'
+def distributionVersion = project.findProperty('forkVersion') ?: file("${projectDir}/../version.txt").text.trim()
 
-group = 'io.realm'
-version = file("${projectDir}/../version.txt").text.trim()
+group = distributionGroup
+version = distributionVersion
 
 configurations {
     provided
@@ -59,7 +67,7 @@ sourceSets {
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation "io.realm:realm-transformer:${version}"
+    implementation "${distributionGroup}:realm-transformer:${distributionVersion}"
     /*Note: the latest Android Gradle plugin has now built in support for annotation processors and warns and/or blocks android-apt,
      see this https://bitbucket.org/hvisser/android-apt/wiki/Migration page on how to migrate
      and this https://www.littlerobots.nl/blog/Whats-next-for-android-apt/ for more info.
@@ -73,7 +81,7 @@ dependencies {
     // See https://github.com/gradle/gradle/issues/16774#issuecomment-893493869
     def toolingApiBuildersJar = (project as ProjectInternal).services.get(ModuleRegistry.class)
             .getModule("gradle-tooling-api-builders")
-            .classpath
+            .implementationClasspath
             .asFiles
             .first()
     testRuntimeOnly(files(toolingApiBuildersJar))
@@ -82,7 +90,7 @@ dependencies {
 task generateVersionClass(type: Copy) {
     from 'src/main/templates/Version.kt'
     into 'build/generated-src/main/kotlin/io/realm'
-    filter(ReplaceTokens, tokens: [version: version])
+    filter(ReplaceTokens, tokens: [group: project.group.toString(), version: project.version.toString()])
     outputs.upToDateWhen { false }
 }
 
@@ -98,7 +106,9 @@ sourceSets {
 compileKotlin.dependsOn generateVersionClass
 
 apply from: "${rootDir}/../mavencentral-publications.gradle"
-apply from: "${rootDir}/../mavencentral-publish.gradle"
+if (!project.hasProperty('forkRepositoryUrl')) {
+    apply from: "${rootDir}/../mavencentral-publish.gradle"
+}
 
 publishing {
     publications {
@@ -115,7 +125,24 @@ publishing {
     }
 }
 
+ext.forkPublicationConfig = [
+        publicationName: 'realmPublication',
+        artifactId: 'realm-gradle-plugin',
+        dependencies: ['realm-transformer']
+]
+apply from: "${rootDir}/../fork-publication.gradle"
+
 java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
     withSourcesJar()
     withJavadocJar()
+}
+
+tasks.named('sourcesJar') {
+    dependsOn generateVersionClass
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+    compilerOptions.jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
 }

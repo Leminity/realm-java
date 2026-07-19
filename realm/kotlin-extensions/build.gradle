@@ -140,10 +140,16 @@ publishing {
             artifactId 'realm-android-kotlin-extensions'
             version project.version
             artifact (file("${rootDir}/kotlin-extensions/build/outputs/aar/realm-kotlin-extensions-base-release.aar")) {
-                builtBy assemble
+                if (project.hasProperty('forkRepositoryUrl')) {
+                    builtBy { project.tasks.named('assembleBaseRelease').get() }
+                } else {
+                    builtBy assemble
+                }
             }
-            artifact sourcesJar
-            artifact javadocJar
+            if (!project.hasProperty('forkRepositoryUrl')) {
+                artifact sourcesJar
+                artifact javadocJar
+            }
             populatePom(
                     it,
                     'realm-android-kotlin-extensions',
@@ -170,6 +176,15 @@ publishing {
         }
     }
 }
+
+ext.forkPublicationConfig = [
+        publicationName: 'basePublication',
+        artifactId: 'realm-android-kotlin-extensions',
+        dependencies: ['realm-android-library'],
+        aarFile: file("${rootDir}/kotlin-extensions/build/outputs/aar/realm-kotlin-extensions-base-release.aar"),
+        builtBy: { project.tasks.named('assembleBaseRelease').get() }
+]
+apply from: "${rootDir}/../fork-publication.gradle"
 
 artifacts {
     archives javadocJar
