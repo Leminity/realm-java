@@ -75,9 +75,11 @@ def inspect_coordinate(repository: Path, group: str, version: str, expected: dic
             errors.append(f"missing published file: {path}")
 
     pom_edges: set[str] = set()
+    pom_packaging: str | None = None
     io_realm_dependencies: list[str] = []
     if pom.is_file():
         root = ET.parse(pom).getroot()
+        pom_packaging = child_text(root, "packaging")
         actual = {
             "group": child_text(root, "groupId"),
             "artifact": child_text(root, "artifactId"),
@@ -102,6 +104,8 @@ def inspect_coordinate(repository: Path, group: str, version: str, expected: dic
                 io_realm_dependencies.append(f"{dep_group}:{dep_artifact}:{dep_version}")
         if io_realm_dependencies:
             errors.append(f"io.realm POM leakage: {sorted(io_realm_dependencies)}")
+        if expected["extension"] == "aar" and pom_packaging != "aar":
+            errors.append(f"AAR POM packaging {pom_packaging!r} != 'aar'")
 
     expected_edges = set(expected["edges"])
     if pom_edges != expected_edges:
@@ -199,6 +203,7 @@ def inspect_coordinate(repository: Path, group: str, version: str, expected: dic
         "module_metadata": str(module),
         "expected_edges": sorted(expected_edges),
         "pom_edges": sorted(pom_edges),
+        "pom_packaging": pom_packaging,
         "module_edges": sorted(metadata_edges),
         "module_variant_usages": module_variant_usages,
         "files": files,
