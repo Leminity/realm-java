@@ -4,6 +4,7 @@
 import hashlib
 import importlib.util
 import re
+import subprocess
 import tempfile
 import zipfile
 from pathlib import Path
@@ -14,6 +15,19 @@ SPEC = importlib.util.spec_from_file_location("ac09", ROOT / "tools/verify-g009-
 MODULE = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(MODULE)
+
+decision = ROOT / MODULE.G006_STABLE_API_DECISION
+assert decision.is_file()
+assert hashlib.sha256(decision.read_bytes()).hexdigest() == (
+    "96cdf382b60c21fa00c65a7f873231ae96292cd0b29cd449a3c405f8d872998b"
+)
+assert subprocess.run(
+    ["git", "ls-files", "--error-unmatch", MODULE.G006_STABLE_API_DECISION],
+    cwd=ROOT,
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+    check=False,
+).returncode == 0
 
 assert MODULE.is_unsupported("io.realm.mongodb.sync.SyncConfiguration")
 assert MODULE.is_unsupported("io.realm.internal.ObjectServerFacade")

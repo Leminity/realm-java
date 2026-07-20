@@ -59,8 +59,7 @@ APPROVED_COMPILER_SIGNATURE_ADDITIONS = {
     },
 }
 G006_STABLE_API_DECISION = (
-    ".omx/recovery/transactions/G006-base-local-db-library-build-20260716T133354Z/"
-    "ac09-stable-api-supersedes-raw-class-inventory-20260716T161100Z/decision.md"
+    "compatibility-fixtures/ac09-g006-stable-api-decision.md"
 )
 # The implementation plan explicitly retires the processor's update checker:
 # .omx/plans/realm-java-android17-agp9-mavencentral.md:185 and the companion
@@ -398,7 +397,7 @@ def verify_retired_processor_absence(processor: Path) -> dict[str, object]:
 
 
 def g006_stable_api_decision_path(root: Path) -> Path:
-    """Find the leader-owned accepted G006 decision from a team worktree."""
+    """Find the checked-in accepted G006 decision from a team worktree."""
     for candidate_root in (root, *root.parents):
         candidate = candidate_root / G006_STABLE_API_DECISION
         if candidate.is_file():
