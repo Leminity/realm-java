@@ -46,11 +46,13 @@ open class Realm : Plugin<Project> {
 
         val dependencyConfigurationName = getDependencyConfigurationName(project)
         val extension = project.extensions.create("realm", RealmPluginExtension::class.java)
+        val hasKotlinSources = usesKotlinSources(project)
+        extension.isKotlinExtensionsEnabled = hasKotlinSources
 
         // AGP 9 finalizes Kotlin processor wiring before afterEvaluate. Apply the legacy KAPT
         // bridge while the Android plugin is being configured; processor dependencies remain
         // selected after evaluation so Java-only projects keep annotationProcessor semantics.
-        if (usesKotlinSources(project)) {
+        if (hasKotlinSources) {
             project.pluginManager.apply(LEGACY_KAPT_PLUGIN_ID)
         }
 
@@ -62,7 +64,6 @@ open class Realm : Plugin<Project> {
 
         project.afterEvaluate {
             val isKotlinProject = usesKotlinSources(project)
-            extension.isKotlinExtensionsEnabled = isKotlinProject
 
             if (extension.isSyncEnabled) {
                 throw GradleException(

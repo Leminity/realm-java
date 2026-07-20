@@ -37,6 +37,7 @@ import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
+import static org.junit.Assume.assumeTrue
 
 /**
  * Black-box compatibility tests for the public {@code realm-android} plugin contract.
@@ -173,6 +174,19 @@ class PluginTest {
     }
 
     @Test
+    void kotlinExtensionDslPreservesExplicitFalseAndDefaultsTrue() {
+        assumeTrue(androidPlugin == 'application' && language == 'kotlin' && order == 'android-then-realm')
+
+        writeFixture(false, false, false)
+        BuildResult explicitlyDisabled = run(':app:dependencies', '--configuration', 'api').build()
+        assertFalse(explicitlyDisabled.output.contains(forkCoordinate('realm-android-kotlin-extensions')))
+
+        writeFixture(false)
+        BuildResult defaultEnabled = run(':app:dependencies', '--configuration', 'api').build()
+        assertTrue(defaultEnabled.output.contains(forkCoordinate('realm-android-kotlin-extensions')))
+    }
+
+    @Test
     void syncIsRejectedBeforeAnyObjectServerDependencyCanResolve() {
         writeFixture(true)
 
@@ -197,7 +211,11 @@ class PluginTest {
             .withArguments((arguments as List<String>) + ['--stacktrace', '--warning-mode', 'all'])
     }
 
-    private void writeFixture(boolean syncEnabled, boolean explicitSyncDisabled = false) {
+    private void writeFixture(
+        boolean syncEnabled,
+        boolean explicitSyncDisabled = false,
+        Boolean kotlinExtensionsEnabled = null
+    ) {
         consumerProject = temporaryFolder.newFolder('consumer-' + System.nanoTime())
         moduleProject = new File(consumerProject, 'app')
         fixtureRepository = temporaryFolder.newFolder('fork-repository-' + System.nanoTime())
@@ -215,11 +233,18 @@ class PluginTest {
             include ':app'
         '''.stripIndent())
         writeFile(new File(consumerProject, 'build.gradle'), '')
-        writeFile(new File(moduleProject, 'build.gradle'), consumerBuildScript(syncEnabled, explicitSyncDisabled))
+        writeFile(
+            new File(moduleProject, 'build.gradle'),
+            consumerBuildScript(syncEnabled, explicitSyncDisabled, kotlinExtensionsEnabled)
+        )
         writeSources()
     }
 
-    private String consumerBuildScript(boolean syncEnabled, boolean explicitSyncDisabled) {
+    private String consumerBuildScript(
+        boolean syncEnabled,
+        boolean explicitSyncDisabled,
+        Boolean kotlinExtensionsEnabled
+    ) {
         boolean application = androidPlugin == 'application'
         boolean kotlin = language != 'java'
         String repositoryUri = fixtureRepository.toURI().toString()
@@ -236,6 +261,11 @@ class PluginTest {
                 syncEnabled = false
             }
         '''.stripIndent() : ''
+        String kotlinExtensionsBlock = kotlinExtensionsEnabled == null ? '' : '''
+            realm {
+                kotlinExtensionsEnabled = ''' + kotlinExtensionsEnabled + '''
+            }
+        '''.stripIndent()
         String javaOnlyKotlinSetting = language == 'java' ? 'enableKotlin = false' : ''
 
         '''
@@ -280,6 +310,7 @@ class PluginTest {
             }
 
             ''' + syncBlock + '''
+            ''' + kotlinExtensionsBlock + '''
 
             tasks.register('verifyRealmPluginContract') {
                 dependsOn 'assembleDebug', 'assembleRelease'
@@ -620,6 +651,10 @@ class PluginTest {
             'Expected exactly ' + expected + ' forked dependencies in ' + configuration + '.\\n' + result.output,
             result.output.contains('REALM-COUNT ' + configuration + '=' + expected)
         )
+    }
+
+    private static String forkCoordinate(String artifact) {
+        FORK_GROUP + ':' + artifact + ':' + FORK_VERSION
     }
 
     private static void assertGeneratedAccessor(BuildResult result, String model, boolean expected) {
