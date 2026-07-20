@@ -363,10 +363,20 @@ jobs:
           tools/g011-verify-native-elf.sh --aar "$aar" --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
           (
             cd "$evidence"
-            rm -f SHA256SUMS checksum-verify.log
-            find . -type f ! -name SHA256SUMS ! -name checksum-verify.log -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.tmp
-            mv SHA256SUMS.tmp SHA256SUMS
-            sha256sum -c SHA256SUMS > checksum-verify.log
+            manifest_tmp=.SHA256SUMS.tmp
+            verify_tmp=.checksum-verify.tmp
+            rm -f SHA256SUMS checksum-verify.log "$manifest_tmp" "$verify_tmp"
+            LC_ALL=C find . -type f \
+              ! -name SHA256SUMS ! -name checksum-verify.log \
+              ! -name .SHA256SUMS.tmp ! -name .checksum-verify.tmp \
+              -printf '%P\0' | LC_ALL=C sort -z | xargs -0 sha256sum > "$manifest_tmp"
+            mv -f "$manifest_tmp" SHA256SUMS
+            if sha256sum -c SHA256SUMS > "$verify_tmp"; then
+              mv -f "$verify_tmp" checksum-verify.log
+            else
+              mv -f "$verify_tmp" checksum-verify.log
+              exit 1
+            fi
           )
           python3 - "$evidence/consumer-evidence.json" "$mode" "$url" "$evidence/SHA256SUMS" <<'PY'
           import hashlib, json, pathlib, sys
@@ -781,10 +791,20 @@ jobs:
           tools/g011-verify-native-elf.sh --aar "$aar" --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
           (
             cd "$evidence"
-            rm -f SHA256SUMS checksum-verify.log
-            find . -type f ! -name SHA256SUMS ! -name checksum-verify.log -printf '%P\0' | sort -z | xargs -0 sha256sum > SHA256SUMS.tmp
-            mv SHA256SUMS.tmp SHA256SUMS
-            sha256sum -c SHA256SUMS > checksum-verify.log
+            manifest_tmp=.SHA256SUMS.tmp
+            verify_tmp=.checksum-verify.tmp
+            rm -f SHA256SUMS checksum-verify.log "$manifest_tmp" "$verify_tmp"
+            LC_ALL=C find . -type f \
+              ! -name SHA256SUMS ! -name checksum-verify.log \
+              ! -name .SHA256SUMS.tmp ! -name .checksum-verify.tmp \
+              -printf '%P\0' | LC_ALL=C sort -z | xargs -0 sha256sum > "$manifest_tmp"
+            mv -f "$manifest_tmp" SHA256SUMS
+            if sha256sum -c SHA256SUMS > "$verify_tmp"; then
+              mv -f "$verify_tmp" checksum-verify.log
+            else
+              mv -f "$verify_tmp" checksum-verify.log
+              exit 1
+            fi
           )
           python3 - "$evidence/consumer-evidence.json" "$url" "$evidence/SHA256SUMS" <<'PY'
           import hashlib, json, pathlib, sys
