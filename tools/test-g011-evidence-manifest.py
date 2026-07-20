@@ -158,6 +158,7 @@ class ManifestTests(unittest.TestCase):
         self.assertIn("actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", workflow)
         self.assertIn("actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95", workflow)
         self.assertIn("actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02", workflow)
+        self.assertIn("include-hidden-files: true", workflow)
         for forbidden in ("pull_request_target", "workflow_dispatch", "ubuntu-latest", "build/g008-root-final-stage-run1"):
             self.assertNotIn(forbidden, workflow)
         required = (

@@ -319,4 +319,5 @@ jobs:
             ${{ env.G011_RUNTIME_MANIFEST }}
             ${{ env.G011_RUNTIME_SHA }}
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 14

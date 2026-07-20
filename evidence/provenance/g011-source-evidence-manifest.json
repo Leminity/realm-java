@@ -182,7 +182,7 @@
     }
   },
   "gate_digests": {
-    ".github/workflows/ci.yml": "9dd382545030488a7757eb7e3a0ee5987092a4db5f5ea75cd7b2a56928e58a10",
+    ".github/workflows/ci.yml": "b55d535033af8d31c8e7e91dbaaf08bc81ffdce4e752554d9cd152304c72a72f",
     ".github/workflows/release.yml": "b753792c4e53e8e488c46cfb250cdd64505b32d210d6b15a717269f6fb3596aa",
     "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "a0c40aefa5aecb14a41eec4daa461fa2541d41eeedbd02a19cf3e91dccaa4ea4",
     "gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt": "61f32f738597fe8a9751e15b88092cd8601be7a136bd5d6d16f372409bbf0640",
@@ -197,7 +197,7 @@
     "tools/test-central-portal.py": "19a4718e4ef1bd9915ba9e8e041ed0154b2b97fe55537d43ca787c4e7999f522",
     "tools/test-g008-publication.py": "459d2567e7bd05403f9fe20bc7e0969d58a50e888e9da19f9214e10b930dcac0",
     "tools/test-g011-consume-six.py": "7e9b0d70649ad776b2f7608e238af42c144f183355f22fd00ae544125dc07675",
-    "tools/test-g011-evidence-manifest.py": "9ecfbdff35f4b575d511b3858e09bf4be58e70942dab104e3630429106b5ef8c",
+    "tools/test-g011-evidence-manifest.py": "d5a46d101947f4e3b5e76cec595f1fa343bdb8b9f68710db2a6afe4888776f3a",
     "tools/test-g011-verify-native-elf.py": "c01d1bd02c87c5461eaa30d5caa87521d66111e39b95dba983f6224e93ecaac3",
     "tools/test-verify-g003-independent-builds.sh": "d9a033c9f8b4138f86fa98c27df0ee10c359ccbd5805762386df3e0c07f3cfb6",
     "tools/test-verify-g004-transformer-public-api.sh": "ac27827c4246b1cacfe5700ab6400aad44396417c382200e58a2eb774f80e2ce",
