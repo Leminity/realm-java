@@ -1,0 +1,12 @@
+{
+  "realm_version": "10.19.0",
+  "official_artifact_manifest_sha256": "255be75f1dca64e2cc94574ced12c5acaa2bb749f8c7a3998056631f08c203a1",
+  "schema_sha256": "1685e31f637636584b76e7a18e4dad362146e96dbc4a0190b382effdbf05d70c",
+  "golden_data_sha256": "016717bd6a066c765a3c7d8418767671e22803af691e5aeee0432255653a2423",
+  "encryption_key_sha256": "fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108",
+  "plain_fixture_sha256": "46ccf472ba5ae55edb22ae640075df006b377be738ce651abe7507641347b734",
+  "encrypted_fixture_sha256": "792abb7cc4ef3aafe99fd091e0dcd4f1cb713800f60304cc9a4ca6c1d37a23df",
+  "official_reader_semantic_validation": true,
+  "sdk_int": 36,
+  "build_fingerprint": "google/sdk_gphone64_x86_64/emu64xa:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys"
+}
