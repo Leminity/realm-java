@@ -149,6 +149,10 @@ class ManifestTests(unittest.TestCase):
     def test_ci_workflow_is_pinned_ordered_and_executable(self) -> None:
         root = Path(__file__).resolve().parents[1]
         workflow = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
+        native_verifier = (root / "tools/g011-verify-native-elf.sh").read_text(encoding="utf-8")
+        self.assertIn('report="$evidence/report.txt"', native_verifier)
+        self.assertIn("native/report.txt", MODULE.RUNTIME_REQUIRED_EXACT)
+        self.assertNotIn("native/result.txt", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertIn("permissions:\n  contents: read", workflow)
         self.assertIn("runs-on: [self-hosted, linux, api37, ps16k]", workflow)
         self.assertIn("actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", workflow)

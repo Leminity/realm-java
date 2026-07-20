@@ -88,7 +88,7 @@ RUNTIME_REQUIRED_EXACT = (
     "g008/maven-central-bundle.zip",
     "g008/unit.log",
     "consumer/result.txt",
-    "native/result.txt",
+    "native/report.txt",
     "g009/official-resolver.log",
     "g009/report.json",
     "g009/unit.log",
