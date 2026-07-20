@@ -12,6 +12,7 @@ import sys
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 from urllib.parse import parse_qs, unquote, urlparse
 import zipfile
 
@@ -494,6 +495,52 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 )
                 self.assertEqual(completed.returncode, 23)
                 environment.pop(name)
+
+    def test_tokenless_process_crosses_kernel_unreadable_ancestor_and_keeps_checking(self) -> None:
+        proc = self.root / "proc"
+        for pid, parent, environment in (
+            (300, 200, b"PATH=/usr/bin\0"),
+            (200, 100, b"CENTRAL_PORTAL_BEARER_TOKEN=unreadable\0"),
+            (100, 1, b"PATH=/usr/bin\0"),
+        ):
+            process = proc / str(pid)
+            process.mkdir(parents=True)
+            (process / "status").write_text(f"Name:\tprobe\nUid:\t{os.getuid()}\t{os.getuid()}\n", encoding="utf-8")
+            (process / "environ").write_bytes(environment)
+            (process / "stat").write_text(f"{pid} (probe) S {parent} 0 0 0\n", encoding="utf-8")
+
+        unreadable = proc / "200" / "environ"
+        original_read_bytes = Path.read_bytes
+
+        def read_bytes(path: Path) -> bytes:
+            if path == unreadable:
+                raise PermissionError(13, "Permission denied", str(path))
+            return original_read_bytes(path)
+
+        with mock.patch.object(Path, "read_bytes", read_bytes):
+            CP._assert_tokenless_process_ancestry(proc, 300, os.getuid())
+            (proc / "100" / "environ").write_bytes(b"MAVEN_SIGNING_PASSWORD=readable-grandparent\0")
+            with self.assertRaisesRegex(CP.PortalError, "tokenless consumer ancestor"):
+                CP._assert_tokenless_process_ancestry(proc, 300, os.getuid())
+
+    def test_tokenless_process_fails_closed_for_non_permission_proc_error(self) -> None:
+        proc = self.root / "proc"
+        process = proc / "300"
+        process.mkdir(parents=True)
+        (process / "status").write_text(f"Name:\tprobe\nUid:\t{os.getuid()}\t{os.getuid()}\n", encoding="utf-8")
+        (process / "environ").write_bytes(b"PATH=/usr/bin\0")
+        (process / "stat").write_text("300 (probe) S 1 0 0 0\n", encoding="utf-8")
+
+        original_read_bytes = Path.read_bytes
+
+        def read_bytes(path: Path) -> bytes:
+            if path == process / "environ":
+                raise OSError(5, "I/O error", str(path))
+            return original_read_bytes(path)
+
+        with mock.patch.object(Path, "read_bytes", read_bytes):
+            with self.assertRaisesRegex(CP.PortalError, "cannot verify tokenless"):
+                CP._assert_tokenless_process_ancestry(proc, 300, os.getuid())
 
     def test_stage_finalizer_rejects_mutation_against_portal_origin_digest(self) -> None:
         transport = MockTransport(

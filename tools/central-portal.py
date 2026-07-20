@@ -14,6 +14,7 @@ import argparse
 import base64
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+import errno
 from fnmatch import fnmatchcase
 import hashlib
 import json
@@ -1042,8 +1043,12 @@ def _assert_tokenless_process() -> None:
 
     if _PROTECTED_PROCESS_ENV_NAMES & set(os.environ):
         raise PortalError("tokenless consumer process contains protected credential variables")
-    proc = Path("/proc")
-    pid = os.getppid()
+    _assert_tokenless_process_ancestry(Path("/proc"), os.getppid(), os.getuid())
+
+
+def _assert_tokenless_process_ancestry(proc: Path, pid: int, current_uid: int) -> None:
+    """Reject protected variables in every kernel-readable same-UID ancestor."""
+
     visited: set[int] = set()
     while proc.is_dir() and pid > 1 and pid not in visited:
         visited.add(pid)
@@ -1051,15 +1056,20 @@ def _assert_tokenless_process() -> None:
             status_lines = (proc / str(pid) / "status").read_text(encoding="utf-8").splitlines()
             uid_line = next(line for line in status_lines if line.startswith("Uid:"))
             ancestor_uid = int(uid_line.split()[1])
-            if ancestor_uid != os.getuid():
+            if ancestor_uid != current_uid:
                 break
+        except (OSError, StopIteration, ValueError, IndexError) as error:
+            raise PortalError("cannot verify tokenless consumer process ancestry") from error
+        try:
             names = {
                 entry.split(b"=", 1)[0].decode("utf-8", "ignore")
                 for entry in (proc / str(pid) / "environ").read_bytes().split(b"\0")
                 if b"=" in entry
             }
-        except (OSError, StopIteration, ValueError, IndexError) as error:
-            raise PortalError("cannot verify tokenless consumer process ancestry") from error
+        except OSError as error:
+            if error.errno not in {errno.EACCES, errno.EPERM}:
+                raise PortalError("cannot verify tokenless consumer process ancestry") from error
+            names = set()
         if _PROTECTED_PROCESS_ENV_NAMES & names:
             raise PortalError("tokenless consumer ancestor contains protected credential variables")
         try:
