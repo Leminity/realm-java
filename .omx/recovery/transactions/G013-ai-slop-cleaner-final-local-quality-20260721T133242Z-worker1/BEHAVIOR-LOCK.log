@@ -1,0 +1,35 @@
+integrated_root=6f089da04c48f129d38086bbe9ecad80bf6c4458
+source_under_test=188f0832252172a5ca93204292a65a0f8fe4f4f3
+source_tree=4e99f91dfe86abbc957e5f9596de454d90c075aa
+core_gitlink=d7b52ccbada0283527db36143cfeab18692b4ed0
+eligible_post_source_paths_begin
+eligible_post_source_paths_end
+task9_checksum_replay_begin
+./AC-MATRIX.md: OK
+./COMMITTED: OK
+./HISTORICAL-AUDIT-PROBES.md: OK
+./LORE.md: OK
+./POST: OK
+./PRE: OK
+./ROLLBACK.md: OK
+./artifacts/execution-audit.json: OK
+./artifacts/integrated-evidence-audit.json: OK
+./artifacts/verify-integrated-evidence.py: OK
+./logs/integrated-evidence-audit.stderr.log: OK
+./logs/integrated-evidence-audit.stdout.log: OK
+./logs/json-validation.log: OK
+./logs/precommit-worktree.log: OK
+./logs/preintegration-audit.stderr.log: OK
+./logs/preintegration-audit.stdout.log: OK
+./logs/privacy-scan.log: OK
+./logs/rollback-audit.log: OK
+./logs/script-validation.log: OK
+./references/EVIDENCE-COMMITS.txt: OK
+./results/integrated-evidence-audit.status: OK
+./results/json-validation.status: OK
+./results/preintegration-audit.status: OK
+./results/privacy-scan.status: OK
+./results/rollback-audit.status: OK
+./results/script-validation.status: OK
+./rollback/no-source-change.patch: OK
+task9_checksum_replay_end
