@@ -1,0 +1,88 @@
+{
+  "acceptance": {
+    "AC-01": "PASS",
+    "AC-02": "PASS",
+    "AC-03": "PASS",
+    "AC-04": "PASS",
+    "AC-05": "PASS",
+    "AC-07": "RUNTIME-LANE_NOT_OWNED_STATIC_PREREQUISITES_PASS",
+    "AC-09": "PASS",
+    "AC-10": "PASS",
+    "AC-11": "PASS",
+    "AC-15": "PASS"
+  },
+  "completed_task_states_verified": [
+    1,
+    2,
+    4,
+    5
+  ],
+  "core_commit": "d7b52ccbada0283527db36143cfeab18692b4ed0",
+  "core_worktree_clean": true,
+  "current_failures": [],
+  "evidence_head": "f5f46a5ca910ea419996daa52c44d7d93a8efcdf",
+  "external_actions": "none",
+  "prior_commit_paths_verified": 397,
+  "prior_evidence": [
+    {
+      "commit": "a4cdb89565f3dc3a3c41ef99e027d096de9e9924",
+      "commit_paths": 35,
+      "parent": "d39316930fd63e379b58bc6296696781099ca4c7",
+      "seal_entries": 33,
+      "seal_sha256": "fa4f8a1686690d77fe8ac936d62f0126b6e660c38f0db1647abd94b2501c3314",
+      "status_counts": {
+        "0": 2,
+        "1": 2
+      },
+      "task": 1,
+      "transaction": ".omx/recovery/transactions/G013-pre-publication-regression-20260721T090051Z-worker1"
+    },
+    {
+      "commit": "285617b195f03d703795115f5ada8de14b4d1e60",
+      "commit_paths": 296,
+      "parent": "188f0832252172a5ca93204292a65a0f8fe4f4f3",
+      "seal_entries": 294,
+      "seal_sha256": "21d7b08bd8f386bdf4565641980f48aa66940f48b444c148d2936fe8043a05e7",
+      "status_counts": {
+        "0": 25,
+        "1": 1
+      },
+      "task": 2,
+      "transaction": ".omx/recovery/transactions/G013-task2-local-acceptance-20260721T092343Z-worker1"
+    },
+    {
+      "commit": "5f866d2479a69b9e4c19435041ce4e846e024695",
+      "commit_paths": 33,
+      "parent": "285617b195f03d703795115f5ada8de14b4d1e60",
+      "seal_entries": 31,
+      "seal_sha256": "c30e0feb030956b2dc182a35a318ddea821398367d3d4c3cf7c28549bd91c1f3",
+      "status_counts": {
+        "0": 8
+      },
+      "task": 4,
+      "transaction": ".omx/recovery/transactions/G013-task4-plugin-api-20260721T115459Z-worker1"
+    },
+    {
+      "commit": "f5f46a5ca910ea419996daa52c44d7d93a8efcdf",
+      "commit_paths": 33,
+      "parent": "5f866d2479a69b9e4c19435041ce4e846e024695",
+      "seal_entries": 31,
+      "seal_sha256": "f4aac444297a8caf0e78346f74baedfcb5c664651650711271e5e53672187fd2",
+      "status_counts": {
+        "0": 8
+      },
+      "task": 5,
+      "transaction": ".omx/recovery/transactions/G013-task5-exact-six-20260721T120149Z-worker1"
+    }
+  ],
+  "prior_seal_entries_verified": 389,
+  "prior_seals_replayed": 4,
+  "result": "PASS",
+  "source_refresh_changed_paths": [
+    "evidence/provenance/g011-source-evidence-manifest.json"
+  ],
+  "source_refresh_commit": "188f0832252172a5ca93204292a65a0f8fe4f4f3",
+  "source_tree": "4e99f91dfe86abbc957e5f9596de454d90c075aa",
+  "source_under_test": "188f0832252172a5ca93204292a65a0f8fe4f4f3",
+  "tracked_worktree_clean_before_evidence_commit": true
+}
