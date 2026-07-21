@@ -1,0 +1,7 @@
+scope_boundary_check=begin
+eligible_source_paths=0
+fallback_search=PASS_empty_eligible_set
+source_tree=PASS
+core_gitlink=PASS
+no_source_edit_disposition=PASS
+scope_boundary_check=end

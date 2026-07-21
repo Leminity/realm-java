@@ -1,0 +1,13 @@
+base_source=188f0832252172a5ca93204292a65a0f8fe4f4f3
+exact_integrated_root=6f089da04c48f129d38086bbe9ecad80bf6c4458
+post_base_commit_count=10
+changed_path_count=554
+excluded_evidence_or_transaction_path_count=554
+eligible_source_bearing_path_count=0
+eligible_source_bearing_commit_count=0
+
+command=git diff --name-only 188f0832252172a5ca93204292a65a0f8fe4f4f3..6f089da04c48f129d38086bbe9ecad80bf6c4458 -- . ':(exclude).omx/**' ':(exclude)evidence/**'
+output=<empty>
+
+command=for each post-base commit, git diff-tree excluding .omx/** and evidence/**
+output=<no source-bearing commit>
