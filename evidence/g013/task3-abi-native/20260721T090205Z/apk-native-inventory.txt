@@ -1,0 +1,11 @@
+apk=compatibility-fixtures/ac08-api37-ps16k-runtime/fork-app/build/outputs/apk/debug/fork-app-debug.apk
+1e8151763f72edfdddc84073f97780bd91df8ef6c3d1c62408c669197d429bcf  compatibility-fixtures/ac08-api37-ps16k-runtime/fork-app/build/outputs/apk/debug/fork-app-debug.apk
+apk_abis:
+arm64-v8a
+armeabi-v7a
+x86_64
+apk_native_entries:
+lib/arm64-v8a/librealm-jni.so
+lib/armeabi-v7a/librealm-jni.so
+lib/x86_64/librealm-jni.so
+aab=not produced by scoped debug runtime fixture; PAGE_ALIGNMENT_16K gate not applicable

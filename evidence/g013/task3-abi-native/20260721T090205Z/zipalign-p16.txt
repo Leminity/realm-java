@@ -1,0 +1,23 @@
+command=/home/leminity/Android/Sdk/build-tools/36.0.0/zipalign -v -c -P 16 4 compatibility-fixtures/ac08-api37-ps16k-runtime/fork-app/build/outputs/apk/debug/fork-app-debug.apk
+Verifying alignment of compatibility-fixtures/ac08-api37-ps16k-runtime/fork-app/build/outputs/apk/debug/fork-app-debug.apk (4)...
+      87 META-INF/com/android/build/gradle/app-metadata.properties (OK - compressed)
+     178 classes.dex (OK - compressed)
+ 1314987 classes2.dex (OK - compressed)
+ 1329249 lib/arm64-v8a/librealm-jni.so (OK - compressed)
+ 4791360 lib/armeabi-v7a/librealm-jni.so (OK - compressed)
+ 7894716 lib/x86_64/librealm-jni.so (OK - compressed)
+11891743 AndroidManifest.xml (OK - compressed)
+11892316 resources.arsc (OK)
+11892430 kotlin/annotation/annotation.kotlin_builtins (OK - compressed)
+11893054 kotlin/collections/collections.kotlin_builtins (OK - compressed)
+11895011 kotlin/concurrent/atomics/atomics.kotlin_builtins (OK - compressed)
+11896180 kotlin/coroutines/coroutines.kotlin_builtins (OK - compressed)
+11896370 kotlin/internal/internal.kotlin_builtins (OK - compressed)
+11896787 kotlin/kotlin.kotlin_builtins (OK - compressed)
+11902304 kotlin/ranges/ranges.kotlin_builtins (OK - compressed)
+11903751 kotlin/reflect/reflect.kotlin_builtins (OK - compressed)
+11905270 META-INF/CERT.SF (OK - compressed)
+11906273 META-INF/CERT.RSA (OK - compressed)
+11907346 META-INF/MANIFEST.MF (OK - compressed)
+Verification successful
+RESULT=PASS

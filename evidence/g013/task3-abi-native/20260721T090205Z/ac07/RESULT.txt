@@ -1,0 +1,8 @@
+RESULT=PASS
+AC=AC-07
+INPUT_DIRECTORY=/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle
+RUN_DIRECTORY=/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/evidence/g013/task3-abi-native/20260721T090205Z/ac07
+FORK_SERIAL=emulator-5654
+OFFICIAL_READER_SERIAL=emulator-5654
+IMMUTABLE_INPUT_HASHES=original/immutable-input.sha256
+FORK_REPORT=fork-modified/fork-report.json

@@ -1,0 +1,18 @@
+task=3
+finished_at=2026-07-21T09:42:52Z
+source_head=d39316930fd63e379b58bc6296696781099ca4c7
+source_ancestry=exact
+core_head=d7b52ccbada0283527db36143cfeab18692b4ed0
+source_changes=none
+external_actions=none
+toolchain=Gradle 9.6.1; OpenJDK 17.0.19; NDK 29.0.14206865; build-tools 36.0.0
+AC06=PASS exact ABI equality [armeabi-v7a, arm64-v8a, x86_64]; x86 absent; Sync symbols absent; all ELF PT_LOAD alignments 0x4000; zipalign -P 16 PASS
+AC07=PASS official 10.19.0 generated fixtures opened by fork and fork-modified files reopened by official reader; wrong key rejected; migration callbacks zero
+AC08=PASS exact API37 AVD realm-api37-ps16k-kvm PAGE_SIZE=16384; plain/encrypted full semantics, notification/unsubscribe, thread confinement, wrong-key, force-stop restart, migration N-to-N+1 once
+AC14=PASS direct WSL2 execution; no container/compatibility fallback; device identity and artifacts bound in evidence
+build=PASS :realm-library:assembleBaseRelease
+typecheck=PASS :realm-library:compileBaseReleaseKotlin :realm-library:compileBaseReleaseJavaWithJavac
+tests=PASS targeted verifier/parameterization tests; testBaseDebugUnitTest NO-SOURCE
+lint=PASS :realm-library:lintBaseRelease
+aab=not produced by scoped debug runtime fixture; AAB alignment gate not applicable
+recovery=initial aggregate assembleBase and nonexistent release unit-test task attempts retained as diagnostic evidence; corrected scoped commands passed

@@ -1,0 +1,33 @@
+[ac07] START oracle-provenance: bash -c cd\ \'/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2\'\ \&\&\ sha256sum\ --check\ evidence/oracle/official-10.19.0/checksums/evidence-sha256sum.txt 
+[ac07] PASS oracle-provenance
+[ac07] START task11-provenance: bash -c cd\ \'/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/evidence/oracle/official-10.19.0/fixture-execution\'\ \&\&\ sha256sum\ --check\ task-11-evidence-sha256sum.txt 
+[ac07] PASS task11-provenance
+[ac07] START official-fixture-manifest: python3 /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/official-10.19.0-generator/verify-generated-fixtures.py /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle fdeab9acf3710362bd2658cdc9a29e8f9c757fcf9811603a8c447cd1d9151108 
+[ac07] PASS official-fixture-manifest
+[ac07] START fork-device-state: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 get-state 
+[ac07] PASS fork-device-state
+[ac07] START official-reader-device-state: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 get-state 
+[ac07] PASS official-reader-device-state
+[ac07] Fork API=37 page_size=16384
+[ac07] Official reader API=37 page_size=16384
+[ac07] Using supplied fork repository /tmp/realm-g013-task3-20260721T090205Z/repository
+[ac07] START fork-assemble: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/gradlew --no-daemon --console=plain --refresh-dependencies -p /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac07-bidirectional/fork-consumer -PforkRepository=/tmp/realm-g013-task3-20260721T090205Z/repository -Pandroid.aapt2FromMavenOverride=/home/leminity/Android/Sdk/build-tools/36.0.0/aapt2 :app:assembleDebug :app:assembleDebugAndroidTest 
+[ac07] PASS fork-assemble
+[ac07] Acquired /tmp/realm-g009-device.lock for the complete AC-07 mutable device phase
+[ac07] START fork-install-app: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 install -r -t /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac07-bidirectional/fork-consumer/app/build/outputs/apk/debug/app-debug.apk 
+[ac07] PASS fork-install-app
+[ac07] START fork-install-test: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 install -r -t /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac07-bidirectional/fork-consumer/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk 
+[ac07] PASS fork-install-test
+[ac07] START fork-instrumentation: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell am instrument -w -r -e class io.realm.fixtureoracle.ForkFixtureCompatibilityTest io.realm.fixtureac07fork.test/androidx.test.runner.AndroidJUnitRunner 
+[ac07] PASS fork-instrumentation
+[ac07] START fork-export-verification: python3 /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac07-bidirectional/verify-ac07-results.py /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/evidence/g013/task3-abi-native/20260721T090205Z/ac07/original /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/evidence/g013/task3-abi-native/20260721T090205Z/ac07/fork-modified /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/evidence/g013/task3-abi-native/20260721T090205Z/ac07/fork-modified/fork-report.json 
+[ac07] PASS fork-export-verification
+[ac07] START official-reader-assemble: bash -c cd\ \'/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/official-10.19.0-generator\'\ \&\&\ ./gradlew\ --no-daemon\ --console=plain\ -Pandroid.aapt2FromMavenOverride=\'/home/leminity/Android/Sdk/build-tools/36.0.0/aapt2\'\ :app:assembleDebug\ :app:assembleDebugAndroidTest 
+[ac07] PASS official-reader-assemble
+[ac07] START official-reader-install-app: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 install -r -t /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/official-10.19.0-generator/app/build/outputs/apk/debug/app-debug.apk 
+[ac07] PASS official-reader-install-app
+[ac07] START official-reader-install-test: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 install -r -t /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/official-10.19.0-generator/app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk 
+[ac07] PASS official-reader-install-test
+[ac07] START official-reverse-instrumentation: /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell am instrument -w -r -e class io.realm.fixtureoracle.OfficialFixtureOracleTest#verifyForkModifiedCopiesWithOfficialReaderWithoutMigration io.realm.fixtureoracle.test/androidx.test.runner.AndroidJUnitRunner 
+[ac07] PASS official-reverse-instrumentation
+[ac07] PASS AC-07; evidence chain preserved in /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/evidence/g013/task3-abi-native/20260721T090205Z/ac07

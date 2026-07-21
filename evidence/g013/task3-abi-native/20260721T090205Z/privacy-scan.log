@@ -1,0 +1,3 @@
+scan=credential-bearing-patterns
+matches=0
+RESULT=PASS

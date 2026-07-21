@@ -1,0 +1,4 @@
+===== clear-fork-data 2026-07-21T18:28:02+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell pm clear io.realm.ac08.fork 
+Success
+[exit=0]

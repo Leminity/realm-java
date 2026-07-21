@@ -1,0 +1,6 @@
+run_id=20260721T090205Z
+mode=local
+repository=file:///tmp/realm-g013-task3-20260721T090205Z/repository
+serial=emulator-5654
+expected_avd=realm-api37-ps16k-kvm
+bearer=redacted

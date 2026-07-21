@@ -1,0 +1,105 @@
+===== official-build-offline 2026-07-21T18:26:19+09:00 =====
++ env ANDROID_HOME=/home/leminity/Android/Sdk ANDROID_SDK_ROOT=/home/leminity/Android/Sdk /home/leminity/.gradle/wrapper/dists/gradle-7.5-all/6qsw290k5lz422uaf8jf6m7co/gradle-7.5/bin/gradle -g /home/leminity/.gradle -p /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac08-api37-ps16k-runtime/official-project --offline --no-daemon --console=plain -Pandroid.aapt2FromMavenOverride=/home/leminity/Android/Sdk/build-tools/36.0.0/aapt2 :official-app:assembleDebug :official-app:assembleDebugAndroidTest 
+To honour the JVM settings for this build a single-use Daemon process will be forked. See https://docs.gradle.org/7.5/userguide/gradle_daemon.html#sec:disabling_the_daemon.
+Daemon will be stopped at the end of the build 
+
+> Configure project :official-app
+WARNING:The option setting 'android.aapt2FromMavenOverride=/home/leminity/Android/Sdk/build-tools/36.0.0/aapt2' is experimental.
+
+> Task :official-app:preBuild UP-TO-DATE
+> Task :official-app:preDebugBuild UP-TO-DATE
+> Task :official-app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :official-app:compileDebugAidl NO-SOURCE
+> Task :official-app:compileDebugRenderscript NO-SOURCE
+> Task :official-app:generateDebugBuildConfig
+> Task :official-app:javaPreCompileDebug
+> Task :official-app:checkDebugAarMetadata
+> Task :official-app:generateDebugResValues
+> Task :official-app:mapDebugSourceSetPaths
+> Task :official-app:generateDebugResources
+> Task :official-app:mergeDebugResources
+> Task :official-app:createDebugCompatibleScreenManifests
+> Task :official-app:extractDeepLinksDebug
+> Task :official-app:processDebugMainManifest
+> Task :official-app:processDebugManifest
+> Task :official-app:mergeDebugShaders
+> Task :official-app:compileDebugShaders NO-SOURCE
+> Task :official-app:generateDebugAssets UP-TO-DATE
+> Task :official-app:mergeDebugAssets
+> Task :official-app:compressDebugAssets
+> Task :official-app:processDebugJavaRes NO-SOURCE
+> Task :official-app:checkDebugDuplicateClasses
+> Task :official-app:desugarDebugFileDependencies
+> Task :official-app:mergeDebugJniLibFolders
+> Task :official-app:validateSigningDebug
+> Task :official-app:writeDebugAppMetadata
+> Task :official-app:mergeLibDexDebug
+> Task :official-app:writeDebugSigningConfigVersions
+> Task :official-app:preDebugAndroidTestBuild SKIPPED
+> Task :official-app:compileDebugAndroidTestAidl NO-SOURCE
+> Task :official-app:mergeExtDexDebug
+> Task :official-app:processDebugAndroidTestManifest
+> Task :official-app:compileDebugAndroidTestRenderscript NO-SOURCE
+> Task :official-app:generateDebugAndroidTestBuildConfig
+> Task :official-app:javaPreCompileDebugAndroidTest
+> Task :official-app:checkDebugAndroidTestAarMetadata
+> Task :official-app:generateDebugAndroidTestResValues
+> Task :official-app:mapDebugAndroidTestSourceSetPaths
+> Task :official-app:generateDebugAndroidTestResources
+> Task :official-app:mergeDebugNativeLibs
+> Task :official-app:mergeDebugAndroidTestResources
+> Task :official-app:mergeDebugAndroidTestShaders
+> Task :official-app:compileDebugAndroidTestShaders NO-SOURCE
+> Task :official-app:generateDebugAndroidTestAssets UP-TO-DATE
+> Task :official-app:mergeDebugAndroidTestAssets
+> Task :official-app:compressDebugAndroidTestAssets
+> Task :official-app:processDebugAndroidTestJavaRes NO-SOURCE
+> Task :official-app:processDebugAndroidTestResources
+> Task :official-app:mergeDebugAndroidTestJniLibFolders
+> Task :official-app:mergeDebugAndroidTestNativeLibs NO-SOURCE
+> Task :official-app:checkDebugAndroidTestDuplicateClasses
+> Task :official-app:desugarDebugAndroidTestFileDependencies
+> Task :official-app:validateSigningDebugAndroidTest
+> Task :official-app:writeDebugAndroidTestSigningConfigVersions
+> Task :official-app:processDebugManifestForPackage
+
+> Task :official-app:stripDebugDebugSymbols
+Unable to strip the following libraries, packaging them as they are: librealm-jni.so.
+
+> Task :official-app:mergeLibDexDebugAndroidTest
+> Task :official-app:mergeExtDexDebugAndroidTest
+> Task :official-app:processDebugResources
+
+> Task :official-app:compileDebugJavaWithJavac
+Note: Processing module SchemaNModule
+Note: Processing module SchemaNPlusOneModule
+Note: Processing class OfficialAddedAtNPlusOne
+Note: Processing class OfficialRecord
+Note: Creating DefaultRealmModule
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :official-app:mergeDebugJavaResource
+> Task :official-app:debugRealmAccessorsTransformer
+> Task :official-app:dexBuilderDebug
+> Task :official-app:mergeProjectDexDebug
+> Task :official-app:bundleDebugClassesToCompileJar
+
+> Task :official-app:compileDebugAndroidTestJavaWithJavac
+Note: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac08-api37-ps16k-runtime/official-app/src/androidTest/java/io/realm/ac08/official/OfficialSchemaFixtureTest.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :official-app:mergeDebugAndroidTestJavaResource
+> Task :official-app:debugAndroidTestRealmAccessorsTransformer
+> Task :official-app:dexBuilderDebugAndroidTest
+> Task :official-app:mergeProjectDexDebugAndroidTest
+> Task :official-app:packageDebug
+> Task :official-app:createDebugApkListingFileRedirect
+> Task :official-app:assembleDebug
+> Task :official-app:packageDebugAndroidTest
+> Task :official-app:createDebugAndroidTestApkListingFileRedirect
+> Task :official-app:assembleDebugAndroidTest
+
+BUILD SUCCESSFUL in 40s
+58 actionable tasks: 58 executed
+[exit=0]

@@ -1,0 +1,13 @@
+captured_at=2026-07-21T09:10:33Z
+adb=Android Debug Bridge version 1.0.41
+List of devices attached
+emulator-5654          device product:sdk_gphone16k_x86_64 model:sdk_gphone16k_x86_64 device:emu64xa16k transport_id:1
+
+--- emulator-5654 identity ---
+ro.build.version.sdk=37
+ro.product.cpu.abi=x86_64
+ro.boot.qemu.avd_name=realm-api37-ps16k-kvm
+ro.product.name=sdk_gphone16k_x86_64
+ro.build.fingerprint=google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys
+page_size=16384
+zipalign=/home/leminity/Android/Sdk/build-tools/36.0.0/zipalign

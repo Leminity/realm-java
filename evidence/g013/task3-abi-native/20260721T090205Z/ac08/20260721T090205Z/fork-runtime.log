@@ -1,0 +1,96 @@
+===== fork-runtime 2026-07-21T18:28:03+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell am instrument -w -r -e class io.realm.ac08.fork.ForkRuntimeTest -e schema_sha256 faf8f389c43d6dfb8c6c8cdf3c2b1b2d9f96e9c239fa29fcaa89e269a152f788 -e encrypted_sha256 792abb7cc4ef3aafe99fd091e0dcd4f1cb713800f60304cc9a4ca6c1d37a23df -e official_no_migration_category io.realm.exceptions.RealmMigrationNeededException -e official_realm_thread_category java.lang.IllegalStateException -e official_managed_object_thread_category java.lang.IllegalStateException -e official_results_thread_category java.lang.IllegalStateException io.realm.ac08.fork.test/androidx.test.runner.AndroidJUnitRunner 
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+io.realm.ac08.fork.ForkRuntimeTest:
+INSTRUMENTATION_STATUS: test=officialSchemaNToForkNPlusOneMigratesOnceReopensWithoutMigrationAndMatchesBaselineCategory
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=officialSchemaNToForkNPlusOneMigratesOnceReopensWithoutMigrationAndMatchesBaselineCategory
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=wrongKeyRejectsAndDoesNotMutateImmutableEncryptedSource
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=2
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=wrongKeyRejectsAndDoesNotMutateImmutableEncryptedSource
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=plainEncryptedInitOpenCloseCommitRollbackCrudQueryLinkListNullDateBinaryAndPrimaryKey
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=3
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=plainEncryptedInitOpenCloseCommitRollbackCrudQueryLinkListNullDateBinaryAndPrimaryKey
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=realmManagedObjectAndResultsThreadConfinementMatchOfficialBaselineCategories
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=4
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=realmManagedObjectAndResultsThreadConfinementMatchOfficialBaselineCategories
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=packageHasNoSyncAccountServiceOrNetworkConfiguration
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=5
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=packageHasNoSyncAccountServiceOrNetworkConfiguration
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=
+INSTRUMENTATION_STATUS: test=notificationThenUnsubscribeStopsFurtherDelivery
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.ForkRuntimeTest
+INSTRUMENTATION_STATUS: current=6
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=6
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=notificationThenUnsubscribeStopsFurtherDelivery
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.592
+
+OK (6 tests)
+
+
+INSTRUMENTATION_CODE: -1
+[exit=0]

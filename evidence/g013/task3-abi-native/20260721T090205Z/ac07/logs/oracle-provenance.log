@@ -1,0 +1,5 @@
+evidence/oracle/official-10.19.0/maven-artifact-manifest.json: OK
+evidence/oracle/official-10.19.0/api/public-class-inventory.tsv: OK
+evidence/oracle/official-10.19.0/api/public-api-javap.txt: OK
+compatibility-fixtures/official-10.19.0-generator/fixture-oracle-procedure.md: OK
+compatibility-fixtures/official-10.19.0-generator/upstream-source-sha256.txt: OK

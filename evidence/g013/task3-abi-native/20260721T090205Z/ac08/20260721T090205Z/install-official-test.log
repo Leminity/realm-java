@@ -1,0 +1,5 @@
+===== install-official-test 2026-07-21T18:28:01+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 install -r -t /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac08-api37-ps16k-runtime/official-app/build/outputs/apk/androidTest/debug/official-app-debug-androidTest.apk 
+Performing Streamed Install
+Success
+[exit=0]

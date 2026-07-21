@@ -1,0 +1,26 @@
+===== phase-b-instrumentation 2026-07-21T18:28:03+09:00 =====
++ /home/leminity/Android/Sdk/platform-tools/adb -s emulator-5654 shell am instrument -w -r -e class io.realm.ac08.fork.RestartPhaseTest#phaseBReopensAndVerifiesSentinels io.realm.ac08.fork.test/androidx.test.runner.AndroidJUnitRunner 
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.RestartPhaseTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=
+io.realm.ac08.fork.RestartPhaseTest:
+INSTRUMENTATION_STATUS: test=phaseBReopensAndVerifiesSentinels
+INSTRUMENTATION_STATUS_CODE: 1
+INSTRUMENTATION_STATUS: class=io.realm.ac08.fork.RestartPhaseTest
+INSTRUMENTATION_STATUS: current=1
+INSTRUMENTATION_STATUS: id=AndroidJUnitRunner
+INSTRUMENTATION_STATUS: numtests=1
+INSTRUMENTATION_STATUS: stream=.
+INSTRUMENTATION_STATUS: test=phaseBReopensAndVerifiesSentinels
+INSTRUMENTATION_STATUS_CODE: 0
+INSTRUMENTATION_RESULT: stream=
+
+Time: 0.028
+
+OK (1 test)
+
+
+INSTRUMENTATION_CODE: -1
+[exit=0]

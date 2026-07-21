@@ -1,0 +1,3 @@
+scan=rg -n PAGE_SIZE|4096 realm/realm-library/src/main/cpp excluding vendored realm-core and generated/build paths
+RESULT=PASS no binding-owned native PAGE_SIZE/4096 assumptions
+vendored_core_note=runtime AC08 PASS on 16384-byte page target and ELF gate PASS; Core retains format/block-size constants plus sysconf(_SC_PAGE_SIZE), not treated as Android linker alignment assumptions

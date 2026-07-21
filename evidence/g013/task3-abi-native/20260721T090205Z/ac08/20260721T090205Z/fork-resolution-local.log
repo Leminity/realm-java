@@ -1,0 +1,38 @@
+===== fork-resolution-local 2026-07-21T18:27:51+09:00 =====
++ env G011_REPOSITORY_MODE=local G008_STAGING_REPOSITORY=file:///tmp/realm-g013-task3-20260721T090205Z/repository /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/gradlew -p /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac08-api37-ps16k-runtime --no-daemon --console=plain --offline :fork-app:dependencies --configuration debugRuntimeClasspath 
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Task :fork-app:dependencies
+
+------------------------------------------------------------
+Project ':fork-app'
+------------------------------------------------------------
+
+debugRuntimeClasspath - Runtime classpath of '/debug'.
++--- io.github.leminity.realm:realm-annotations:10.19.0-agp9.1
++--- org.jetbrains.kotlin:kotlin-stdlib:2.2.10
+|    \--- org.jetbrains:annotations:13.0
+\--- io.github.leminity.realm:realm-android-library:10.19.0-agp9.1
+     +--- com.google.code.findbugs:jsr305:3.0.2
+     +--- com.getkeepsafe.relinker:relinker:1.4.3
+     +--- io.reactivex.rxjava2:rxandroid:2.1.1
+     +--- io.github.leminity.realm:realm-annotations:10.19.0-agp9.1
+     \--- org.mongodb:bson:3.12.1
+
+(*) - Indicates repeated occurrences of a transitive dependency subtree. Gradle expands transitive dependency subtrees only once per project; repeat occurrences only display the root of the subtree, followed by this annotation.
+
+A web-based, searchable dependency report is available by adding the --scan option.
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/compatibility-fixtures/ac08-api37-ps16k-runtime/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 8s
+1 actionable task: 1 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+[exit=0]

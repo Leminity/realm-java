@@ -1,0 +1,304 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :realm-library:cleanExternalBuildFiles UP-TO-DATE
+> Task :realm-library:externalNativeBuildCleanBaseDebug
+> Task :realm-library:externalNativeBuildCleanBaseRelease
+> Task :realm-library:clean UP-TO-DATE
+> Task :realm-library:preBuild UP-TO-DATE
+> Task :realm-library:preBaseDebugBuild UP-TO-DATE
+> Task :realm-library:checkBaseDebugAarMetadata
+
+> Task :realm-library:configureCMakeDebug[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+C/C++: Build type: Debug
+C/C++: JNI Header directory: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include
+C/C++: Dependencies:  PACKAGE_NAME=realm-core VERSION=13.26.0 OPENSSL_VERSION=3.0.8 ZLIB_VERSION=1.2.13 BAAS_VERSION=5087ffd5a0e4975e625f0fbcceed23107f611055
+
+> Task :realm-library:buildCMakeDebug[arm64-v8a][realm-jni]
+C/C++: ninja: Entering directory `/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a'
+C/C++: In file included from /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/realm/util/bson/bson.cpp:21:
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24314:35: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24314 | inline nlohmann::json operator "" _json(const char* s, std::size_t n)
+C/C++:        |                       ~~~~~~~~~~~~^~~~~
+C/C++:        |                       operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24322:49: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24322 | inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
+C/C++:        |                                     ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                     operator""_json_pointer
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24386:58: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24386 |     using nlohmann::literals::json_literals::operator "" _json; // NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~
+C/C++:        |                                              operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24387:58: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24387 |     using nlohmann::literals::json_literals::operator "" _json_pointer; //NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                              operator""_json_pointer
+C/C++: 4 warnings generated.
+C/C++: /home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --sysroot=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DREALM_DEBUG=1 -DREALM_HAVE_EPOLL=1 -Drealm_jni_EXPORTS -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/src -isystem /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/openssl/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREALM_PLATFORM_JAVA=1 -DREALM_WRAP_MEMMOVE=0 -DREALM_ANDROID -DREALM_HAVE_CONFIG -DPIC -fdata-sections -pthread -frtti -fvisibility=hidden -fsigned-char -fno-stack-protector -std=c++17 -Werror -Wall -Wextra -pedantic -Wmissing-declarations     -Wempty-body -Wparentheses -Wunknown-pragmas -Wunreachable-code     -Wno-missing-field-initializers -Wno-unevaluated-expression -Wno-unreachable-code     -Wno-c99-extensions  -fno-limit-debug-info  -glldb -g -flto=thin -fPIC -pthread -MD -MT CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o -MF CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o.d -o CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o -c /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_NativeObjectReference.cpp
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_NativeObjectReference.cpp:17:10: fatal error: 'io_realm_internal_NativeObjectReference.h' file not found
+C/C++:    17 | #include "io_realm_internal_NativeObjectReference.h"
+C/C++:       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C/C++: 1 error generated.
+C/C++: /home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --sysroot=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DREALM_DEBUG=1 -DREALM_HAVE_EPOLL=1 -Drealm_jni_EXPORTS -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/src -isystem /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/openssl/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREALM_PLATFORM_JAVA=1 -DREALM_WRAP_MEMMOVE=0 -DREALM_ANDROID -DREALM_HAVE_CONFIG -DPIC -fdata-sections -pthread -frtti -fvisibility=hidden -fsigned-char -fno-stack-protector -std=c++17 -Werror -Wall -Wextra -pedantic -Wmissing-declarations     -Wempty-body -Wparentheses -Wunknown-pragmas -Wunreachable-code     -Wno-missing-field-initializers -Wno-unevaluated-expression -Wno-unreachable-code     -Wno-c99-extensions  -fno-limit-debug-info  -glldb -g -flto=thin -fPIC -pthread -MD -MT CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o -MF CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o.d -o CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o -c /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_CheckedRow.cpp
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_CheckedRow.cpp:17:10: fatal error: 'io_realm_internal_CheckedRow.h' file not found
+C/C++:    17 | #include "io_realm_internal_CheckedRow.h"
+C/C++:       |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+C/C++: 1 error generated.
+C/C++: /home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --sysroot=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DREALM_DEBUG=1 -DREALM_HAVE_EPOLL=1 -Drealm_jni_EXPORTS -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/src -isystem /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/openssl/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREALM_PLATFORM_JAVA=1 -DREALM_WRAP_MEMMOVE=0 -DREALM_ANDROID -DREALM_HAVE_CONFIG -DPIC -fdata-sections -pthread -frtti -fvisibility=hidden -fsigned-char -fno-stack-protector -std=c++17 -Werror -Wall -Wextra -pedantic -Wmissing-declarations     -Wempty-body -Wparentheses -Wunknown-pragmas -Wunreachable-code     -Wno-missing-field-initializers -Wno-unevaluated-expression -Wno-unreachable-code     -Wno-c99-extensions  -fno-limit-debug-info  -glldb -g -flto=thin -fPIC -pthread -MD -MT CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o -MF CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o.d -o CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o -c /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_RealmQuery.cpp
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_RealmQuery.cpp:17:10: fatal error: 'io_realm_RealmQuery.h' file not found
+C/C++:    17 | #include "io_realm_RealmQuery.h"
+C/C++:       |          ^~~~~~~~~~~~~~~~~~~~~~~
+C/C++: 1 error generated.
+
+> Task :realm-library:buildCMakeDebug[arm64-v8a][realm-jni] FAILED
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':realm-library:buildCMakeDebug[arm64-v8a][realm-jni]' (registered by plugin 'com.android.internal.library').
+> com.android.ide.common.process.ProcessException: ninja: Entering directory `/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a'
+  [0/2] Re-checking globbed directories...
+  [1/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/disable_sync_to_disk.cpp.o
+  [2/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/error_codes.cpp.o
+  [3/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_blob.cpp.o
+  [4/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/decimal128.cpp.o
+  [5/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/exceptions.cpp.o
+  [6/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_blobs_small.cpp.o
+  [7/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_unsigned.cpp.o
+  [8/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_binary.cpp.o
+  [9/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_decimal128.cpp.o
+  [10/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_fixed_bytes.cpp.o
+  [11/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_with_find.cpp.o
+  [12/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_blobs_big.cpp.o
+  [13/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_string.cpp.o
+  [14/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_integer.cpp.o
+  [15/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/bplustree.cpp.o
+  [16/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array.cpp.o
+  [17/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_key.cpp.o
+  [18/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_mixed.cpp.o
+  [19/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_string_short.cpp.o
+  [20/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_timestamp.cpp.o
+  [21/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/column_binary.cpp.o
+  [22/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/alloc.cpp.o
+  [23/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/chunked_binary.cpp.o
+  [24/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/collection.cpp.o
+  [25/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/alloc_slab.cpp.o
+  [26/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/array_backlink.cpp.o
+  [27/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/impl/simulated_failure.cpp.o
+  [28/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/cluster_tree.cpp.o
+  [29/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/dictionary.cpp.o
+  [30/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/impl/output_stream.cpp.o
+  [31/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/cluster.cpp.o
+  [32/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/string_data.cpp.o
+  [33/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/global_key.cpp.o
+  [34/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/node.cpp.o
+  [35/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/group.cpp.o
+  [36/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/query_value.cpp.o
+  [37/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/object_id.cpp.o
+  [38/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/impl/transact_log.cpp.o
+  [39/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/mixed.cpp.o
+  [40/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/history.cpp.o
+  [41/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/tokenizer.cpp.o
+  [42/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/index_string.cpp.o
+  [43/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/group_writer.cpp.o
+  [44/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/db.cpp.o
+  [45/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/obj_list.cpp.o
+  [46/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/impl/copy_replication.cpp.o
+  [47/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/status.cpp.o
+  [48/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/link_translator.cpp.o
+  [49/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/table_ref.cpp.o
+  [50/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/unicode.cpp.o
+  [51/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/spec.cpp.o
+  [52/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/utilities.cpp.o
+  [53/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/uuid.cpp.o
+  [54/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/object_converter.cpp.o
+  [55/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/replication.cpp.o
+  [56/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/version.cpp.o
+  [57/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/basic_system_errors.cpp.o
+  [58/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/query.cpp.o
+  [59/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/backtrace.cpp.o
+  [60/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/backup_restore.cpp.o
+  [61/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/interprocess_mutex.cpp.o
+  [62/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/cli_args.cpp.o
+  [63/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/base64.cpp.o
+  [64/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/obj.cpp.o
+  [65/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/compression.cpp.o
+  [66/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/fifo_helper.cpp.o
+  [67/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/query_expression.cpp.o
+  [68/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/memory_stream.cpp.o
+  [69/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/list.cpp.o
+  [70/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/platform_info.cpp.o
+  [71/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/logger.cpp.o
+  [72/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/misc_errors.cpp.o
+  [73/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/interprocess_condvar.cpp.o
+  [74/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/file.cpp.o
+  [75/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/terminate.cpp.o
+  [76/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/time.cpp.o
+  [77/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/query_engine.cpp.o
+  [78/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/table_view.cpp.o
+  [79/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/encrypted_file_mapping.cpp.o
+  [80/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/timestamp_formatter.cpp.o
+  [81/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/thread.cpp.o
+  [82/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128.c.o
+  [83/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_compare.c.o
+  [84/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/set.cpp.o
+  [85/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/transaction.cpp.o
+  [86/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/sha_crypto.cpp.o
+  [87/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/timestamp_logger.cpp.o
+  [88/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/to_string.cpp.o
+  [89/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/demangle.cpp.o
+  [90/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/enum.cpp.o
+  [91/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/json_parser.cpp.o
+  [92/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_mul.c.o
+  [93/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_div.c.o
+  [94/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_add.c.o
+  [95/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_fma.c.o
+  [96/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_string.c.o
+  [97/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_2_str_tables.c.o
+  [98/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid64_to_bid128.c.o
+  [99/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/table.cpp.o
+  [100/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/sort_descriptor.cpp.o
+  [101/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/file_mapper.cpp.o
+  [102/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/load_file.cpp.o
+  [103/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/misc_ext_errors.cpp.o
+  [104/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/random.cpp.o
+  [105/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/resource_limits.cpp.o
+  [106/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/uri.cpp.o
+  [107/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/bson/regular_expression.cpp.o
+  [108/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_to_int64.c.o
+  [109/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid128_quantize.c.o
+  [110/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid_convert_data.c.o
+  [111/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid_decimal_data.c.o
+  [112/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid_decimal_globals.c.o
+  [113/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid_from_int.c.o
+  [114/215] Building C object realm-core/src/external/IntelRDFPMathLib20U2/CMakeFiles/Bid.dir/LIBRARY/src/bid_round.c.o
+  [115/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/geospatial.cpp.o
+  [116/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s1angle.cc.o
+  [117/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/util/math/mathlimits.cc.o
+  [118/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2.cc.o
+  [119/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2latlng.cc.o
+  [120/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2cellid.cc.o
+  [121/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s1interval.cc.o
+  [122/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/serializer.cpp.o
+  [123/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2cap.cc.o
+  [124/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2cell.cc.o
+  [125/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2edgeutil.cc.o
+  [126/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2cellunion.cc.o
+  [127/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2latlngrect.cc.o
+  [128/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2pointregion.cc.o
+  [129/215] Building CXX object realm-core/src/realm/CMakeFiles/Storage.dir/util/bson/bson.cpp.o
+  In file included from /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/realm/util/bson/bson.cpp:21:
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24314:35: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+   24314 | inline nlohmann::json operator "" _json(const char* s, std::size_t n)
+         |                       ~~~~~~~~~~~~^~~~~
+         |                       operator""_json
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24322:49: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+   24322 | inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
+         |                                     ~~~~~~~~~~~~^~~~~~~~~~~~~
+         |                                     operator""_json_pointer
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24386:58: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+   24386 |     using nlohmann::literals::json_literals::operator "" _json; // NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+         |                                              ~~~~~~~~~~~~^~~~~
+         |                                              operator""_json
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24387:58: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+   24387 |     using nlohmann::literals::json_literals::operator "" _json_pointer; //NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+         |                                              ~~~~~~~~~~~~^~~~~~~~~~~~~
+         |                                              operator""_json_pointer
+  4 warnings generated.
+  [130/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2edgeindex.cc.o
+  [131/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2region.cc.o
+  [132/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2r2rect.cc.o
+  [133/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/util/math/mathutil.cc.o
+  [134/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2loop.cc.o
+  [135/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2polyline.cc.o
+  [136/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/collection_notifications.cpp.o
+  [137/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2polygon.cc.o
+  [138/215] Building CXX object realm-core/src/external/s2/CMakeFiles/s2geometry.dir/s2polygonbuilder.cc.o
+  [139/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/index_set.cpp.o
+  [140/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/object_changeset.cpp.o
+  [141/215] Building CXX object realm-core/src/realm/parser/CMakeFiles/QueryParser.dir/keypath_mapping.cpp.o
+  [142/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/schema.cpp.o
+  [143/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/collection_change_builder.cpp.o
+  [144/215] Building CXX object CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o
+  FAILED: [code=1] CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o 
+  /home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --sysroot=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DREALM_DEBUG=1 -DREALM_HAVE_EPOLL=1 -Drealm_jni_EXPORTS -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/src -isystem /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/openssl/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREALM_PLATFORM_JAVA=1 -DREALM_WRAP_MEMMOVE=0 -DREALM_ANDROID -DREALM_HAVE_CONFIG -DPIC -fdata-sections -pthread -frtti -fvisibility=hidden -fsigned-char -fno-stack-protector -std=c++17 -Werror -Wall -Wextra -pedantic -Wmissing-declarations     -Wempty-body -Wparentheses -Wunknown-pragmas -Wunreachable-code     -Wno-missing-field-initializers -Wno-unevaluated-expression -Wno-unreachable-code     -Wno-c99-extensions  -fno-limit-debug-info  -glldb -g -flto=thin -fPIC -pthread -MD -MT CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o -MF CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o.d -o CMakeFiles/realm-jni.dir/io_realm_internal_NativeObjectReference.cpp.o -c /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_NativeObjectReference.cpp
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_NativeObjectReference.cpp:17:10: fatal error: 'io_realm_internal_NativeObjectReference.h' file not found
+     17 | #include "io_realm_internal_NativeObjectReference.h"
+        |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  1 error generated.
+  [145/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/util/uuid.cpp.o
+  [146/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/util/scheduler.cpp.o
+  [147/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/object_schema.cpp.o
+  [148/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/class.cpp.o
+  [149/215] Building CXX object realm-core/src/realm/parser/CMakeFiles/QueryParser.dir/generated/query_flex.cpp.o
+  [150/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/object.cpp.o
+  [151/215] Building CXX object realm-core/src/realm/parser/CMakeFiles/QueryParser.dir/generated/query_bison.cpp.o
+  [152/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/collection.cpp.o
+  [153/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/object_store.cpp.o
+  [154/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/dictionary.cpp.o
+  [155/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/object_notifier.cpp.o
+  [156/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/weak_realm_notifier.cpp.o
+  [157/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/list_notifier.cpp.o
+  [158/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/list.cpp.o
+  [159/215] Building CXX object CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o
+  FAILED: [code=1] CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o 
+  /home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --sysroot=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DREALM_DEBUG=1 -DREALM_HAVE_EPOLL=1 -Drealm_jni_EXPORTS -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/src -isystem /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/openssl/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREALM_PLATFORM_JAVA=1 -DREALM_WRAP_MEMMOVE=0 -DREALM_ANDROID -DREALM_HAVE_CONFIG -DPIC -fdata-sections -pthread -frtti -fvisibility=hidden -fsigned-char -fno-stack-protector -std=c++17 -Werror -Wall -Wextra -pedantic -Wmissing-declarations     -Wempty-body -Wparentheses -Wunknown-pragmas -Wunreachable-code     -Wno-missing-field-initializers -Wno-unevaluated-expression -Wno-unreachable-code     -Wno-c99-extensions  -fno-limit-debug-info  -glldb -g -flto=thin -fPIC -pthread -MD -MT CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o -MF CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o.d -o CMakeFiles/realm-jni.dir/io_realm_internal_CheckedRow.cpp.o -c /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_CheckedRow.cpp
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_internal_CheckedRow.cpp:17:10: fatal error: 'io_realm_internal_CheckedRow.h' file not found
+     17 | #include "io_realm_internal_CheckedRow.h"
+        |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  1 error generated.
+  [160/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/deep_change_checker.cpp.o
+  [161/215] Building CXX object CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o
+  FAILED: [code=1] CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o 
+  /home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android21 --sysroot=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DREALM_DEBUG=1 -DREALM_HAVE_EPOLL=1 -Drealm_jni_EXPORTS -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseDebug/jni_include -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src -I/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/src -isystem /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a/realm-core/openssl/include -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -DREALM_PLATFORM_JAVA=1 -DREALM_WRAP_MEMMOVE=0 -DREALM_ANDROID -DREALM_HAVE_CONFIG -DPIC -fdata-sections -pthread -frtti -fvisibility=hidden -fsigned-char -fno-stack-protector -std=c++17 -Werror -Wall -Wextra -pedantic -Wmissing-declarations     -Wempty-body -Wparentheses -Wunknown-pragmas -Wunreachable-code     -Wno-missing-field-initializers -Wno-unevaluated-expression -Wno-unreachable-code     -Wno-c99-extensions  -fno-limit-debug-info  -glldb -g -flto=thin -fPIC -pthread -MD -MT CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o -MF CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o.d -o CMakeFiles/realm-jni.dir/io_realm_RealmQuery.cpp.o -c /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_RealmQuery.cpp
+  /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/io_realm_RealmQuery.cpp:17:10: fatal error: 'io_realm_RealmQuery.h' file not found
+     17 | #include "io_realm_RealmQuery.h"
+        |          ^~~~~~~~~~~~~~~~~~~~~~~
+  1 error generated.
+  [162/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/transact_log_handler.cpp.o
+  [163/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/epoll/external_commit_helper.cpp.o
+  [164/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/collection_notifier.cpp.o
+  [165/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/sectioned_results.cpp.o
+  [166/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/results.cpp.o
+  [167/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/results_notifier.cpp.o
+  [168/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/set.cpp.o
+  [169/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/impl/realm_coordinator.cpp.o
+  [170/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/shared_realm.cpp.o
+  [171/215] Linking CXX static library realm-core/src/realm/librealm-dbg.a
+  [172/215] Building CXX object realm-core/src/realm/object-store/CMakeFiles/ObjectStore.dir/thread_safe_reference.cpp.o
+  [173/215] Building CXX object realm-core/src/realm/parser/CMakeFiles/QueryParser.dir/driver.cpp.o
+  ninja: build stopped: subcommand failed.
+  
+  C++ build system [build] failed while executing:
+      /home/linuxbrew/.linuxbrew/bin/ninja \
+        -C \
+        /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/Debug/5453372y/arm64-v8a \
+        realm-jni
+    from /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+> Get more help at https://help.gradle.org.
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD FAILED in 2m 56s
+7 actionable tasks: 5 executed, 2 up-to-date

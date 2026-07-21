@@ -1,0 +1,10 @@
+purpose=ephemeral local-only AC07/AC08 runtime repository; never publish
+head=d39316930fd63e379b58bc6296696781099ca4c7
+core=d7b52ccbada0283527db36143cfeab18692b4ed0
+base_ci_bundle=/home/leminity/actions-runner-realm-java/_work/realm-java/realm-java/build/g008-maven-central-bundle.zip
+base_ci_bundle_commit=9b952eb0c55c280128a9fee910274b6f906fa051
+base_ci_bundle_sha256=e3ecc94bd64403559fa44a38c54f335455ad73830c326747296a0607db60d389
+fresh_current_head_aar=io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar
+fresh_current_head_aar_sha256=867340444356ffae837f937bb817c51825581a56f0f5b522a18d7ba23c680397
+base_to_head_artifact_production_source_diff=none
+note=all runtime fixture scripts and tests are current d393 worktree files; only unchanged plugin/support artifacts are reused from the bound CI bundle

@@ -1,0 +1,156 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :realm-library:preBuild UP-TO-DATE
+> Task :realm-library:stageBaseReleaseJniHeaderSnapshot
+> Task :realm-library:preBaseReleaseBuild
+> Task :realm-library:checkBaseReleaseAarMetadata
+
+> Task :realm-library:configureCMakeRelWithDebInfo[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+C/C++: Build type: RelWithDebInfo
+C/C++: JNI Header directory: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseRelease/jni_include
+C/C++: Dependencies:  PACKAGE_NAME=realm-core VERSION=13.26.0 OPENSSL_VERSION=3.0.8 ZLIB_VERSION=1.2.13 BAAS_VERSION=5087ffd5a0e4975e625f0fbcceed23107f611055
+
+> Task :realm-library:buildCMakeRelWithDebInfo[arm64-v8a][realm-jni]
+C/C++: ninja: Entering directory `/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/RelWithDebInfo/383k3k4q/arm64-v8a'
+C/C++: In file included from /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/realm/util/bson/bson.cpp:21:
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24314:35: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24314 | inline nlohmann::json operator "" _json(const char* s, std::size_t n)
+C/C++:        |                       ~~~~~~~~~~~~^~~~~
+C/C++:        |                       operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24322:49: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24322 | inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
+C/C++:        |                                     ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                     operator""_json_pointer
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24386:58: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24386 |     using nlohmann::literals::json_literals::operator "" _json; // NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~
+C/C++:        |                                              operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24387:58: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24387 |     using nlohmann::literals::json_literals::operator "" _json_pointer; //NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                              operator""_json_pointer
+C/C++: 4 warnings generated.
+
+> Task :realm-library:configureCMakeRelWithDebInfo[armeabi-v7a]
+C/C++: Build type: RelWithDebInfo
+C/C++: JNI Header directory: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseRelease/jni_include
+C/C++: Dependencies:  PACKAGE_NAME=realm-core VERSION=13.26.0 OPENSSL_VERSION=3.0.8 ZLIB_VERSION=1.2.13 BAAS_VERSION=5087ffd5a0e4975e625f0fbcceed23107f611055
+
+> Task :realm-library:buildCMakeRelWithDebInfo[armeabi-v7a][realm-jni]
+C/C++: ninja: Entering directory `/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/RelWithDebInfo/383k3k4q/armeabi-v7a'
+C/C++: In file included from /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/realm/util/bson/bson.cpp:21:
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24314:35: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24314 | inline nlohmann::json operator "" _json(const char* s, std::size_t n)
+C/C++:        |                       ~~~~~~~~~~~~^~~~~
+C/C++:        |                       operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24322:49: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24322 | inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
+C/C++:        |                                     ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                     operator""_json_pointer
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24386:58: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24386 |     using nlohmann::literals::json_literals::operator "" _json; // NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~
+C/C++:        |                                              operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24387:58: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24387 |     using nlohmann::literals::json_literals::operator "" _json_pointer; //NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                              operator""_json_pointer
+C/C++: 4 warnings generated.
+
+> Task :realm-library:configureCMakeRelWithDebInfo[x86_64]
+C/C++: Build type: RelWithDebInfo
+C/C++: JNI Header directory: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/../../../build/intermediates/javac/baseRelease/jni_include
+C/C++: Dependencies:  PACKAGE_NAME=realm-core VERSION=13.26.0 OPENSSL_VERSION=3.0.8 ZLIB_VERSION=1.2.13 BAAS_VERSION=5087ffd5a0e4975e625f0fbcceed23107f611055
+
+> Task :realm-library:buildCMakeRelWithDebInfo[x86_64][realm-jni]
+C/C++: ninja: Entering directory `/mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/.cxx/RelWithDebInfo/383k3k4q/x86_64'
+C/C++: In file included from /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/realm/util/bson/bson.cpp:21:
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24314:35: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24314 | inline nlohmann::json operator "" _json(const char* s, std::size_t n)
+C/C++:        |                       ~~~~~~~~~~~~^~~~~
+C/C++:        |                       operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24322:49: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24322 | inline nlohmann::json::json_pointer operator "" _json_pointer(const char* s, std::size_t n)
+C/C++:        |                                     ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                     operator""_json_pointer
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24386:58: warning: identifier '_json' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24386 |     using nlohmann::literals::json_literals::operator "" _json; // NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~
+C/C++:        |                                              operator""_json
+C/C++: /mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/src/main/cpp/realm-core/src/external/json/json.hpp:24387:58: warning: identifier '_json_pointer' preceded by whitespace in a literal operator declaration is deprecated [-Wdeprecated-literal-operator]
+C/C++:  24387 |     using nlohmann::literals::json_literals::operator "" _json_pointer; //NOLINT(misc-unused-using-decls,google-global-names-in-headers)
+C/C++:        |                                              ~~~~~~~~~~~~^~~~~~~~~~~~~
+C/C++:        |                                              operator""_json_pointer
+C/C++: 4 warnings generated.
+
+> Task :realm-library:mergeBaseReleaseJniLibFolders
+> Task :realm-library:generateBaseReleaseBuildConfig FROM-CACHE
+> Task :realm-library:generateBaseReleaseResources FROM-CACHE
+> Task :realm-library:packageBaseReleaseResources FROM-CACHE
+> Task :realm-library:processBaseReleaseNavigationResources FROM-CACHE
+> Task :realm-library:parseBaseReleaseLocalResources FROM-CACHE
+> Task :realm-library:generateBaseReleaseRFile FROM-CACHE
+> Task :realm-library:mergeBaseReleaseNativeLibs
+> Task :realm-library:extractBaseReleaseAnnotations FROM-CACHE
+> Task :realm-library:extractDeepLinksForAarBaseRelease FROM-CACHE
+> Task :realm-library:generateBaseReleaseAssets UP-TO-DATE
+> Task :realm-library:mergeBaseReleaseAssets
+> Task :realm-annotations-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-annotations-processor:generateVersionClass
+> Task :realm-library:stripBaseReleaseDebugSymbols
+> Task :realm-annotations-processor:compileKotlin FROM-CACHE
+> Task :realm-annotations-processor:compileJava FROM-CACHE
+> Task :realm-library:copyBaseReleaseJniLibsProjectAndLocalJars
+> Task :realm-annotations-processor:processResources
+> Task :realm-annotations-processor:classes
+> Task :realm-annotations-processor:jar
+> Task :realm-library:cleanBaseReleaseJniHeaderValidation UP-TO-DATE
+> Task :realm-library:kaptGenerateStubsBaseReleaseKotlin FROM-CACHE
+> Task :realm-library:prepareBaseReleaseArtProfile
+> Task :realm-library:javaPreCompileBaseRelease
+> Task :realm-library:prepareLintJarForPublish
+> Task :realm-library:processBaseReleaseManifest FROM-CACHE
+> Task :realm-library:writeBaseReleaseAarMetadata
+> Task :realm-library:mapBaseReleaseSourceSetPaths
+> Task :realm-library:mergeBaseReleaseResources
+> Task :realm-library:verifyBaseReleaseResources
+> Task :realm-library:kaptBaseReleaseKotlin
+> Task :realm-library:compileBaseReleaseKotlin FROM-CACHE
+> Task :realm-library:compileBaseReleaseJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :realm-library:baseReleaseRealmBuildTransformer
+> Task :realm-library:mergeBaseReleaseGeneratedProguardFiles
+> Task :realm-library:mergeBaseReleaseConsumerProguardFiles
+> Task :realm-library:processBaseReleaseJavaRes
+> Task :realm-library:mergeBaseReleaseJavaResource
+> Task :realm-library:syncBaseReleaseLibJars FROM-CACHE
+> Task :realm-library:bundleBaseReleaseAar
+> Task :realm-library:verifyBaseReleaseJniHeaders
+> Task :realm-library:assembleBaseRelease
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 13m 34s
+47 actionable tasks: 32 executed, 14 from cache, 1 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html

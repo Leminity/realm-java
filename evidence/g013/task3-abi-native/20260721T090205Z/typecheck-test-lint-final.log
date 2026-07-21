@@ -1,0 +1,85 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+
+> Configure project :kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :realm-library:preBuild UP-TO-DATE
+> Task :realm-library:stageBaseReleaseJniHeaderSnapshot UP-TO-DATE
+> Task :realm-library:preBaseReleaseBuild UP-TO-DATE
+> Task :realm-library:generateBaseReleaseBuildConfig UP-TO-DATE
+> Task :realm-library:generateBaseReleaseResources UP-TO-DATE
+> Task :realm-library:packageBaseReleaseResources UP-TO-DATE
+> Task :realm-library:processBaseReleaseNavigationResources UP-TO-DATE
+> Task :realm-library:parseBaseReleaseLocalResources UP-TO-DATE
+> Task :realm-library:generateBaseReleaseRFile UP-TO-DATE
+> Task :realm-annotations-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-annotations-processor:generateVersionClass
+> Task :realm-annotations-processor:compileKotlin UP-TO-DATE
+> Task :realm-annotations-processor:compileJava UP-TO-DATE
+> Task :realm-annotations-processor:processResources UP-TO-DATE
+> Task :realm-annotations-processor:classes UP-TO-DATE
+> Task :realm-annotations-processor:jar UP-TO-DATE
+> Task :realm-library:kaptGenerateStubsBaseReleaseKotlin UP-TO-DATE
+> Task :realm-library:kaptBaseReleaseKotlin UP-TO-DATE
+> Task :realm-library:compileBaseReleaseKotlin UP-TO-DATE
+> Task :realm-library:cleanBaseReleaseJniHeaderValidation
+> Task :realm-library:javaPreCompileBaseRelease UP-TO-DATE
+> Task :realm-library:compileBaseReleaseJavaWithJavac
+> Task :realm-library:compileBaseReleaseJavaWithJavac FROM-CACHE
+> Task :realm-library:preBaseDebugBuild UP-TO-DATE
+> Task :realm-library:generateBaseDebugBuildConfig
+> Task :realm-library:generateBaseDebugResources FROM-CACHE
+> Task :realm-library:packageBaseDebugResources
+> Task :realm-library:processBaseDebugNavigationResources FROM-CACHE
+> Task :realm-library:parseBaseDebugLocalResources FROM-CACHE
+> Task :realm-library:generateBaseDebugRFile FROM-CACHE
+> Task :realm-library:javaPreCompileBaseDebug FROM-CACHE
+> Task :realm-library:preBaseDebugUnitTestBuild UP-TO-DATE
+> Task :realm-library:javaPreCompileBaseDebugUnitTest FROM-CACHE
+> Task :realm-library:generateBaseDebugUnitTestStubRFile
+> Task :realm-library:extractProguardFiles
+> Task :realm-library:processBaseReleaseManifest UP-TO-DATE
+> Task :realm-library:generateBaseReleaseLintReportModel
+> Task :realm-library:kaptGenerateStubsBaseDebugKotlin
+> Task :realm-library:kaptBaseDebugKotlin
+> Task :realm-library:lintAnalyzeBaseRelease
+> Task :realm-library:compileBaseDebugKotlin
+> Task :realm-library:compileBaseDebugJavaWithJavac
+Note: Some input files use or override a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+Note: Some input files use unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :realm-library:baseDebugRealmBuildTransformer
+> Task :realm-library:bundleLibRuntimeToJarBaseDebug
+> Task :realm-library:bundleLibCompileToJarBaseDebug
+> Task :realm-library:processBaseDebugJavaRes
+> Task :realm-library:kaptGenerateStubsBaseDebugUnitTestKotlin
+> Task :realm-library:kaptBaseDebugUnitTestKotlin SKIPPED
+> Task :realm-library:compileBaseDebugUnitTestKotlin NO-SOURCE
+> Task :realm-library:compileBaseDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :realm-library:processBaseDebugUnitTestJavaRes NO-SOURCE
+> Task :realm-library:testBaseDebugUnitTest NO-SOURCE
+
+> Task :realm-library:lintReportBaseRelease
+Wrote HTML report to file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/realm-library/build/reports/lint-results-baseRelease.html
+
+> Task :realm-library:lintBaseRelease
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-2/realm/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4m 24s
+42 actionable tasks: 19 executed, 7 from cache, 16 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
