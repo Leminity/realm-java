@@ -551,7 +551,8 @@ jobs:
                       raise SystemExit(f'credential material detected in retained evidence: {path}')
                   if path.resolve() not in protected and any(value in data for value in repository_identifiers):
                       raise SystemExit(f'validated repository identifier detected in retained evidence: {path}')
-          print('stage evidence credential/repository scan PASS')
+          print('stage evidence secret scan PASS')
+          print('stage evidence repository identifier scan PASS')
           PY
           rm -rf "$RUNNER_TEMP/g011-gradle-validated"
           exit "$status"
@@ -980,7 +981,8 @@ jobs:
                       raise SystemExit(f'credential material detected in retained evidence: {path}')
                   if path.resolve() not in protected and deployment_id.encode() in data:
                       raise SystemExit(f'deployment identifier detected in retained release evidence: {path}')
-          print('release evidence credential/deployment scan PASS')
+          print('release evidence secret scan PASS')
+          print('release evidence deployment identifier scan PASS')
           PY
           rm -rf "$RUNNER_TEMP/g011-gradle-central"
           exit "$status"
