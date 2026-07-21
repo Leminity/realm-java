@@ -1,0 +1,67 @@
+FEFE
+======================================================================
+ERROR: test_verify_stage_manifest_cli_writes_only_a_sanitized_result_projection (__main__.CentralPortalTests.test_verify_stage_manifest_cli_writes_only_a_sanitized_result_projection)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 960, in test_verify_stage_manifest_cli_writes_only_a_sanitized_result_projection
+    stage_result, stage_manifest = self._stage(stage_transport)
+                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 258, in _stage
+    result = CP.finalize_stage(
+        stage_prepared=stage_prepared,
+    ...<5 lines>...
+        consumer_runner=consumer_runner or self._consumer_runner,
+    )
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 1452, in finalize_stage
+    _assert_tokenless_process()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 1047, in _assert_tokenless_process
+    raise PortalError("tokenless consumer process contains protected credential variables")
+central_portal.PortalError: tokenless consumer process contains protected credential variables
+
+======================================================================
+ERROR: test_release_failure_writes_redacted_durable_outcome (__main__.CentralPortalTests.test_release_failure_writes_redacted_durable_outcome)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 829, in test_release_failure_writes_redacted_durable_outcome
+    stage_result, stage_manifest = self._stage(stage_transport)
+                                   ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 258, in _stage
+    result = CP.finalize_stage(
+        stage_prepared=stage_prepared,
+    ...<5 lines>...
+        consumer_runner=consumer_runner or self._consumer_runner,
+    )
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 1452, in finalize_stage
+    _assert_tokenless_process()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 1047, in _assert_tokenless_process
+    raise PortalError("tokenless consumer process contains protected credential variables")
+central_portal.PortalError: tokenless consumer process contains protected credential variables
+
+======================================================================
+FAIL: test_stage_finalizer_consumes_the_exact_validated_repository_with_bearer (__main__.CentralPortalTests.test_stage_finalizer_consumes_the_exact_validated_repository_with_bearer)
+----------------------------------------------------------------------
+central_portal.PortalError: consumer evidence is not bound to the exact repository
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 464, in test_stage_finalizer_consumes_the_exact_validated_repository_with_bearer
+    with self.assertRaisesRegex(CP.PortalError, "Portal credential is not configured"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "Portal credential is not configured" does not match "consumer evidence is not bound to the exact repository"
+
+======================================================================
+FAIL: test_stage_preserves_redacted_first_failed_status (__main__.CentralPortalTests.test_stage_preserves_redacted_first_failed_status)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 1029, in test_stage_preserves_redacted_first_failed_status
+    self.assertNotIn("<redacted-test-deployment>", first)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '<redacted-test-deployment>' unexpectedly found in '{"bundle_sha256":"cf702bbbe6bf8778046bad4bca88cf1ec5604c3079823c1f55b68804ecad6d24","deployment_id":"<redacted-test-deployment>","drop_policy":"drop-after-evidence","expected_state":"VALIDATED_AND_VERIFIED_MIRROR","format":"realm-maven-central-stage-failure-v1","observed_state":"FAILED","source_manifest_sha256":"474a6ca0fe76f7f2a6cf6a8285ffb9f149d9757908a4a8996b4173c0a058bc6c","state_trace":[{"attempt":1,"deployment_id":"<redacted-test-deployment>","observed_at_epoch":1784620947,"state":"FAILED"}]}\n'
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.051s
+
+FAILED (failures=2, errors=2)
