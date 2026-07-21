@@ -52,7 +52,9 @@ class IndependentReviewRemediationTests(unittest.TestCase):
         self.assertIn(MODIFICATION_NOTICE, notice)
         for relative in sorted(FORMAT_CONSTRAINED):
             self.assertIn(relative, notice)
-        self.assertIn("immutable upstream Core gitlink provenance", notice)
+        self.assertIn("locally modified Realm Core source", notice)
+        self.assertIn("c97091234d40efaaaf7d8d8349eb3c97012f6c9b", notice)
+        self.assertIn("d7b52ccbada0283527db36143cfeab18692b4ed0", notice)
         self.assertIn(CORE_GITLINK, notice)
 
     def test_readme_identifies_the_fork_before_upstream_project_context(self) -> None:

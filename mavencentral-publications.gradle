@@ -118,9 +118,10 @@ def normalizePublishedPomDependencies(artifactId) {
 }
 
 def populatePom(publication, pomName, pomDescription, pomDependencies = null) {
+    def forkDescription = "${pomDescription} Unofficial Leminity maintenance fork of upstream Realm Java 10.19.0 (https://github.com/realm/realm-java)."
     publication.pom {
         name = pomName
-        description = pomDescription
+        description = forkDescription
         url = 'https://github.com/Leminity/realm-java'
         licenses {
             license {

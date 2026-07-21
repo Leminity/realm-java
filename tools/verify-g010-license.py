@@ -27,7 +27,27 @@ ARTIFACTS = {
     "realm-android-kotlin-extensions": "aar",
 }
 FORK_URL = "https://github.com/Leminity/realm-java"
+UPSTREAM_URL = "https://github.com/realm/realm-java"
 APACHE_NAME = "The Apache Software License, Version 2.0"
+POM_FORK_DISCLOSURE = (
+    "Unofficial Leminity maintenance fork of upstream Realm Java 10.19.0 "
+    f"({UPSTREAM_URL})."
+)
+CORE_BACKPORT_SOURCE_COMMIT = "c97091234d40efaaaf7d8d8349eb3c97012f6c9b"
+CORE_MODIFICATION_NOTICE = "Modified by the Leminity maintenance fork from upstream Realm Core."
+CORE_BACKPORT_PATHS = (
+    "src/realm/alloc.hpp",
+    "src/realm/alloc_slab.cpp",
+    "src/realm/util/encrypted_file_mapping.cpp",
+    "src/realm/util/encrypted_file_mapping.hpp",
+    "src/realm/util/file.cpp",
+    "src/realm/util/file.hpp",
+    "src/realm/util/file_mapper.cpp",
+    "src/realm/util/file_mapper.hpp",
+    "test/test_alloc.cpp",
+    "test/test_encrypted_file_mapping.cpp",
+    "test/test_shared.cpp",
+)
 
 
 class ValidationError(RuntimeError):
@@ -77,14 +97,25 @@ def validate_source_notices(root: Path) -> tuple[bytes, bytes]:
         "changed from the upstream work",
         "no trademark rights",
         "does not modify the License",
+        "locally modified Realm Core source",
+        CORE_BACKPORT_SOURCE_COMMIT,
     ):
         if required not in notice_text:
             raise ValidationError(f"root NOTICE is missing required fork attribution: {required!r}")
-    require_file(root / "realm/realm-library/src/main/cpp/realm-core/LICENSE", "Realm Core license")
+    core_root = root / "realm/realm-library/src/main/cpp/realm-core"
+    require_file(core_root / "LICENSE", "Realm Core license")
     require_file(
         root / "realm/realm-library/src/main/cpp/realm-core/external/catch/LICENSE.txt",
         "bundled Catch license",
     )
+    for relative_path in CORE_BACKPORT_PATHS:
+        core_path = require_file(core_root / relative_path, f"modified Realm Core file {relative_path}")
+        core_text = core_path.read_text(encoding="utf-8")
+        for required in (CORE_MODIFICATION_NOTICE, CORE_BACKPORT_SOURCE_COMMIT):
+            if required not in core_text:
+                raise ValidationError(
+                    f"{core_path}: missing prominent Leminity Core backport notice: {required!r}"
+                )
     return license_contents, notice_contents
 
 
@@ -121,6 +152,11 @@ def validate_pom(path: Path, artifact: str, version: str) -> None:
         actual = child_text(project, name)
         if (expected is None and not actual) or (expected is not None and actual != expected):
             raise ValidationError(f"{path}: expected {name}={expected!r}, found {actual!r}")
+    description = child_text(project, "description")
+    if POM_FORK_DISCLOSURE not in description:
+        raise ValidationError(
+            f"{path}: description must identify the unofficial Leminity fork and upstream origin"
+        )
     licenses = child(project, "licenses")
     license_node = child(licenses, "license") if licenses is not None else None
     if child_text(license_node, "name") != APACHE_NAME:

@@ -24,13 +24,15 @@ You must cause any modified files to carry prominent notices
 NOTICE = """Realm Java Fork Notice
 This distribution is based on Realm Java 10.19.0 and is maintained by Leminity.
 Its modified files have changed from the upstream work.
+This distribution includes locally modified Realm Core source backported from
+c97091234d40efaaaf7d8d8349eb3c97012f6c9b.
 Realm, Realm Java, and MongoDB names are used only to describe origin; no trademark rights are claimed.
 This NOTICE is informational and does not modify the License.
 """.encode()
 
 
 def pom(artifact: str, version: str) -> str:
-    return f"""<project><groupId>io.github.leminity.realm</groupId><artifactId>{artifact}</artifactId><version>{version}</version><description>fixture</description><url>https://github.com/Leminity/realm-java</url><licenses><license><name>The Apache Software License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0.txt</url></license></licenses><issueManagement><system>github</system><url>https://github.com/Leminity/realm-java/issues</url></issueManagement><scm><url>https://github.com/Leminity/realm-java</url><connection>scm:git:https://github.com/Leminity/realm-java.git</connection><developerConnection>scm:git:ssh://git@github.com/Leminity/realm-java.git</developerConnection></scm><developers><developer><id>leminity</id><name>Leminity</name></developer></developers></project>"""
+    return f"""<project><groupId>io.github.leminity.realm</groupId><artifactId>{artifact}</artifactId><version>{version}</version><description>Fixture. {VERIFY.POM_FORK_DISCLOSURE}</description><url>https://github.com/Leminity/realm-java</url><licenses><license><name>The Apache Software License, Version 2.0</name><url>https://www.apache.org/licenses/LICENSE-2.0.txt</url></license></licenses><issueManagement><system>github</system><url>https://github.com/Leminity/realm-java/issues</url></issueManagement><scm><url>https://github.com/Leminity/realm-java</url><connection>scm:git:https://github.com/Leminity/realm-java.git</connection><developerConnection>scm:git:ssh://git@github.com/Leminity/realm-java.git</developerConnection></scm><developers><developer><id>leminity</id><name>Leminity</name></developer></developers></project>"""
 
 
 class VerifyG010LicenseTest(unittest.TestCase):
@@ -48,6 +50,15 @@ class VerifyG010LicenseTest(unittest.TestCase):
         catch_license = root / "realm/realm-library/src/main/cpp/realm-core/external/catch/LICENSE.txt"
         catch_license.parent.mkdir(parents=True)
         catch_license.write_text("catch", encoding="utf-8")
+        core_root = root / "realm/realm-library/src/main/cpp/realm-core"
+        for relative_path in VERIFY.CORE_BACKPORT_PATHS:
+            core_path = core_root / relative_path
+            core_path.parent.mkdir(parents=True, exist_ok=True)
+            core_path.write_text(
+                f"// {VERIFY.CORE_MODIFICATION_NOTICE}\n"
+                f"// Backport source: {VERIFY.CORE_BACKPORT_SOURCE_COMMIT}.\n",
+                encoding="utf-8",
+            )
         for artifact, extension in VERIFY.ARTIFACTS.items():
             directory = repository / VERIFY.GROUP_PATH / artifact / "1.0.0"
             directory.mkdir(parents=True)
@@ -80,6 +91,25 @@ class VerifyG010LicenseTest(unittest.TestCase):
         root, repository = self.make_fixture()
         (root / "NOTICE").unlink()
         with self.assertRaisesRegex(VERIFY.ValidationError, "root NOTICE"):
+            VERIFY.validate_repository(repository, root)
+
+    def test_rejects_generic_pom_description_without_fork_origin(self) -> None:
+        root, repository = self.make_fixture()
+        artifact = "realm-gradle-plugin"
+        pom_path = repository / VERIFY.GROUP_PATH / artifact / "1.0.0" / f"{artifact}-1.0.0.pom"
+        pom_path.write_text(pom(artifact, "1.0.0").replace(VERIFY.POM_FORK_DISCLOSURE, "fixture"), encoding="utf-8")
+        with self.assertRaisesRegex(VERIFY.ValidationError, "unofficial Leminity fork"):
+            VERIFY.validate_repository(repository, root)
+
+    def test_requires_notice_in_every_modified_core_backport_file(self) -> None:
+        root, repository = self.make_fixture()
+        missing_notice = (
+            root
+            / "realm/realm-library/src/main/cpp/realm-core"
+            / VERIFY.CORE_BACKPORT_PATHS[0]
+        )
+        missing_notice.write_text("// upstream contents only\n", encoding="utf-8")
+        with self.assertRaisesRegex(VERIFY.ValidationError, "prominent Leminity Core backport notice"):
             VERIFY.validate_repository(repository, root)
 
 

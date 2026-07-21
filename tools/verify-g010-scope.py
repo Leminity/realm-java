@@ -13,7 +13,7 @@ from pathlib import Path
 
 BASELINE_TAG = "v10.19.0"
 BASELINE_CORE = "5533505d18fda93a7a971d58a191db5005583c92"
-EXPECTED_CORE = "d7b52ccbada0283527db36143cfeab18692b4ed0"
+EXPECTED_CORE = "a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47"
 CORE_PATH = "realm/realm-library/src/main/cpp/realm-core"
 CORE_TOOLCHAIN_PREREQUISITE = "b741862e7ca7cb1b81d276457989067b7737dc86"
 CORE_TOOLCHAIN_PREREQUISITE_PATH = "src/external/s2/base/macros.h"

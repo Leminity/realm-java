@@ -7,7 +7,7 @@ readonly EXPECTED_COMMIT=0ab8d6961afb038d0e0c69478de45dda3958d641
 readonly EXPECTED_TAG=v10.19.0
 readonly EXPECTED_APPROVED_FORK_ROOT=117f0bee2cdea2c4bf75c7d3226dd389a21439bc
 readonly EXPECTED_BASELINE_CORE=5533505d18fda93a7a971d58a191db5005583c92
-readonly EXPECTED_FORK_CORE=d7b52ccbada0283527db36143cfeab18692b4ed0
+readonly EXPECTED_FORK_CORE=a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47
 readonly EXPECTED_CATCH=3f0283de7a9c43200033da996ff9093be3ac84dc
 readonly EXPECTED_SHA1=d9ae30f34095107ece9dceb224839f0dc2f9c1c7
 readonly EXPECTED_SHA2=0e9aebf34101c6aa89355fd76ac9cd886735dee1
@@ -84,7 +84,10 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   tools/__pycache__/test-g011-evidence-manifest.cpython-314.pyc
   tools/test-g013-independent-review-remediation.py
   tools/test-g013-workflow-trust.py
+  tools/test-verify-g010-license.py
   tools/test-verify-baseline.sh
+  tools/verify-g010-license.py
+  tools/verify-g010-scope.py
   tools/verify-baseline.sh
 )
 

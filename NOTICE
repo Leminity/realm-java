@@ -16,13 +16,14 @@ machine-readable contract. It is therefore identified explicitly here:
 
 * version.txt changes the upstream version to the fork version 10.19.0-agp9.1.
 
-The entry `realm/realm-library/src/main/cpp/realm-core` is immutable upstream Core gitlink provenance;
-it is not locally modified Core source. The fork pins that gitlink to Realm Core commit
-d7b52ccbada0283527db36143cfeab18692b4ed0 and does not edit Core contents in this repository.
+The entry `realm/realm-library/src/main/cpp/realm-core` points to locally modified Realm Core source.
+The Leminity maintenance fork backports encrypted-file page-size portability from upstream Realm Core
+commit c97091234d40efaaaf7d8d8349eb3c97012f6c9b through fork commit
+d7b52ccbada0283527db36143cfeab18692b4ed0. Each of the 11 files changed by that backport carries a
+prominent inline modification notice identifying Leminity and the upstream source commit.
 
-The bundled Realm Core source is retained at commit
-d7b52ccbada0283527db36143cfeab18692b4ed0 with its own LICENSE and bundled
-third-party license files. This NOTICE is informational and does not modify the License.
+The bundled Realm Core source retains its own LICENSE and bundled third-party license files.
+This NOTICE is informational and does not modify the License.
 
 "Realm", "Realm Java", and "MongoDB" identify material
 changed from the upstream work; no trademark rights are claimed.
