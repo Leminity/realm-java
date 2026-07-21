@@ -1,0 +1,13 @@
+{
+  "build_successful_count": 4,
+  "fixture_passes": 4,
+  "fixtures": [
+    "application/java",
+    "application/kotlin",
+    "library/java",
+    "library/kotlin"
+  ],
+  "forbidden_internal_api_hits": 0,
+  "static_public_api_pass": 1,
+  "status": "PASS"
+}

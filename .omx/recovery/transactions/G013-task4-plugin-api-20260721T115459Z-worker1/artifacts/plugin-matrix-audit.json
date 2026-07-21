@@ -1,0 +1,25 @@
+{
+  "cells": [
+    "application-java-android-then-realm",
+    "application-java-realm-then-android",
+    "application-kotlin-android-then-realm",
+    "application-kotlin-realm-then-android",
+    "application-mixed-android-then-realm",
+    "application-mixed-realm-then-android",
+    "library-java-android-then-realm",
+    "library-java-realm-then-android",
+    "library-kotlin-android-then-realm",
+    "library-kotlin-realm-then-android",
+    "library-mixed-android-then-realm",
+    "library-mixed-realm-then-android"
+  ],
+  "contracts_per_cell": 4,
+  "errors": 0,
+  "failures": 0,
+  "parameter_cells": 12,
+  "skipped": 11,
+  "status": "PASS",
+  "testcase_count": 48,
+  "tests": 48,
+  "xml_sha256": "5cc129da0fc471fe81d4d4609fcb9a92a04306bf3084369c9daeaeadd87da796"
+}
