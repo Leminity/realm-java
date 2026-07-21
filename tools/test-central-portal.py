@@ -30,6 +30,30 @@ CORE_COMMIT = "b" * 40
 CI_ARTIFACT_SHA256 = "e" * 64
 CI_RUN_ID = "123456"
 CI_ARTIFACT_ID = "789012"
+TAG = "v10.19.0-agp9.1"
+VERSION = "10.19.0-agp9.1"
+BINDING = {
+    "tag": TAG,
+    "version": VERSION,
+    "commit": COMMIT,
+    "core_commit": CORE_COMMIT,
+}
+BINDING_ARGS = [
+    "--tag", TAG,
+    "--version", VERSION,
+    "--commit", COMMIT,
+    "--core-commit", CORE_COMMIT,
+]
+FINAL_COMMIT = "71908d956e5223a51031b2882dee933350fb0324"
+FINAL_CORE_COMMIT = "a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47"
+STALE_COMMIT = "9b952eb0c55c280128a9fee910274b6f906fa051"
+STALE_CORE_COMMIT = "d7b52ccbada0283527db36143cfeab18692b4ed0"
+FINAL_BINDING = {
+    "tag": TAG,
+    "version": VERSION,
+    "commit": FINAL_COMMIT,
+    "core_commit": FINAL_CORE_COMMIT,
+}
 REPOSITORY = "Leminity/realm-java"
 GATE_TIME = "2026-07-17T08:00:00Z"
 
@@ -256,6 +280,7 @@ class CentralPortalTests(unittest.TestCase):
             os.environ, {"CENTRAL_PORTAL_BEARER_TOKEN": SECRET}, clear=False
         ):
             result = CP.finalize_stage(
+                **BINDING,
                 stage_prepared=stage_prepared,
                 stage_prepared_sha256=str(prepared_result["stage_prepared_sha256"]),
                 validated_consumer_command=self.consumer_command,
@@ -495,6 +520,7 @@ class CentralPortalTests(unittest.TestCase):
             os.environ.pop("CENTRAL_PORTAL_BEARER_TOKEN", None)
             with self.assertRaisesRegex(CP.PortalError, "Portal credential is not configured"):
                 CP.finalize_stage(
+                    **BINDING,
                     stage_prepared=prepared_path,
                     stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
                     validated_consumer_command=self.consumer_command,
@@ -505,6 +531,7 @@ class CentralPortalTests(unittest.TestCase):
                 )
             os.environ["CENTRAL_PORTAL_BEARER_TOKEN"] = SECRET
             result = CP.finalize_stage(
+                **BINDING,
                 stage_prepared=prepared_path,
                 stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
                 validated_consumer_command=self.consumer_command,
@@ -613,6 +640,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         prepared_path.write_text(json.dumps(mutated), encoding="utf-8")
         with self.assertRaisesRegex(CP.PortalError, "prepared stage SHA-256 mismatch"):
             CP.finalize_stage(
+                **BINDING,
                 stage_prepared=prepared_path,
                 stage_prepared_sha256=str(result["stage_prepared_sha256"]),
                 validated_consumer_command=self.consumer_command,
@@ -650,6 +678,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
 
         release_prepared = self.root / "central-release-prepared.json"
         portal_result = CP.release(
+            **BINDING,
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
             token_env="UNUSED",
@@ -661,6 +690,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
             release_evidence=self.root / "central-release-outcome.json",
         )
         result = CP.finalize_release(
+            **BINDING,
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
             release_prepared=release_prepared,
@@ -696,6 +726,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         rejected_transport = MockTransport([])
         with self.assertRaisesRegex(CP.PortalError, "SHA-256 mismatch"):
             CP.release(
+                **BINDING,
                 stage_manifest=stage_manifest,
                 stage_manifest_sha256="0" * 64,
                 token_env="UNUSED",
@@ -717,6 +748,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         stage_result, stage_manifest = self._stage(stage_transport)
         release_prepared = self.root / "mutated-release-prepared.json"
         portal_result = CP.release(
+            **BINDING,
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
             token_env="UNUSED",
@@ -741,6 +773,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         release_prepared.write_text(json.dumps(mutated), encoding="utf-8")
         with self.assertRaisesRegex(CP.PortalError, "prepared release SHA-256 mismatch"):
             CP.finalize_release(
+                **BINDING,
                 stage_manifest=stage_manifest,
                 stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
                 release_prepared=release_prepared,
@@ -752,6 +785,64 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 release_evidence=self.root / "mutated-release-outcome.json",
             )
 
+    def test_stale_stage_recovery_is_rejected_before_consumer_or_portal_calls(self) -> None:
+        stage_transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-stale"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        prepared_result, prepared_path, stage_manifest = self._prepare_stage(stage_transport)
+        prepared = json.loads(prepared_path.read_text(encoding="utf-8"))
+        prepared["commit"] = STALE_COMMIT
+        prepared["core_commit"] = STALE_CORE_COMMIT
+        prepared["runtime_provenance"]["head"] = STALE_COMMIT
+        prepared["runtime_provenance"]["core_commit"] = STALE_CORE_COMMIT
+        prepared_path.write_text(json.dumps(prepared), encoding="utf-8")
+
+        consumer_called = False
+
+        def unexpected_consumer(_: list[str], __: dict[str, str]) -> None:
+            nonlocal consumer_called
+            consumer_called = True
+
+        with self.assertRaisesRegex(CP.PortalError, "exact final source/tag/Core binding"):
+            CP.finalize_stage(
+                **FINAL_BINDING,
+                stage_prepared=prepared_path,
+                stage_prepared_sha256=CP.sha256_file(prepared_path),
+                validated_consumer_command=self.consumer_command,
+                validated_consumer_gradle_home=self.root / "stale-stage-home",
+                validated_consumer_evidence=self.root / "validated-evidence",
+                stage_manifest=stage_manifest,
+                consumer_runner=unexpected_consumer,
+            )
+        self.assertFalse(consumer_called)
+        self.assertFalse(stage_manifest.exists())
+
+        stale_manifest = dict(prepared)
+        stale_manifest["format"] = CP.STAGE_MANIFEST_FORMAT
+        stale_manifest.pop("validated_mirror_url")
+        stale_manifest["validated_consumer_evidence_sha256"] = "f" * 64
+        stale_manifest_path = self.root / "stale-stage-manifest.json"
+        stale_manifest_path.write_text(json.dumps(stale_manifest), encoding="utf-8")
+        rejected_transport = MockTransport([])
+        with self.assertRaisesRegex(CP.PortalError, "exact final source/tag/Core binding"):
+            CP.release(
+                **FINAL_BINDING,
+                stage_manifest=stale_manifest_path,
+                stage_manifest_sha256=CP.sha256_file(stale_manifest_path),
+                token_env="UNUSED",
+                allow_network=True,
+                attempts=1,
+                delay_seconds=0,
+                client=CP.PortalClient(
+                    SECRET, transport=rejected_transport, sleep=lambda _: None
+                ),
+                release_prepared=self.root / "stale-release-prepared.json",
+            )
+        self.assertEqual(rejected_transport.calls, [])
+
     def test_release_finalizer_rejects_a_self_hashed_wrong_final_deployment_trace(self) -> None:
         stage_transport = MockTransport(
             [
@@ -762,6 +853,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         stage_result, stage_manifest = self._stage(stage_transport)
         release_prepared = self.root / "wrong-trace-release-prepared.json"
         CP.release(
+            **BINDING,
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
             token_env="UNUSED",
@@ -786,6 +878,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         release_prepared.write_text(json.dumps(mutated), encoding="utf-8")
         with self.assertRaisesRegex(CP.PortalError, "exact final PUBLISHED deployment trace"):
             CP.finalize_release(
+                **BINDING,
                 stage_manifest=stage_manifest,
                 stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
                 release_prepared=release_prepared,
@@ -808,6 +901,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         release_transport = MockTransport([CP.HttpResponse(200, b'{"deploymentState":"PUBLISHED"}')])
         with self.assertRaisesRegex(CP.PortalError, "outside the approved release transaction"):
             CP.release(
+                **BINDING,
                 stage_manifest=stage_manifest,
                 stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
                 token_env="UNUSED",
@@ -839,6 +933,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         )
         release_prepared = self.root / "async-release-prepared.json"
         result = CP.release(
+            **BINDING,
             stage_manifest=stage_manifest,
             stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
             token_env="UNUSED",
@@ -869,6 +964,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         )
         with self.assertRaises(CP.PortalError):
             CP.release(
+                **BINDING,
                 stage_manifest=stage_manifest,
                 stage_manifest_sha256=str(stage_result["stage_manifest_sha256"]),
                 token_env="UNUSED",
@@ -963,6 +1059,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 sys.executable,
                 str(ROOT / "tools" / "central-portal.py"),
                 "release",
+                *BINDING_ARGS,
                 "--stage-manifest",
                 str(stage_manifest),
                 "--stage-manifest-sha256",
@@ -996,6 +1093,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 sys.executable,
                 str(ROOT / "tools" / "central-portal.py"),
                 "verify-stage-manifest",
+                *BINDING_ARGS,
                 "--stage-manifest",
                 str(stage_manifest),
                 "--stage-manifest-sha256",
