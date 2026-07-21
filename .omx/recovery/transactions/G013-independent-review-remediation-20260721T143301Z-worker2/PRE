@@ -1,0 +1,12 @@
+operation=G013 independent-review remediation for Apache-2.0 notices, fork README identity, baseline verifier, and tracked pyc hygiene
+worker=worker-2
+pre_head=36f5346e8a0841ac6af09a391bd45902b1be0091
+exact_required_root=36f5346e8a0841ac6af09a391bd45902b1be0091
+rollback_ref=refs/omx/rollback/g013-independent-review-remediation-20260721T143301Z-worker2
+rollback_ref_target=36f5346e8a0841ac6af09a391bd45902b1be0091
+pre_tracked_status=0
+source_contract=AGP_9.1.1_Gradle_9.6.1_SDK37_minSdk21_NDK_29.0.14206865_JDK17_local_DB_only
+abis=armeabi-v7a,arm64-v8a,x86_64
+external_actions=none
+ultragoal_or_codex_goal_mutation=none
+subagent_skip=role-intent rejected parent_not_active_leader; native surface lacks agent_type and model override

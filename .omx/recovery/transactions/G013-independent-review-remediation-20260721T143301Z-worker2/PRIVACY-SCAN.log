@@ -1,0 +1,4 @@
+Scope: worker-2 source diff, combined provenance files, and transaction metadata.
+Patterns checked: common GitHub token prefixes, AWS access keys, private-key PEM headers, and literal credential assignments.
+Result: PASS — no credential values or deployment identifiers introduced.
+External actions: none.

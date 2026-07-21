@@ -1,0 +1,17 @@
+== bash syntax ==
+bash_n_rc=0
+== remediation regression ==
+......
+----------------------------------------------------------------------
+Ran 6 tests in 2.681s
+
+OK
+remediation_rc=0
+== baseline regression ==
+immutable baseline manifest digest mismatch: 497d6669d8e846eea2f590031cda36fce3c5985f22c492e0e2e4961298731538
+validated tag=v10.19.0-agp9.1 pom_version=10.19.0-agp9.1
+validated tag=v10.19.0-agp9.27 pom_version=10.19.0-agp9.27
+release-tag parser tests: PASS
+baseline provenance verification: PASS
+baseline verifier regression tests: PASS
+baseline_rc=0
