@@ -77,6 +77,7 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   .github/workflows/ci.yml
   .github/workflows/pull-request.yml
   NOTICE
+  docs/release/G010-fork-release.md
   evidence/provenance/g011-source-evidence-manifest.json
   tools/g011-evidence-manifest.py
   tools/test-g011-evidence-manifest.py

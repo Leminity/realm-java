@@ -16,6 +16,12 @@ FORMAT_CONSTRAINED = {
     "version.txt",
 }
 CORE_GITLINK = "realm/realm-library/src/main/cpp/realm-core"
+CANONICAL_CORE = "a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47"
+HISTORICAL_CORE_BACKPORT = "d7b52ccb"
+LIVE_PROVENANCE_DOCS = (
+    "README.md",
+    "docs/release/G010-fork-release.md",
+)
 
 
 def git(*args: str) -> str:
@@ -67,6 +73,18 @@ class IndependentReviewRemediationTests(unittest.TestCase):
         self.assertIn("git clone https://github.com/Leminity/realm-java.git", readme)
         self.assertNotIn("git clone git@github.com:realm/realm-java.git", readme)
         self.assertNotIn("git clone https://github.com/realm/realm-java.git", readme)
+
+    def test_live_docs_bind_current_core_and_historical_backport(self) -> None:
+        for relative in LIVE_PROVENANCE_DOCS:
+            with self.subTest(path=relative):
+                contents = (ROOT / relative).read_text(encoding="utf-8")
+                self.assertEqual(1, contents.count(CANONICAL_CORE))
+                self.assertEqual(1, contents.count(HISTORICAL_CORE_BACKPORT))
+                historical_line = next(
+                    line for line in contents.splitlines() if HISTORICAL_CORE_BACKPORT in line
+                )
+                self.assertIn("historical behavior backport", historical_line)
+                self.assertIn("current canonical realm core", contents.lower())
 
     def test_python_bytecode_is_ignored_and_not_tracked(self) -> None:
         ignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
