@@ -1,0 +1,88 @@
+=== commit metadata ===
+commit=16d599003f640c687f1e0ce3b0eb7f2d26c8579a
+parents=36f5346e8a0841ac6af09a391bd45902b1be0091
+subject=fix(ci): isolate pull requests from release runner
+body=Lore:
+- Pre-Head: 36f5346e8a0841ac6af09a391bd45902b1be0091
+- Trust-Boundary: PR jobs use GitHub-hosted Ubuntu; the full API37/ps16k gate runs only on exact agp9.1 pushes
+- Tests: 43/43 focused and related workflow tests PASS; YAML/Python/static checks PASS
+- Release-Workflow: unchanged
+- Transaction: .omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1
+- External-Actions: none
+- Goal-Mutation: none
+- Rollback-Ref: refs/omx/recovery/g013-independent-review-worker1-20260721T143253Z-pre
+
+=== changed paths ===
+M	.github/workflows/ci.yml
+A	.github/workflows/pull-request.yml
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/CHECKSUM-VERIFY.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/COMMITTED
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/LORE.md
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/POST
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/PRE
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/ROLLBACK.md
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/SHA256SUMS
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/SUBAGENT.md
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/final-verification-precommit.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/g011-manifest-unit.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/preparation-incident.txt
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/privacy-scan.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/python-compile.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/python-line-length.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/regression-red.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/related-workflow-regressions.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/workflow-trust-unit.log
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/rollback/ci.yml.pre
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/rollback/pull-request.yml.pre.ABSENT
+A	.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/rollback/test-g013-workflow-trust.py.pre.ABSENT
+A	tools/test-g013-workflow-trust.py
+=== diff stat ===
+ .github/workflows/ci.yml                           |   5 +-
+ .github/workflows/pull-request.yml                 |  21 ++
+ .../CHECKSUM-VERIFY.log                            |  18 ++
+ .../COMMITTED                                      |   8 +
+ .../LORE.md                                        |  15 +
+ .../POST                                           |  20 ++
+ .../PRE                                            |  11 +
+ .../ROLLBACK.md                                    |  10 +
+ .../SHA256SUMS                                     |  18 ++
+ .../SUBAGENT.md                                    |   7 +
+ .../logs/final-verification-precommit.log          |  27 ++
+ .../logs/g011-manifest-unit.log                    |  41 +++
+ .../logs/preparation-incident.txt                  |   1 +
+ .../logs/privacy-scan.log                          |   3 +
+ .../logs/python-compile.log                        |   0
+ .../logs/python-line-length.log                    |   0
+ .../logs/regression-red.log                        |  46 +++
+ .../logs/related-workflow-regressions.log          |  13 +
+ .../logs/workflow-trust-unit.log                   |   5 +
+ .../rollback/ci.yml.pre                            | 323 +++++++++++++++++++++
+ .../rollback/pull-request.yml.pre.ABSENT           |   1 +
+ .../test-g013-workflow-trust.py.pre.ABSENT         |   1 +
+ tools/test-g013-workflow-trust.py                  | 103 +++++++
+ 23 files changed, 696 insertions(+), 1 deletion(-)
+=== core/release bindings ===
+core=d7b52ccbada0283527db36143cfeab18692b4ed0
+release_base=3c5fecb00ed6c598676135ab04408b983f8c9447
+release_candidate=3c5fecb00ed6c598676135ab04408b983f8c9447
+=== transaction files ===
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/CHECKSUM-VERIFY.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/COMMITTED
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/LORE.md
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/POST
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/PRE
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/ROLLBACK.md
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/SHA256SUMS
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/SUBAGENT.md
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/final-verification-precommit.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/g011-manifest-unit.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/preparation-incident.txt
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/privacy-scan.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/python-compile.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/python-line-length.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/regression-red.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/related-workflow-regressions.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/logs/workflow-trust-unit.log
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/rollback/ci.yml.pre
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/rollback/pull-request.yml.pre.ABSENT
+.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T143253Z-worker1/rollback/test-g013-workflow-trust.py.pre.ABSENT

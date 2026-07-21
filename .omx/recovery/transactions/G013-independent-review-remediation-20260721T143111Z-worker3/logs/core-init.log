@@ -1,0 +1,11 @@
+command=GIT_ALLOW_PROTOCOL=file git submodule update --init --recursive realm/realm-library/src/main/cpp/realm-core
+Cloning into '/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-3/realm/realm-library/src/main/cpp/realm-core'...
+fatal: transport 'https' not allowed
+fatal: clone of 'https://github.com/Leminity/realm-core.git' into submodule path '/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-3/realm/realm-library/src/main/cpp/realm-core' failed
+Failed to clone 'realm/realm-library/src/main/cpp/realm-core'. Retry scheduled
+Cloning into '/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-3/realm/realm-library/src/main/cpp/realm-core'...
+fatal: transport 'https' not allowed
+fatal: clone of 'https://github.com/Leminity/realm-core.git' into submodule path '/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-3/realm/realm-library/src/main/cpp/realm-core' failed
+Failed to clone 'realm/realm-library/src/main/cpp/realm-core' a second time, aborting
+rc=1
+outer_gitlink=d7b52ccbada0283527db36143cfeab18692b4ed0

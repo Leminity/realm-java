@@ -1,0 +1,13 @@
+=== core gitlinks ===
+36f5346e8a0841ac6af09a391bd45902b1be0091 160000 commit d7b52ccbada0283527db36143cfeab18692b4ed0	realm/realm-library/src/main/cpp/realm-core
+0e8bddf0a46827a7336a6a13406df8e35834db25 160000 commit d7b52ccbada0283527db36143cfeab18692b4ed0	realm/realm-library/src/main/cpp/realm-core
+=== possible post-boundary paths ===
+0e8bddf0a46827a7336a6a13406df8e35834db25 803
+188f0832252172a5ca93204292a65a0f8fe4f4f3 588
+7e3da3b708d5aa0c0f24ceca09358fc1eed4420d 63
+=== team candidates ===
+g013-independent-revi-835c6090
+TEAM g013-independent-revi-835c6090
+  worker-1 head=36f5346e8a0841ac6af09a391bd45902b1be0091 path=/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1
+  worker-2 head=36f5346e8a0841ac6af09a391bd45902b1be0091 path=/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-2
+  worker-3 head=36f5346e8a0841ac6af09a391bd45902b1be0091 path=/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-3

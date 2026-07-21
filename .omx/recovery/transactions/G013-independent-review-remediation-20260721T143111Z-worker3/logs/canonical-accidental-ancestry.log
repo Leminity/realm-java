@@ -1,0 +1,260 @@
+--- canonical ancestry ---
+HEAD=8fd6c6ea21cd5e1a85a8d8d0a64cb1df4c0f90cf
+PASS not ancestor 665dbcd89e03922b2d6c859bad013921e48a848a
+PASS not ancestor ed12cfc5594e41637c18a9e1898ec4dff72dab98
+--- rollback refs ---
+refs/omx/recovery/g013-independent-review-worker1-20260721T143253Z-pre 36f5346e8a0841ac6af09a391bd45902b1be0091
+refs/omx/rollback/g013-accidental-team-recovery-20260721T144655Z-accidental-commit 665dbcd89e03922b2d6c859bad013921e48a848a
+refs/omx/rollback/g013-accidental-team-recovery-20260721T144655Z-leader-head ed12cfc5594e41637c18a9e1898ec4dff72dab98
+--- worktrees/heads ---
+worktree /mnt/d/workspace/jiran/realm
+HEAD 8fd6c6ea21cd5e1a85a8d8d0a64cb1df4c0f90cf
+branch refs/heads/agp9.1
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/apply-g013-reversible-835c6090/worktrees/worker-1
+HEAD 9b952eb0c55c280128a9fee910274b6f906fa051
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/at-exact-source-b0fb9-835c6090/worktrees/worker-1
+HEAD b0fb95049158ba26ae429449290df86f546dc5ee
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/at-exact-source-b0fb9-835c6090/worktrees/worker-2
+HEAD b0fb95049158ba26ae429449290df86f546dc5ee
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/at-exact-source-b0fb9-835c6090/worktrees/worker-3
+HEAD b0fb95049158ba26ae429449290df86f546dc5ee
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/execute-g012-exact-so-835c6090/worktrees/worker-1
+HEAD e89ebcdd74db065a09fe8ac4f4af10c1bf074e5c
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/execute-g012-exact-so-835c6090/worktrees/worker-2
+HEAD e89ebcdd74db065a09fe8ac4f4af10c1bf074e5c
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/execute-g012-exact-so-835c6090/worktrees/worker-3
+HEAD e89ebcdd74db065a09fe8ac4f4af10c1bf074e5c
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/execute-g012-self-rev-835c6090/worktrees/worker-1
+HEAD e89ebcdd74db065a09fe8ac4f4af10c1bf074e5c
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g006-base-local-db-li-6fc3cb75/worktrees/worker-1
+HEAD 316cf1acfadc6d1e0ba3fc1a2ce3fb794cb267b9
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g006-base-local-db-li-6fc3cb75/worktrees/worker-2
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g006-base-local-db-li-6fc3cb75/worktrees/worker-3
+HEAD 37ab6df9e68d3bb3fe26d308899454fef051d6be
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-ci-baseline-reco-835c6090/worktrees/worker-1
+HEAD 9b952eb0c55c280128a9fee910274b6f906fa051
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-ci-baseline-reco-835c6090/worktrees/worker-2
+HEAD 9b952eb0c55c280128a9fee910274b6f906fa051
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-ci-baseline-reco-835c6090/worktrees/worker-3
+HEAD e89ebcdd74db065a09fe8ac4f4af10c1bf074e5c
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-exact-source-rel-835c6090/worktrees/worker-1
+HEAD e89ebcdd74db065a09fe8ac4f4af10c1bf074e5c
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-external-transac-835c6090/worktrees/worker-1
+HEAD 163ae9c846b4ed4534c359ad289b49deb452df41
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-external-transac-835c6090/worktrees/worker-2
+HEAD b0fb95049158ba26ae429449290df86f546dc5ee
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g012-external-transac-835c6090/worktrees/worker-3
+HEAD b0fb95049158ba26ae429449290df86f546dc5ee
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1
+HEAD 8fd6c6ea21cd5e1a85a8d8d0a64cb1df4c0f90cf
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-2
+HEAD 3a2a49263d58d274d035c5297276c8ba99e75284
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-3
+HEAD 36f5346e8a0841ac6af09a391bd45902b1be0091
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g013-reversible-local-835c6090/worktrees/worker-1
+HEAD 9b952eb0c55c280128a9fee910274b6f906fa051
+detached
+
+worktree /mnt/d/workspace/jiran/realm/.omx/team/g013-reversible-local-835c6090/worktrees/worker-2
+HEAD 9b952eb0c55c280128a9fee910274b6f906fa051
+detached
+
+worktree /tmp/g006-task13-g005-fixture-order
+HEAD b088469829033427c5cd55da2898854a4429f9f7
+branch refs/heads/worker-3/task13-g005-fixture-order
+
+worktree /tmp/g006-task14-exact-158ecd
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/g006-task15-b4eddcee
+HEAD b4eddcee30ee98913b785c21ee7877723871aae6
+detached
+
+worktree /tmp/g006-task17-baseline-158
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/g006-task17-candidate-a2eb456
+HEAD a2eb456a1c4f38d254037268eed31dce93542786
+detached
+
+worktree /tmp/g006-task18-exact-root-audit-20260716T1608Z/exact-root-worktree
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/g006-task19-root-42efd08a
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/g006-task19-root-indexed-42efd08a
+HEAD 316cf1acfadc6d1e0ba3fc1a2ce3fb794cb267b9
+detached
+
+worktree /tmp/g006-task20-candidate-42efd08
+HEAD 42efd08ab1ec45e84d371287ada0ce69f9035e2d
+detached
+
+worktree /tmp/g006-task20-exact-root
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/g006-task31-wt
+HEAD 6476d636632b0f6413703637ea7727ac10ef26c2
+detached
+
+worktree /tmp/g006-task6-a2eb456a
+HEAD a2eb456a1c4f38d254037268eed31dce93542786
+detached
+
+worktree /tmp/realm-g005-root-integration
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/realm-g005-worker2-predep
+HEAD 743e9630ad63047d0122f4b30d5e7a05e01284f7
+detached
+
+worktree /tmp/realm-g005-worker2-terminal
+HEAD 299f23a04de195555c25520f70496b6338ed8ba4
+detached
+
+worktree /tmp/realm-g005-worker3-final-158ecd948
+HEAD 158ecd9480b7c994f45732ca72bfb01fcdca3970
+detached
+
+worktree /tmp/task26-detached
+HEAD 316cf1acfadc6d1e0ba3fc1a2ce3fb794cb267b9
+detached
+
+worktree /tmp/task30-detached
+HEAD 6476d636632b0f6413703637ea7727ac10ef26c2
+detached
+
+--- g013 refs ---
+refs/heads/agp9.1 8fd6c6ea21cd5e1a85a8d8d0a64cb1df4c0f90cf omx(team): auto-checkpoint worker-2 [2]
+refs/heads/g010-task16-worker-3 286069a954c9c727dc4c5b64024151352b41e192 chore: add Apache publication notices
+refs/heads/omx/rollback-worker3-task32-20260717T051847Z 286069a954c9c727dc4c5b64024151352b41e192 chore: add Apache publication notices
+refs/heads/omx/rollback-worker3-task33-20260717T053202Z 56a2a401d270104a8a768adeb56d3e7d0bc6ede3 test(g011): add remote consumer and AC08 harness gates
+refs/heads/omx/rollback-worker3-task34-20260717T053523Z 98b9e07f9c4b388a86d641c0f6927cf8feafb02f test(g011): make evidence transactions fresh and atomic
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-build 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-build-transformer-bootstrap 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-core-hydration 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-core-nested-hydration 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-isolated-retry 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-native-build-retry 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-preflight 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/rollback/g007-worker-1/G007-worker-1-lane1-20260716T191429Z-targeted-base-publication 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/heads/worker-3/task13-g005-fixture-order b088469829033427c5cd55da2898854a4429f9f7 test: order fixture verification after Android assemblies
+refs/heads/worker2/g003-baseline-exact-path 772c2658d5f03e8609ada39c475642db3b070492 test: allow exact G003 baseline surfaces
+refs/heads/worker2/g003-final-matrix 4c4958adc24af02d963fee1bf5bcfa77e5242fb6 test: validate generated G003 publication POM paths
+refs/heads/worker2/g003-lanec-rebased d5482999970ef1fd8a8fa70b3a3d6cff84ff2168 docs: clarify G003 baseline test environment gap
+refs/omx-recovery/20260716T083401Z/worker-1 824b1c87a164d8a635ba2a0b34b3af9dcf32985d omx(team): auto-checkpoint worker-1 [1]
+refs/omx-recovery/20260716T083401Z/worker-2 9d2ed5468bbeffa162bd36d5d9e27404932e2be2 docs: clarify G003 baseline test environment gap
+refs/omx-recovery/20260716T083401Z/worker-3 ad25497a7e472a327d46e66e5be4a6aeb5b48fd1 docs: record G003 Gradle 9 configuration baseline
+refs/omx-recovery/20260720T162014Z-remove-omx-runtime-merge-scaffolding.Oemife/pre-merge-head 2e85f673cdaeccac04cb551938ae8e17755ac185 omx(team): merge worker-1
+refs/omx-recovery/20260720T170324Z-promote-semantic-lore.mpHJB2/pre-team-merge-head 97a510b88acdd270b494f5621c0d6d9df6128ed6 omx(team): merge worker-1
+refs/omx-recovery/G006-stale-autointegration-20260716T135313Z 8645499469bcd6966a830b10506340e61a0ce4ff omx(team): auto-checkpoint worker-3 [8]
+refs/omx-recovery/G007/worker-1 1918dd75c7af1dac730a4b8d89c0081c64b1faf0 task: acknowledge terminal handoff correction
+refs/omx-recovery/G007/worker-2 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/omx-recovery/G007/worker-3 f5c9536d771837933b3a461c4531beb18f9cb660 test: verify Realm runtime on API37 ps16k target
+refs/omx-recovery/G012-team-final-reconcile/worker-1 b8faf2dc6ac39c7b4d89668559d5b2a9d8e0c080 omx(team): auto-checkpoint worker-1 [1]
+refs/omx-recovery/G012-team-final-reconcile/worker-2 b4d4c7fa5a6e282b20cc36aaf8e64e99f2d08621 omx(team): auto-checkpoint worker-2 [3]
+refs/omx-recovery/G012-team-final-reconcile/worker-3 d5c49ae68c41a671530f0179d64b3c9f3ab866ea omx(team): auto-checkpoint worker-3 [5]
+refs/omx-recovery/g005/partial-root 0e8963afd42d3e47e431bdfb26f766c20bfa3d0c omx(team): auto-checkpoint worker-2 [2]
+refs/omx-recovery/g005/pre-final-root 0e8963afd42d3e47e431bdfb26f766c20bfa3d0c omx(team): auto-checkpoint worker-2 [2]
+refs/omx-recovery/g005/pre-final-worker1 37a6f4a8effc46e5d8ed6f0f1b8f36ab61104616 fix: apply legacy kapt before AGP finalization
+refs/omx-recovery/g005/pre-final-worker2 891437844051c84e20a8ed52ad4c3dbcc839fa21 test: verify processor service resource bytes
+refs/omx-recovery/g005/worker1-latest 6eb16941849f8c1962f6c6128efa4412276cc8c6 fix: preserve Java annotation processing with built-in Kotlin
+refs/omx-recovery/g005/worker2-checkpoint a6b6ca2fc7201ae235f0f4bacf69700d91f35a64 omx(team): auto-checkpoint worker-2 [2]
+refs/omx-recovery/g006/worker-1-initial 158ecd9480b7c994f45732ca72bfb01fcdca3970 test: bind Realm verifier to variant assemblies
+refs/omx-recovery/g006/worker-2-initial 158ecd9480b7c994f45732ca72bfb01fcdca3970 test: bind Realm verifier to variant assemblies
+refs/omx-recovery/g006/worker-3-initial 158ecd9480b7c994f45732ca72bfb01fcdca3970 test: bind Realm verifier to variant assemblies
+refs/omx-recovery/pre-integration/G003-4c-root f170e2974db04feba9060f933e9a3be27ad63802 omx(team): merge worker-2
+refs/omx-recovery/pre-integration/G003-4c-worker2 4c4958adc24af02d963fee1bf5bcfa77e5242fb6 test: validate generated G003 publication POM paths
+refs/omx-recovery/pre-integration/G004-task7-worker3 2edaa9b28af8f15df3a7d112f1fa10662e7dbc30 test: select primary transformer jar deterministically
+refs/omx-recovery/rolling/worker-1 b8faf2dc6ac39c7b4d89668559d5b2a9d8e0c080 omx(team): auto-checkpoint worker-1 [1]
+refs/omx-recovery/rolling/worker-2 b4d4c7fa5a6e282b20cc36aaf8e64e99f2d08621 omx(team): auto-checkpoint worker-2 [3]
+refs/omx-recovery/rolling/worker-3 d5c49ae68c41a671530f0179d64b3c9f3ab866ea omx(team): auto-checkpoint worker-3 [5]
+refs/omx-recovery/transactions/G003-b64e-integrated f170e2974db04feba9060f933e9a3be27ad63802 omx(team): merge worker-2
+refs/omx/backups/g012-ci-baseline-reco-20260721T044209Z-pre 139b629c269d75aea487dae7f43a8ae8d418e18f omx(team): merge worker-1
+refs/omx/recovery/g009-stale-execute-only-ultragoa-6fc3cb75-worker-1-20260716T234533Z 1918dd75c7af1dac730a4b8d89c0081c64b1faf0 task: acknowledge terminal handoff correction
+refs/omx/recovery/g009-stale-execute-only-ultragoa-6fc3cb75-worker-2-20260716T234533Z 6476d636632b0f6413703637ea7727ac10ef26c2 build: support Realm local DB on AGP 9
+refs/omx/recovery/g009-stale-execute-only-ultragoa-6fc3cb75-worker-3-20260716T234533Z f5c9536d771837933b3a461c4531beb18f9cb660 test: verify Realm runtime on API37 ps16k target
+refs/omx/recovery/g009-worker3-precommit-20260717T014134Z 4dbe1ffb1998f4c5ef516093a70c8fda8184717d task: add AC-09 compatibility verifier
+refs/omx/recovery/g011-task35-worker3-20260717T060315Z e205b378ebe8c160021ad88c05a308a6f301a98a test(g003): ignore commented Kotlin plugin references
+refs/omx/recovery/g012-auto-merge-bytecode-pre-20260721T051235Z 16770fcb13f16d5280f2254346ceb18d0b259e52 omx(team): merge worker-1
+refs/omx/recovery/g012-claude-runtime-autointegration-20260718T001959Z 75c0134d4f772602f0f123edb0652607e4f4bc45 omx(team): auto-checkpoint worker-3 [5]
+refs/omx/recovery/g013-independent-review-worker1-20260721T143253Z-pre 36f5346e8a0841ac6af09a391bd45902b1be0091 task: record ai-slop chain integration
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/pre-worker b651fafb56882f800d52d32ceabd0455de65f4c2 Merge commit '558cd1316f8e8ee8fd3a0f5690c7b52c0992e05b' into agp9.1
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/001-009fecc83470 009fecc834707e727e91ca818d74a6adbaa30ce9 omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/002-7bd2b0011a33 7bd2b0011a3376271618e7ba9a24bf0e6b1961f8 omx(team): merge worker-1
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/003-88f7fe84d84c 88f7fe84d84c287b8604d49e69c1ab2dbc887b5c omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/004-e316e559dfc5 e316e559dfc51f33954bf11b9b796647b0f8e42c omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/005-9c8f43eb21e8 9c8f43eb21e8a092990eceb3a2353895bd391df6 omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/006-ef7801213def ef7801213defd37acf70daf8f277c36d2398d790 omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/007-4d864ca4d17c 4d864ca4d17c2601d3309a373055b1464dca43cd omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-20260720T204215Z-57b020c85b3e/runtime/008-558cd1316f8e 558cd1316f8e8ee8fd3a0f5690c7b52c0992e05b omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/pre-worker b0fb95049158ba26ae429449290df86f546dc5ee chore(provenance): refresh G011 gate digests
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/001-009fecc83470 009fecc834707e727e91ca818d74a6adbaa30ce9 omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/002-7bd2b0011a33 7bd2b0011a3376271618e7ba9a24bf0e6b1961f8 omx(team): merge worker-1
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/003-88f7fe84d84c 88f7fe84d84c287b8604d49e69c1ab2dbc887b5c omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/004-e316e559dfc5 e316e559dfc51f33954bf11b9b796647b0f8e42c omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/005-9c8f43eb21e8 9c8f43eb21e8a092990eceb3a2353895bd391df6 omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/006-ef7801213def ef7801213defd37acf70daf8f277c36d2398d790 omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/007-4d864ca4d17c 4d864ca4d17c2601d3309a373055b1464dca43cd omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/git-history-recovery-835c6090-attempt2-20260720T210040Z-19d4c1ffbf03/runtime/008-558cd1316f8e 558cd1316f8e8ee8fd3a0f5690c7b52c0992e05b omx(team): auto-checkpoint worker-1 [1]
+refs/omx/recovery/task5-worker-task4-5ebcde847 5ebcde84739199ec8eb1b01e64cece6dabc43562 fix(release): exclude checksum temp files
+refs/omx/rollback/g013-accidental-team-recovery-20260721T144655Z-accidental-commit 665dbcd89e03922b2d6c859bad013921e48a848a omx(team): checkpoint worker-1 shutdown changes
+refs/omx/rollback/g013-accidental-team-recovery-20260721T144655Z-leader-head ed12cfc5594e41637c18a9e1898ec4dff72dab98 Merge commit '665dbcd89e03922b2d6c859bad013921e48a848a' into agp9.1
+refs/omx/rollback/g013-ai-slop-chain-integration-20260721T134950Z-worker1 6f089da04c48f129d38086bbe9ecad80bf6c4458 task: seal final G013 integrated local review
+refs/omx/rollback/g013-independent-review-remediation-20260721T143301Z-worker2 36f5346e8a0841ac6af09a391bd45902b1be0091 task: record ai-slop chain integration
+refs/omx/rollback/g013-independent-review-worker3-20260721T143111Z 36f5346e8a0841ac6af09a391bd45902b1be0091 task: record ai-slop chain integration
+refs/omx/rollback/g013-task10-worker1-chain-20260721T124752Z ef8ed3f52ece1a092bc2480533656bba4e76609f task: replay G013 portal privacy gates
+refs/omx/rollback/g013-task11-task9-20260721T131011Z 7e3da3b708d5aa0c0f24ceca09358fc1eed4420d omx(team): integrate exact worker-1 G013 evidence chain
+refs/remotes/origin/cr/not-with-empty-group fe78b9c6c87ae5ebfcf8cac155a25db4cfcf25fc Updates according to code review
+refs/remotes/upstream/cr/not-with-empty-group fe78b9c6c87ae5ebfcf8cac155a25db4cfcf25fc Updates according to code review

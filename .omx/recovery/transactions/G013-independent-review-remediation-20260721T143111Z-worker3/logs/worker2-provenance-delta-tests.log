@@ -1,0 +1,30 @@
+===== baseline-regression =====
+immutable baseline manifest digest mismatch: 497d6669d8e846eea2f590031cda36fce3c5985f22c492e0e2e4961298731538
+validated tag=v10.19.0-agp9.1 pom_version=10.19.0-agp9.1
+validated tag=v10.19.0-agp9.27 pom_version=10.19.0-agp9.27
+release-tag parser tests: PASS
+baseline provenance verification: PASS
+baseline verifier regression tests: PASS
+PASS
+===== baseline-verifier =====
+validated tag=v10.19.0-agp9.1 pom_version=10.19.0-agp9.1
+validated tag=v10.19.0-agp9.27 pom_version=10.19.0-agp9.27
+release-tag parser tests: PASS
+baseline provenance verification: PASS
+PASS
+===== workflow-trust =====
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.134s
+
+OK
+PASS
+===== independent-remediation =====
+......
+----------------------------------------------------------------------
+Ran 6 tests in 2.664s
+
+OK
+PASS
+===== diff-check =====
+PASS
