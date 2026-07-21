@@ -16,6 +16,8 @@ FORMAT_CONSTRAINED = {
     "version.txt",
 }
 CORE_GITLINK = "realm/realm-library/src/main/cpp/realm-core"
+CANONICAL_RELEASE_TAG = "v10.19.0-agp9.1"
+HISTORICAL_INTEGRATION_MILESTONE = "0e8bddf0a46827a7336a6a13406df8e35834db25"
 CANONICAL_CORE = "a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47"
 HISTORICAL_CORE_BACKPORT = "d7b52ccb"
 LIVE_PROVENANCE_DOCS = (
@@ -74,10 +76,23 @@ class IndependentReviewRemediationTests(unittest.TestCase):
         self.assertNotIn("git clone git@github.com:realm/realm-java.git", readme)
         self.assertNotIn("git clone https://github.com/realm/realm-java.git", readme)
 
-    def test_live_docs_bind_current_core_and_historical_backport(self) -> None:
+    def test_live_docs_bind_canonical_release_and_core_history(self) -> None:
         for relative in LIVE_PROVENANCE_DOCS:
             with self.subTest(path=relative):
                 contents = (ROOT / relative).read_text(encoding="utf-8")
+                release_lines = [
+                    line for line in contents.splitlines()
+                    if "canonical release checkout" in line.lower()
+                ]
+                self.assertEqual(1, len(release_lines))
+                self.assertIn(CANONICAL_RELEASE_TAG, release_lines[0])
+                self.assertEqual(1, contents.count(HISTORICAL_INTEGRATION_MILESTONE))
+                integration_line = next(
+                    line for line in contents.splitlines()
+                    if HISTORICAL_INTEGRATION_MILESTONE in line
+                )
+                self.assertIn("historical integration milestone", integration_line.lower())
+                self.assertNotIn("current", integration_line.lower())
                 self.assertEqual(1, contents.count(CANONICAL_CORE))
                 self.assertEqual(1, contents.count(HISTORICAL_CORE_BACKPORT))
                 historical_line = next(

@@ -14,8 +14,9 @@ does not claim MongoDB endorsement or trademark rights.
 This is an **unofficial Leminity maintenance fork** of upstream Realm Java. The reproducible
 fork/release contract, provenance, compatibility boundaries, and local-only verification
 commands are documented in [`docs/release/G010-fork-release.md`](docs/release/G010-fork-release.md).
-The fork is versioned as `10.19.0-agp9.1`, based on upstream tag `v10.19.0` plus integrated
-revision `0e8bddf0a46827a7336a6a13406df8e35834db25`; its current canonical Realm Core provenance is
+The fork is versioned as `10.19.0-agp9.1`; tag `v10.19.0-agp9.1` is its canonical release checkout.
+It descends from upstream tag `v10.19.0`. Historical integration milestone: `0e8bddf0a46827a7336a6a13406df8e35834db25`.
+Its current canonical Realm Core provenance is
 `a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47` (including historical behavior backport `d7b52ccb`).
 
 The supported surface is the base local database only. Sync and ObjectServer integrations are

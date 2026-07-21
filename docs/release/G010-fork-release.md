@@ -7,7 +7,8 @@ support.
 ## Provenance and coordinates
 
 - Upstream baseline: tag `v10.19.0`.
-- Integrated source revision: `0e8bddf0a46827a7336a6a13406df8e35834db25`.
+- Canonical release checkout: tag `v10.19.0-agp9.1`.
+- Historical integration milestone: `0e8bddf0a46827a7336a6a13406df8e35834db25`.
 - Current canonical Realm Core source provenance: `a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47`; historical behavior backport: `d7b52ccb`.
 - Version: `10.19.0-agp9.1` (`version.txt`).
 - Maven coordinates use group `io.github.leminity.realm`; the six fork artifacts are
