@@ -1531,7 +1531,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         self.assertEqual(workflow.count('test "$actual_archive_sha" = "$expected_archive_sha"'), 1)
         self.assertEqual(workflow.count('= "$expected_archive_sha"'), 3)
         self.assertIn('test "$stage_tag" = "$TAG"', release_job)
-        self.assertIn('test "$stage_version" = "$(tr -d \'[:space:]\' < version.txt)"', release_job)
+        self.assertIn('test "$stage_version" = "$(cat version.txt)"', release_job)
         self.assertIn("--validated-consumer-command", workflow)
         self.assertIn("--validated-consumer-bearer-env CENTRAL_PORTAL_BEARER_TOKEN", workflow)
         self.assertIn('--bearer-env) bearer_env="$2"', workflow)
