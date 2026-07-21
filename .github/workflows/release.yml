@@ -534,8 +534,6 @@ jobs:
               for path in (
                   prepared_path,
                   pathlib.Path('build/maven-central-stage-manifest.json'),
-                  pathlib.Path('build/maven-central-stage-manifest.json.failed.json'),
-                  pathlib.Path(os.environ['RUNNER_TEMP']) / 'g011-consumer-validated/validated-deployment-mirror-evidence.json',
               )
               if path.is_file()
           }
@@ -965,7 +963,6 @@ jobs:
                   stage_manifest,
                   pathlib.Path('build/maven-central-release-intent.json'),
                   pathlib.Path('build/maven-central-release-prepared.json'),
-                  pathlib.Path('build/maven-central-release-evidence.json'),
               )
               if path.is_file()
           }

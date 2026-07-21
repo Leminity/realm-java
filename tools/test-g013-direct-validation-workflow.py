@@ -46,6 +46,27 @@ class G013DirectValidationWorkflowTests(unittest.TestCase):
         self.assertIn("deployment_id = prepared['deployment_id']", self.workflow)
         self.assertIn("validated repository identifier detected in retained evidence", self.workflow)
 
+    def test_stage_scan_exempts_only_binding_manifests(self) -> None:
+        scan = self.workflow.split(
+            "      - name: Classify exact stage transaction evidence", 1
+        )[0].rsplit("          protected = {", 1)[1]
+        protected = scan.split("          for root_name", 1)[0]
+        self.assertIn("prepared_path", protected)
+        self.assertIn("maven-central-stage-manifest.json", protected)
+        self.assertNotIn("maven-central-stage-manifest.json.failed.json", protected)
+        self.assertNotIn("validated-deployment-mirror-evidence.json", protected)
+
+    def test_release_scan_does_not_exempt_retained_release_evidence(self) -> None:
+        scan = self.workflow.split(
+            "      - name: Verify retained release evidence contains no credential material", 1
+        )[1].split("      - name: Classify exact publication transaction evidence", 1)[0]
+        protected = scan.split("          protected = {", 1)[1].split(
+            "          for root_name", 1
+        )[0]
+        self.assertIn("maven-central-release-intent.json", protected)
+        self.assertIn("maven-central-release-prepared.json", protected)
+        self.assertNotIn("maven-central-release-evidence.json", protected)
+
 
 if __name__ == "__main__":
     unittest.main()
