@@ -16,6 +16,7 @@ concurrency:
 env:
   ANDROID_SDK_ROOT: /home/leminity/Android/Sdk
   EMULATOR_RUNTIME_LIB_DIR: /home/leminity/.local/realm-emulator-libs/root/usr/lib/x86_64-linux-gnu
+  FINAL_SOURCE_BRANCH: agp9.1
 
 jobs:
   stage:
@@ -25,6 +26,7 @@ jobs:
     runs-on: [self-hosted, linux, api37, ps16k]
     outputs:
       source_commit: ${{ steps.source.outputs.commit }}
+      source_core_commit: ${{ steps.source.outputs.core_commit }}
       stage_manifest_b64: ${{ steps.stage_manifest.outputs.stage_manifest_b64 }}
       stage_manifest_sha256: ${{ steps.stage_manifest.outputs.stage_manifest_sha256 }}
     steps:
@@ -108,17 +110,35 @@ jobs:
           TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
-          version="$(tr -d '[:space:]' < version.txt)"
+          mapfile -t version_lines < version.txt
+          test "${#version_lines[@]}" = 1
+          version="${version_lines[0]}"
+          [[ -n "$version" && "$version" != *[[:space:]]* ]]
           bash tools/verify-release-tag.sh "$TAG" "$version"
           test "$GITHUB_REF" = "refs/tags/$TAG"
           commit="$(git rev-parse HEAD)"
-          test "$commit" = "$(git rev-list -n1 "$TAG")"
-          test "$(git rev-parse "${TAG}^{commit}")" = "$commit"
+          final_ref_root="refs/g011/final-source/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/stage-source"
+          final_branch_ref="$final_ref_root/branch"
+          final_tag_ref="$final_ref_root/tag"
+          cleanup_refs() {
+            git update-ref -d "$final_branch_ref" || true
+            git update-ref -d "$final_tag_ref" || true
+          }
+          trap cleanup_refs EXIT
+          git fetch --quiet --force --no-tags origin \
+            "refs/heads/$FINAL_SOURCE_BRANCH:$final_branch_ref" \
+            "refs/tags/$TAG:$final_tag_ref"
+          test "$commit" = "$(git rev-parse "$final_branch_ref^{commit}")"
+          test "$commit" = "$(git rev-parse "$final_tag_ref^{commit}")"
+          test "$commit" = "$(git rev-parse "refs/tags/$TAG^{commit}")"
           test -z "$(git status --porcelain --untracked-files=all)"
           core_path=realm/realm-library/src/main/cpp/realm-core
-          core_commit="$(git ls-tree "$commit" "$core_path" | awk '{print $3}')"
+          core_commit="$(git ls-tree "$commit" "$core_path" | awk '$1 == "160000" && $2 == "commit" {print $3}')"
           test -n "$core_commit"
           test "$(git -C "$core_path" rev-parse HEAD)" = "$core_commit"
+          test -z "$(git -C "$core_path" status --porcelain --untracked-files=all)"
+          cleanup_refs
+          trap - EXIT
           printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
           printf 'core_commit=%s\n' "$core_commit" >> "$GITHUB_OUTPUT"
           printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
@@ -127,6 +147,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           COMMIT: ${{ steps.source.outputs.commit }}
+          CORE_COMMIT: ${{ steps.source.outputs.core_commit }}
           TAG: ${{ github.event.release.tag_name }}
           VERSION: ${{ steps.source.outputs.version }}
         run: |
@@ -218,12 +239,14 @@ jobs:
           manifest_sha="$(sha256sum build/maven-central-stage-manifest.json | awk '{print $1}')"
           python3 tools/central-portal.py verify-stage-manifest \
             --stage-manifest build/maven-central-stage-manifest.json \
-            --stage-manifest-sha256 "$manifest_sha"
-          python3 - build/maven-central-stage-manifest.json "$COMMIT" "$TAG" "$VERSION" <<'PY'
+            --stage-manifest-sha256 "$manifest_sha" \
+            --tag "$TAG" --version "$VERSION" --commit "$COMMIT" --core-commit "$CORE_COMMIT"
+          python3 - build/maven-central-stage-manifest.json "$TAG" "$VERSION" "$COMMIT" "$CORE_COMMIT" <<'PY'
           import json, sys
           manifest = json.load(open(sys.argv[1], encoding='utf-8'))
-          if (manifest.get('commit'), manifest.get('tag'), manifest.get('version')) != tuple(sys.argv[2:]):
-              raise SystemExit('prior stage outcome differs from exact source/tag/version')
+          actual = tuple(manifest.get(field) for field in ('tag', 'version', 'commit', 'core_commit'))
+          if actual != tuple(sys.argv[2:]):
+              raise SystemExit('prior stage outcome differs from exact source/tag/Core binding')
           PY
           echo 'recovered=true' >> "$GITHUB_OUTPUT"
       - name: Download and independently verify exact successful CI evidence
@@ -449,19 +472,46 @@ jobs:
         if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          COMMIT: ${{ steps.source.outputs.commit }}
+          CORE_COMMIT: ${{ steps.source.outputs.core_commit }}
+          TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.source.outputs.version }}
           G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
           G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
           G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
           G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
         run: |
           set -euo pipefail
+          final_ref_root="refs/g011/final-source/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/stage-upload"
+          final_branch_ref="$final_ref_root/branch"
+          final_tag_ref="$final_ref_root/tag"
+          cleanup_refs() {
+            git update-ref -d "$final_branch_ref" || true
+            git update-ref -d "$final_tag_ref" || true
+          }
+          trap cleanup_refs EXIT
+          git fetch --quiet --force --no-tags origin \
+            "refs/heads/$FINAL_SOURCE_BRANCH:$final_branch_ref" \
+            "refs/tags/$TAG:$final_tag_ref"
+          test "$COMMIT" = "$(git rev-parse HEAD)"
+          test "$COMMIT" = "$(git rev-parse "$final_branch_ref^{commit}")"
+          test "$COMMIT" = "$(git rev-parse "$final_tag_ref^{commit}")"
+          test "$COMMIT" = "$(git rev-parse "refs/tags/$TAG^{commit}")"
+          test "$VERSION" = "$(cat version.txt)"
+          core_path=realm/realm-library/src/main/cpp/realm-core
+          test "$CORE_COMMIT" = "$(git ls-tree "$COMMIT" "$core_path" | awk '$1 == "160000" && $2 == "commit" {print $3}')"
+          test "$CORE_COMMIT" = "$(git -C "$core_path" rev-parse HEAD)"
+          test -z "$(git status --porcelain --untracked-files=all -- . ':(exclude)build')"
+          test -z "$(git -C "$core_path" status --porcelain --untracked-files=all)"
+          cleanup_refs
+          trap - EXIT
           : > build/maven-central-stage-entered
           validated_home="$RUNNER_TEMP/g011-gradle-validated"
           trap 'rm -rf "$validated_home"' EXIT
           python3 tools/central-portal.py stage \
             --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json \
-            --tag '${{ github.event.release.tag_name }}' --version '${{ steps.source.outputs.version }}' \
-            --commit '${{ steps.source.outputs.commit }}' --core-commit '${{ steps.source.outputs.core_commit }}' \
+            --tag "$TAG" --version "$VERSION" \
+            --commit "$COMMIT" --core-commit "$CORE_COMMIT" \
             --runtime-provenance '${{ steps.ci_evidence.outputs.runtime_provenance }}' \
             --ci-artifact-sha256 '${{ steps.ci_evidence.outputs.ci_artifact_sha256 }}' \
             --ci-run-id '${{ steps.ci_evidence.outputs.ci_run_id }}' \
@@ -480,6 +530,7 @@ jobs:
           python3 tools/central-portal.py finalize-stage \
             --stage-prepared build/maven-central-stage-prepared.json \
             --stage-prepared-sha256 "$stage_prepared_sha256" \
+            --tag "$TAG" --version "$VERSION" --commit "$COMMIT" --core-commit "$CORE_COMMIT" \
             --validated-consumer-command build/run-g011-consumer.sh \
             --validated-consumer-bearer-env CENTRAL_PORTAL_BEARER_TOKEN \
             --validated-consumer-gradle-home "$validated_home" \
@@ -636,6 +687,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           STAGE_MANIFEST_B64: ${{ needs.stage.outputs.stage_manifest_b64 }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+          COMMIT: ${{ needs.stage.outputs.source_commit }}
+          CORE_COMMIT: ${{ needs.stage.outputs.source_core_commit }}
           TAG: ${{ github.event.release.tag_name }}
         run: |
           set -euo pipefail
@@ -647,11 +700,20 @@ jobs:
           commit="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["commit"])')"
           core="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["core_commit"])')"
           test "$stage_tag" = "$TAG"
-          test "$stage_version" = "$(tr -d '[:space:]' < version.txt)"
+          test "$stage_version" = "$(cat version.txt)"
+          test "$commit" = "$COMMIT"
+          test "$core" = "$CORE_COMMIT"
           test "$commit" = "$(git rev-parse HEAD)"
-          test "$commit" = "$(git rev-list -n1 "$TAG")"
+          test "$commit" = "$(git rev-parse "refs/tags/$TAG^{commit}")"
+          core_path=realm/realm-library/src/main/cpp/realm-core
+          test "$core" = "$(git ls-tree "$commit" "$core_path" | awk '$1 == "160000" && $2 == "commit" {print $3}')"
           test "$core" = "$(git -C realm/realm-library/src/main/cpp/realm-core rev-parse HEAD)"
           test -z "$(git status --porcelain --untracked-files=no)"
+          test -z "$(git -C "$core_path" status --porcelain --untracked-files=all)"
+          python3 tools/central-portal.py verify-stage-manifest \
+            --stage-manifest stage-manifest.json --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
+            --tag "$stage_tag" --version "$stage_version" --commit "$commit" --core-commit "$core" \
+            > /dev/null
           ci_run_id="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["ci_run_id"])')"
           ci_artifact_id="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["ci_artifact_id"])')"
           expected_archive_sha="$(python3 -c 'import json; print(json.load(open("stage-manifest.json"))["ci_artifact_sha256"])')"
@@ -857,22 +919,70 @@ jobs:
             --official-gradle-home-archive-sha256 "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" \
             --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" \
             --official-inputs-preflight-only
+      - name: Rebind final reviewed source to the exact staged deployment immediately before publication
+        id: final_source
+        env:
+          EXPECTED_COMMIT: ${{ needs.stage.outputs.source_commit }}
+          EXPECTED_CORE_COMMIT: ${{ needs.stage.outputs.source_core_commit }}
+          STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          version="$(cat version.txt)"
+          bash tools/verify-release-tag.sh "$TAG" "$version"
+          final_ref_root="refs/g011/final-source/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/release-intent"
+          final_branch_ref="$final_ref_root/branch"
+          final_tag_ref="$final_ref_root/tag"
+          cleanup_refs() {
+            git update-ref -d "$final_branch_ref" || true
+            git update-ref -d "$final_tag_ref" || true
+          }
+          trap cleanup_refs EXIT
+          git fetch --quiet --force --no-tags origin \
+            "refs/heads/$FINAL_SOURCE_BRANCH:$final_branch_ref" \
+            "refs/tags/$TAG:$final_tag_ref"
+          commit="$(git rev-parse HEAD)"
+          test "$commit" = "$EXPECTED_COMMIT"
+          test "$commit" = "$(git rev-parse "$final_branch_ref^{commit}")"
+          test "$commit" = "$(git rev-parse "$final_tag_ref^{commit}")"
+          test "$commit" = "$(git rev-parse "refs/tags/$TAG^{commit}")"
+          core_path=realm/realm-library/src/main/cpp/realm-core
+          core_commit="$(git ls-tree "$commit" "$core_path" | awk '$1 == "160000" && $2 == "commit" {print $3}')"
+          test -n "$core_commit"
+          test "$core_commit" = "$EXPECTED_CORE_COMMIT"
+          test "$core_commit" = "$(git -C "$core_path" rev-parse HEAD)"
+          test -z "$(git status --porcelain --untracked-files=all -- . ':(exclude)build' ':(exclude)stage-manifest.json')"
+          test -z "$(git -C "$core_path" status --porcelain --untracked-files=all)"
+          python3 tools/central-portal.py verify-stage-manifest \
+            --stage-manifest stage-manifest.json --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
+            --tag "$TAG" --version "$version" --commit "$commit" --core-commit "$core_commit" \
+            > /dev/null
+          cleanup_refs
+          trap - EXIT
+          printf 'tag=%s\n' "$TAG" >> "$GITHUB_OUTPUT"
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+          printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
+          printf 'core_commit=%s\n' "$core_commit" >> "$GITHUB_OUTPUT"
       - name: Write immutable publication intent after reviewer approval and final reaudit
         env:
-          COMMIT: ${{ needs.stage.outputs.source_commit }}
+          COMMIT: ${{ steps.final_source.outputs.commit }}
+          CORE_COMMIT: ${{ steps.final_source.outputs.core_commit }}
+          TAG: ${{ steps.final_source.outputs.tag }}
+          VERSION: ${{ steps.final_source.outputs.version }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
         run: |
           set -euo pipefail
-          python3 - "$COMMIT" "$STAGE_MANIFEST_SHA256" <<'PY'
+          python3 - "$TAG" "$VERSION" "$COMMIT" "$CORE_COMMIT" "$STAGE_MANIFEST_SHA256" <<'PY'
           import hashlib, json, pathlib, sys
-          commit, expected_stage_sha = sys.argv[1:]
+          tag, version, commit, core_commit, expected_stage_sha = sys.argv[1:]
           stage = pathlib.Path('stage-manifest.json')
           actual_stage_sha = hashlib.sha256(stage.read_bytes()).hexdigest()
           if actual_stage_sha != expected_stage_sha:
               raise SystemExit('publication intent stage manifest digest differs')
           manifest = json.loads(stage.read_text(encoding='utf-8'))
-          if manifest.get('commit') != commit:
-              raise SystemExit('publication intent commit differs from stage manifest')
+          actual = tuple(manifest.get(field) for field in ('tag', 'version', 'commit', 'core_commit'))
+          if actual != (tag, version, commit, core_commit):
+              raise SystemExit('publication intent differs from exact final source/tag/Core binding')
           audit = pathlib.Path('build/maven-central-release-environment-policy-audit.json')
           value = {
               'format': 'realm-maven-central-publication-intent-v1',
@@ -901,12 +1011,42 @@ jobs:
         id: portal_release
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          EXPECTED_COMMIT: ${{ steps.final_source.outputs.commit }}
+          EXPECTED_CORE_COMMIT: ${{ steps.final_source.outputs.core_commit }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
+          TAG: ${{ steps.final_source.outputs.tag }}
+          VERSION: ${{ steps.final_source.outputs.version }}
         run: |
           set -euo pipefail
+          final_ref_root="refs/g011/final-source/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}/release-publish"
+          final_branch_ref="$final_ref_root/branch"
+          final_tag_ref="$final_ref_root/tag"
+          cleanup_refs() {
+            git update-ref -d "$final_branch_ref" || true
+            git update-ref -d "$final_tag_ref" || true
+          }
+          trap cleanup_refs EXIT
+          git fetch --quiet --force --no-tags origin \
+            "refs/heads/$FINAL_SOURCE_BRANCH:$final_branch_ref" \
+            "refs/tags/$TAG:$final_tag_ref"
+          commit="$(git rev-parse HEAD)"
+          test "$commit" = "$EXPECTED_COMMIT"
+          test "$commit" = "$(git rev-parse "$final_branch_ref^{commit}")"
+          test "$commit" = "$(git rev-parse "$final_tag_ref^{commit}")"
+          test "$commit" = "$(git rev-parse "refs/tags/$TAG^{commit}")"
+          core_path=realm/realm-library/src/main/cpp/realm-core
+          core_commit="$(git ls-tree "$commit" "$core_path" | awk '$1 == "160000" && $2 == "commit" {print $3}')"
+          test "$core_commit" = "$EXPECTED_CORE_COMMIT"
+          test "$core_commit" = "$(git -C "$core_path" rev-parse HEAD)"
+          test "$VERSION" = "$(cat version.txt)"
+          test -z "$(git status --porcelain --untracked-files=all -- . ':(exclude)build' ':(exclude)stage-manifest.json')"
+          test -z "$(git -C "$core_path" status --porcelain --untracked-files=all)"
+          cleanup_refs
+          trap - EXIT
           : > build/maven-central-release-entered
           python3 tools/central-portal.py release \
             --stage-manifest stage-manifest.json --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
+            --tag "$TAG" --version "$VERSION" --commit "$commit" --core-commit "$core_commit" \
             --release-prepared build/maven-central-release-prepared.json \
             --release-evidence build/maven-central-release-evidence.json \
             --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network \
@@ -917,8 +1057,12 @@ jobs:
           printf 'release_prepared_sha256=%s\n' "$release_prepared_sha256" >> "$GITHUB_OUTPUT"
       - name: Consume Maven Central in a separate tokenless process
         env:
+          COMMIT: ${{ steps.final_source.outputs.commit }}
+          CORE_COMMIT: ${{ steps.final_source.outputs.core_commit }}
           STAGE_MANIFEST_SHA256: ${{ needs.stage.outputs.stage_manifest_sha256 }}
           RELEASE_PREPARED_SHA256: ${{ steps.portal_release.outputs.release_prepared_sha256 }}
+          TAG: ${{ steps.final_source.outputs.tag }}
+          VERSION: ${{ steps.final_source.outputs.version }}
           G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
           G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
           G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
@@ -931,6 +1075,7 @@ jobs:
           prepared=build/maven-central-release-prepared.json
           python3 tools/central-portal.py finalize-release \
             --stage-manifest stage-manifest.json --stage-manifest-sha256 "$STAGE_MANIFEST_SHA256" \
+            --tag "$TAG" --version "$VERSION" --commit "$COMMIT" --core-commit "$CORE_COMMIT" \
             --release-prepared "$prepared" --release-prepared-sha256 "$RELEASE_PREPARED_SHA256" \
             --published-consumer-command build/run-g011-central-consumer.sh \
             --published-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-central" \

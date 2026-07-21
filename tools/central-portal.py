@@ -1146,7 +1146,31 @@ def _read_hashed_json(path: Path, expected_sha256: str, *, label: str) -> dict[s
     return dict(value)
 
 
-def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, object]:
+def _require_exact_release_binding(
+    value: Mapping[str, object],
+    *,
+    tag: str,
+    version: str,
+    commit: str,
+    core_commit: str,
+    label: str,
+) -> None:
+    validate_release_binding(tag, version, commit, core_commit)
+    actual = tuple(str(value.get(field, "")) for field in ("tag", "version", "commit", "core_commit"))
+    expected = (tag, version, commit, core_commit)
+    if actual != expected:
+        raise PortalError(f"{label} differs from exact final source/tag/Core binding")
+
+
+def _read_stage_manifest(
+    path: Path,
+    expected_sha256: str,
+    *,
+    tag: str,
+    version: str,
+    commit: str,
+    core_commit: str,
+) -> Mapping[str, object]:
     _require_sha256(expected_sha256, "stage manifest SHA-256")
     if not path.is_file():
         raise PortalError("stage manifest does not exist")
@@ -1185,6 +1209,14 @@ def _read_stage_manifest(path: Path, expected_sha256: str) -> Mapping[str, objec
         str(manifest["version"]),
         str(manifest["commit"]),
         str(manifest["core_commit"]),
+    )
+    _require_exact_release_binding(
+        manifest,
+        tag=tag,
+        version=version,
+        commit=commit,
+        core_commit=core_commit,
+        label="stage manifest",
     )
     _require_sha256(manifest["bundle_sha256"], "bundle SHA-256")
     _require_sha256(manifest["source_manifest_sha256"], "source manifest SHA-256")
@@ -1333,10 +1365,27 @@ def _validate_prepared_stage(value: Mapping[str, object]) -> dict[str, object]:
     return dict(value)
 
 
-def _read_stage_prepared(path: Path, expected_sha256: str) -> dict[str, object]:
-    return _validate_prepared_stage(
+def _read_stage_prepared(
+    path: Path,
+    expected_sha256: str,
+    *,
+    tag: str,
+    version: str,
+    commit: str,
+    core_commit: str,
+) -> dict[str, object]:
+    prepared = _validate_prepared_stage(
         _read_hashed_json(path, expected_sha256, label="prepared stage")
     )
+    _require_exact_release_binding(
+        prepared,
+        tag=tag,
+        version=version,
+        commit=commit,
+        core_commit=core_commit,
+        label="prepared stage",
+    )
+    return prepared
 
 
 def _verify_materialized_mirror(
@@ -1501,6 +1550,10 @@ def finalize_stage(
     *,
     stage_prepared: Path,
     stage_prepared_sha256: str,
+    tag: str,
+    version: str,
+    commit: str,
+    core_commit: str,
     validated_consumer_command: Path,
     validated_consumer_gradle_home: Path,
     validated_consumer_evidence: Path,
@@ -1513,7 +1566,14 @@ def finalize_stage(
     failure_path = stage_manifest.with_name(stage_manifest.name + ".failed.json")
     if stage_manifest.exists() or failure_path.exists():
         raise PortalError("stage manifest already has a consumer outcome")
-    prepared = _read_stage_prepared(stage_prepared, stage_prepared_sha256)
+    prepared = _read_stage_prepared(
+        stage_prepared,
+        stage_prepared_sha256,
+        tag=tag,
+        version=version,
+        commit=commit,
+        core_commit=core_commit,
+    )
     _verify_materialized_mirror(prepared, validated_consumer_evidence)
     bearer_token = _token_from_environment(validated_consumer_bearer_env)
     try:
@@ -1545,7 +1605,14 @@ def finalize_stage(
     manifest["validated_consumer_evidence_sha256"] = consumer_sha256
     _write_json(stage_manifest, manifest)
     stage_sha256 = sha256_file(stage_manifest)
-    _read_stage_manifest(stage_manifest, stage_sha256)
+    _read_stage_manifest(
+        stage_manifest,
+        stage_sha256,
+        tag=tag,
+        version=version,
+        commit=commit,
+        core_commit=core_commit,
+    )
     return {
         "deployment_id": manifest["deployment_id"],
         "stage_manifest_sha256": stage_sha256,
@@ -1556,6 +1623,10 @@ def release(
     *,
     stage_manifest: Path,
     stage_manifest_sha256: str,
+    tag: str,
+    version: str,
+    commit: str,
+    core_commit: str,
     token_env: str,
     allow_network: bool,
     attempts: int,
@@ -1571,7 +1642,14 @@ def release(
 
     if release_prepared.exists() or (release_evidence is not None and release_evidence.exists()):
         raise PortalError("release transaction already has an outcome")
-    manifest = _read_stage_manifest(stage_manifest, stage_manifest_sha256)
+    manifest = _read_stage_manifest(
+        stage_manifest,
+        stage_manifest_sha256,
+        tag=tag,
+        version=version,
+        commit=commit,
+        core_commit=core_commit,
+    )
     if not allow_network:
         raise PortalError("network access requires --allow-network")
     client = client or PortalClient(_token_from_environment(token_env))
@@ -1624,6 +1702,10 @@ def finalize_release(
     *,
     stage_manifest: Path,
     stage_manifest_sha256: str,
+    tag: str,
+    version: str,
+    commit: str,
+    core_commit: str,
     release_prepared: Path,
     release_prepared_sha256: str,
     published_consumer_command: Path,
@@ -1637,7 +1719,14 @@ def finalize_release(
     _assert_tokenless_process()
     if release_evidence.exists():
         raise PortalError("release evidence already exists")
-    manifest = _read_stage_manifest(stage_manifest, stage_manifest_sha256)
+    manifest = _read_stage_manifest(
+        stage_manifest,
+        stage_manifest_sha256,
+        tag=tag,
+        version=version,
+        commit=commit,
+        core_commit=core_commit,
+    )
     prepared = _read_hashed_json(
         release_prepared, release_prepared_sha256, label="prepared release"
     )
@@ -1763,6 +1852,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     verify_stage.add_argument("--stage-manifest", required=True, type=Path)
     verify_stage.add_argument("--stage-manifest-sha256", required=True)
+    verify_stage.add_argument("--tag", required=True)
+    verify_stage.add_argument("--version", required=True)
+    verify_stage.add_argument("--commit", required=True)
+    verify_stage.add_argument("--core-commit", required=True)
 
     policy = commands.add_parser("audit-environment-policy", help="write a redacted, hashed environment-policy audit")
     policy.add_argument("--stage-policy", required=True, type=Path)
@@ -1806,6 +1899,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     release_parser = commands.add_parser("release", help="publish the exact deployment in a staged manifest")
     release_parser.add_argument("--stage-manifest", required=True, type=Path)
     release_parser.add_argument("--stage-manifest-sha256", required=True)
+    release_parser.add_argument("--tag", required=True)
+    release_parser.add_argument("--version", required=True)
+    release_parser.add_argument("--commit", required=True)
+    release_parser.add_argument("--core-commit", required=True)
     release_parser.add_argument("--release-prepared", required=True, type=Path)
     release_parser.add_argument("--release-evidence", required=True, type=Path)
     release_parser.add_argument("--token-env", default="CENTRAL_PORTAL_TOKEN")
@@ -1821,6 +1918,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     finalize_stage_parser.add_argument("--stage-prepared", required=True, type=Path)
     finalize_stage_parser.add_argument("--stage-prepared-sha256", required=True)
+    finalize_stage_parser.add_argument("--tag", required=True)
+    finalize_stage_parser.add_argument("--version", required=True)
+    finalize_stage_parser.add_argument("--commit", required=True)
+    finalize_stage_parser.add_argument("--core-commit", required=True)
     finalize_stage_parser.add_argument("--validated-consumer-command", required=True, type=Path)
     finalize_stage_parser.add_argument("--validated-consumer-gradle-home", required=True, type=Path)
     finalize_stage_parser.add_argument("--validated-consumer-evidence", required=True, type=Path)
@@ -1835,6 +1936,10 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     )
     finalize_release_parser.add_argument("--stage-manifest", required=True, type=Path)
     finalize_release_parser.add_argument("--stage-manifest-sha256", required=True)
+    finalize_release_parser.add_argument("--tag", required=True)
+    finalize_release_parser.add_argument("--version", required=True)
+    finalize_release_parser.add_argument("--commit", required=True)
+    finalize_release_parser.add_argument("--core-commit", required=True)
     finalize_release_parser.add_argument("--release-prepared", required=True, type=Path)
     finalize_release_parser.add_argument("--release-prepared-sha256", required=True)
     finalize_release_parser.add_argument("--published-consumer-command", required=True, type=Path)
@@ -1865,7 +1970,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "source_manifest_sha256": source_manifest_sha256,
             }
         elif args.command == "verify-stage-manifest":
-            manifest = _read_stage_manifest(args.stage_manifest, args.stage_manifest_sha256)
+            manifest = _read_stage_manifest(
+                args.stage_manifest,
+                args.stage_manifest_sha256,
+                tag=args.tag,
+                version=args.version,
+                commit=args.commit,
+                core_commit=args.core_commit,
+            )
             result = {
                 "status": "VERIFIED",
                 "deployment_id": manifest["deployment_id"],
@@ -1915,6 +2027,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = finalize_stage(
                 stage_prepared=args.stage_prepared,
                 stage_prepared_sha256=args.stage_prepared_sha256,
+                tag=args.tag,
+                version=args.version,
+                commit=args.commit,
+                core_commit=args.core_commit,
                 validated_consumer_command=args.validated_consumer_command,
                 validated_consumer_gradle_home=args.validated_consumer_gradle_home,
                 validated_consumer_evidence=args.validated_consumer_evidence,
@@ -1925,6 +2041,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = release(
                 stage_manifest=args.stage_manifest,
                 stage_manifest_sha256=args.stage_manifest_sha256,
+                tag=args.tag,
+                version=args.version,
+                commit=args.commit,
+                core_commit=args.core_commit,
                 token_env=args.token_env,
                 allow_network=args.allow_network,
                 attempts=args.poll_attempts,
@@ -1939,6 +2059,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             result = finalize_release(
                 stage_manifest=args.stage_manifest,
                 stage_manifest_sha256=args.stage_manifest_sha256,
+                tag=args.tag,
+                version=args.version,
+                commit=args.commit,
+                core_commit=args.core_commit,
                 release_prepared=args.release_prepared,
                 release_prepared_sha256=args.release_prepared_sha256,
                 published_consumer_command=args.published_consumer_command,
