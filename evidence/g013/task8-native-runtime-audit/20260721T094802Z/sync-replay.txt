@@ -1,0 +1,8 @@
+forbidden_patterns=realm::sync|realm_sync|SyncSession|SyncManager|libsync|object-store/sync
+--- jni/arm64-v8a/librealm-jni.so
+SYNC_SYMBOL_SCAN=PASS
+--- jni/armeabi-v7a/librealm-jni.so
+SYNC_SYMBOL_SCAN=PASS
+--- jni/x86_64/librealm-jni.so
+SYNC_SYMBOL_SCAN=PASS
+RESULT=PASS

@@ -1,0 +1,4 @@
+task3_top_checksums_ok=90
+ac08_nested_checksums_ok=28
+task3_privacy=RESULT=PASS
+RESULT=PASS

@@ -1,0 +1,16 @@
+task=8
+finished_at=2026-07-21T09:55:58Z
+audited_commit=42affb8d4e2a1fc078b1916ba653e8e1c99df135
+audited_parent=d39316930fd63e379b58bc6296696781099ca4c7
+source_changes=none
+external_actions=none
+native_replay=PASS exact ABIs armeabi-v7a arm64-v8a x86_64; all ELF PT_LOAD 0x4000
+package_replay=PASS AAR/APK digests match; x86 absent; Sync symbols absent; zipalign -P16 PASS
+target_replay=PASS SDK=37 AVD=realm-api37-ps16k-kvm PAGE_SIZE=16384 no compatibility fallback
+AC07_audit=PASS official/fork bidirectional evidence; immutable inputs; wrong-key rejection; zero migration callbacks
+AC08_audit=PASS official 1/1; fork 6/6; notification/thread/wrong-key/migration/restart markers; exact target
+digests=PASS task3 top-level 90/90; AC08 nested 28/28
+commit_audit=PASS exact d393 parent; 94 evidence-only paths; Lore markers present
+tests=PASS native verifier 3/3 and AC08 parameterization 6/6
+privacy=PASS no credential-bearing patterns
+verdict=PASS

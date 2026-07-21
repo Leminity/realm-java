@@ -1,0 +1,8 @@
+task=8
+subject=Independent native/runtime evidence audit
+started_at=2026-07-21T09:48:02Z
+audited_commit=42affb8d4e2a1fc078b1916ba653e8e1c99df135
+audited_parent=d39316930fd63e379b58bc6296696781099ca4c7
+expected_source_head=d39316930fd63e379b58bc6296696781099ca4c7
+task3_evidence=evidence/g013/task3-abi-native/20260721T090205Z
+external_actions=none

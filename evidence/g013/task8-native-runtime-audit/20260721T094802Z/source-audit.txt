@@ -1,0 +1,6 @@
+head=42affb8d4e2a1fc078b1916ba653e8e1c99df135
+tracked_or_untracked_status_begin
+?? evidence/g013/task8-native-runtime-audit/
+tracked_or_untracked_status_end
+source_worktree_clean_except_task8_evidence=PASS
+source_delta_from_d393=none

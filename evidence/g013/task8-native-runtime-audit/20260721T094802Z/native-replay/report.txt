@@ -1,0 +1,11 @@
+tool=g011-verify-native-elf
+ndk_version=29.0.14206865
+llvm_readelf=/home/leminity/Android/Sdk/ndk/29.0.14206865/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-readelf
+aar=realm/realm-library/build/outputs/aar/realm-android-library-base-release.aar
+aar_sha256=867340444356ffae837f937bb817c51825581a56f0f5b522a18d7ba23c680397
+expected_abis=armeabi-v7a arm64-v8a x86_64
+ABI_SET=PASS
+entry=jni/arm64-v8a/librealm-jni.so abi=arm64-v8a load_alignment=0x4000 0x4000 0x4000 status=PASS
+entry=jni/armeabi-v7a/librealm-jni.so abi=armeabi-v7a load_alignment=0x4000 0x4000 0x4000 status=PASS
+entry=jni/x86_64/librealm-jni.so abi=x86_64 load_alignment=0x4000 0x4000 0x4000 status=PASS
+RESULT=PASS

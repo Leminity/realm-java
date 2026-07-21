@@ -1,0 +1,7 @@
+audited_commit=42affb8d4e2a1fc078b1916ba653e8e1c99df135
+parent=d39316930fd63e379b58bc6296696781099ca4c7
+parent_exact_d393=PASS
+commit_paths=94
+evidence_only=PASS
+subject=task: verify G013 native and API37 16KiB gates
+lore_markers=4

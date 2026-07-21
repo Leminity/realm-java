@@ -1,0 +1,2 @@
+authored_text_diff_check=PASS
+note=llvm-readelf and adb raw outputs retain upstream trailing whitespace verbatim

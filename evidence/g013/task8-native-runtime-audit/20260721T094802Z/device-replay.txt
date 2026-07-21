@@ -1,0 +1,7 @@
+captured_at=2026-07-21T09:49:35Z
+serial=emulator-5654
+sdk=37
+avd=realm-api37-ps16k-kvm
+product=sdk_gphone16k_x86_64
+page_size=16384
+fingerprint=google/sdk_gphone16k_x86_64/emu64xa16k:17/CE2A.260420.019/15611780:userdebug/dev-keys

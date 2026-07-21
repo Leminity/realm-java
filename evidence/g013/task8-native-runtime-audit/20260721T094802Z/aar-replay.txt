@@ -1,0 +1,9 @@
+aar=realm/realm-library/build/outputs/aar/realm-android-library-base-release.aar
+867340444356ffae837f937bb817c51825581a56f0f5b522a18d7ba23c680397  realm/realm-library/build/outputs/aar/realm-android-library-base-release.aar
+entries:
+jni/arm64-v8a/librealm-jni.so
+jni/armeabi-v7a/librealm-jni.so
+jni/x86_64/librealm-jni.so
+task3_expected_hash=867340444356ffae837f937bb817c51825581a56f0f5b522a18d7ba23c680397
+current_hash=867340444356ffae837f937bb817c51825581a56f0f5b522a18d7ba23c680397
+x86=ABSENT
