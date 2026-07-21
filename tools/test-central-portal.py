@@ -96,13 +96,13 @@ class CentralPortalTests(unittest.TestCase):
             {
                 "total_count": 1,
                 "branch_policies": [
-                    {"id": 1, "name": CP.APPROVED_DEPLOYMENT_TAG_PATTERN}
+                    {"id": 1, "name": CP.APPROVED_DEPLOYMENT_TAG_PATTERN, "type": "tag"}
                 ],
             }
         )
         self.stage_deployment_policies.write_text(deployment_policy, encoding="utf-8")
         self.release_deployment_policies.write_text(deployment_policy, encoding="utf-8")
-        for path, reviewer in ((self.stage_policy, "stage-reviewer"), (self.release_policy, "release-reviewer")):
+        for path in (self.stage_policy, self.release_policy):
             path.write_text(
                 json.dumps(
                 {
@@ -121,9 +121,12 @@ class CentralPortalTests(unittest.TestCase):
                             "id": 1,
                             "node_id": "MDQ6UmVxdWlyZWRSZXZpZXdlcnMx",
                             "type": "required_reviewers",
-                            "prevent_self_review": True,
+                            "prevent_self_review": False,
                             "reviewers": [
-                                {"type": "User", "reviewer": {"id": reviewer, "login": reviewer}}
+                                {
+                                    "type": "User",
+                                    "reviewer": {"id": 123456, "login": CP.APPROVED_ENVIRONMENT_REVIEWER},
+                                }
                             ],
                         }
                     ],
@@ -1064,37 +1067,49 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         with self.assertRaisesRegex(CP.PortalError, "paths differ"):
             CP.verify_bundle_binding(self.bundle, self.source_manifest)
 
-    def test_policy_audit_is_redacted_hashed_and_requires_independent_reviewers(self) -> None:
+    def test_policy_audit_is_redacted_hashed_and_requires_exact_solo_reviewer(self) -> None:
         audit_sha = CP.verify_environment_policy_audit(self.policy_audit)
         self.assertEqual(audit_sha, CP.sha256_file(self.policy_audit))
         audit = self.policy_audit.read_text(encoding="utf-8")
-        self.assertNotIn("stage-reviewer", audit)
-        self.assertNotIn("release-reviewer", audit)
-        duplicate = self.root / "duplicate-release-policy.json"
-        duplicate_policy = json.loads(self.release_policy.read_text(encoding="utf-8"))
-        duplicate_policy["protection_rules"][0]["reviewers"] = json.loads(
-            self.stage_policy.read_text(encoding="utf-8")
-        )["protection_rules"][0]["reviewers"]
-        duplicate.write_text(json.dumps(duplicate_policy), encoding="utf-8")
-        with self.assertRaisesRegex(CP.PortalError, "not distinct"):
+        self.assertNotIn(CP.APPROVED_ENVIRONMENT_REVIEWER, audit)
+        expected_fingerprint = hashlib.sha256(CP.APPROVED_ENVIRONMENT_REVIEWER.encode("utf-8")).hexdigest()
+        audit_value = json.loads(audit)
+        for environment in ("stage", "release"):
+            self.assertIs(audit_value[environment]["prevent_self_review"], False)
+            self.assertEqual(audit_value[environment]["reviewer_fingerprints"], [expected_fingerprint])
+
+        def write_tampered_audit(name: str, value: dict[str, object]) -> Path:
+            unsigned = {key: item for key, item in value.items() if key != "audit_sha256"}
+            value["audit_sha256"] = hashlib.sha256(
+                json.dumps(unsigned, sort_keys=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest()
+            path = self.root / name
+            path.write_text(json.dumps(value), encoding="utf-8")
+            return path
+
+        tampered_self_review = json.loads(audit)
+        tampered_self_review["stage"]["prevent_self_review"] = True
+        tampered_self_review_path = write_tampered_audit(
+            "tampered-self-review-audit.json", tampered_self_review
+        )
+        with self.assertRaisesRegex(CP.PortalError, "does not enable solo reviewer self-review"):
+            CP.verify_environment_policy_audit(tampered_self_review_path)
+
+        tampered_reviewer = json.loads(audit)
+        tampered_reviewer["release"]["reviewer_fingerprints"] = ["0" * 64]
+        tampered_reviewer_path = write_tampered_audit(
+            "tampered-reviewer-audit.json", tampered_reviewer
+        )
+        with self.assertRaisesRegex(CP.PortalError, "exact solo reviewer"):
+            CP.verify_environment_policy_audit(tampered_reviewer_path)
+
+        wrong_reviewer = self.root / "wrong-reviewer-policy.json"
+        wrong_policy = json.loads(self.stage_policy.read_text(encoding="utf-8"))
+        wrong_policy["protection_rules"][0]["reviewers"][0]["reviewer"]["login"] = "OtherUser"
+        wrong_reviewer.write_text(json.dumps(wrong_policy), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "exactly Leminity"):
             CP.write_environment_policy_audit(
-                self.stage_policy,
-                self.stage_deployment_policies,
-                duplicate,
-                self.release_deployment_policies,
-                REPOSITORY,
-                self.admin_bypass_attestation,
-                GATE_TIME,
-                "v10.19.0-agp9.1",
-                self.root / "duplicate-audit.json",
-            )
-        policy = json.loads(self.stage_policy.read_text(encoding="utf-8"))
-        policy["protection_rules"][0]["prevent_self_review"] = False
-        missing_self_review = self.root / "missing-self-review.json"
-        missing_self_review.write_text(json.dumps(policy), encoding="utf-8")
-        with self.assertRaisesRegex(CP.PortalError, "prevent-self-review"):
-            CP.write_environment_policy_audit(
-                missing_self_review,
+                wrong_reviewer,
                 self.stage_deployment_policies,
                 self.release_policy,
                 self.release_deployment_policies,
@@ -1102,7 +1117,43 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 self.admin_bypass_attestation,
                 GATE_TIME,
                 "v10.19.0-agp9.1",
-                self.root / "missing-self-review-audit.json",
+                self.root / "wrong-reviewer-audit.json",
+            )
+
+        multiple_reviewers = self.root / "multiple-reviewers-policy.json"
+        multiple_policy = json.loads(self.stage_policy.read_text(encoding="utf-8"))
+        multiple_policy["protection_rules"][0]["reviewers"].append(
+            {"type": "User", "reviewer": {"id": 654321, "login": "OtherUser"}}
+        )
+        multiple_reviewers.write_text(json.dumps(multiple_policy), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "exactly Leminity"):
+            CP.write_environment_policy_audit(
+                multiple_reviewers,
+                self.stage_deployment_policies,
+                self.release_policy,
+                self.release_deployment_policies,
+                REPOSITORY,
+                self.admin_bypass_attestation,
+                GATE_TIME,
+                "v10.19.0-agp9.1",
+                self.root / "multiple-reviewers-audit.json",
+            )
+
+        policy = json.loads(self.stage_policy.read_text(encoding="utf-8"))
+        policy["protection_rules"][0]["prevent_self_review"] = True
+        prevented_self_review = self.root / "prevented-self-review.json"
+        prevented_self_review.write_text(json.dumps(policy), encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "self-review must be enabled"):
+            CP.write_environment_policy_audit(
+                prevented_self_review,
+                self.stage_deployment_policies,
+                self.release_policy,
+                self.release_deployment_policies,
+                REPOSITORY,
+                self.admin_bypass_attestation,
+                GATE_TIME,
+                "v10.19.0-agp9.1",
+                self.root / "prevented-self-review-audit.json",
             )
         broad = self.root / "broad-deployment-policies.json"
         broad.write_text(
@@ -1110,8 +1161,8 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 {
                     "total_count": 2,
                     "branch_policies": [
-                        {"id": 1, "name": CP.APPROVED_DEPLOYMENT_TAG_PATTERN},
-                        {"id": 2, "name": "*"},
+                        {"id": 1, "name": CP.APPROVED_DEPLOYMENT_TAG_PATTERN, "type": "tag"},
+                        {"id": 2, "name": "*", "type": "tag"},
                     ],
                 }
             ),
@@ -1128,6 +1179,31 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 GATE_TIME,
                 "v10.19.0-agp9.1",
                 self.root / "broad-policy-audit.json",
+            )
+
+        branch_policy = self.root / "branch-deployment-policy.json"
+        branch_policy.write_text(
+            json.dumps(
+                {
+                    "total_count": 1,
+                    "branch_policies": [
+                        {"id": 1, "name": CP.APPROVED_DEPLOYMENT_TAG_PATTERN, "type": "branch"}
+                    ],
+                }
+            ),
+            encoding="utf-8",
+        )
+        with self.assertRaisesRegex(CP.PortalError, "custom tag policy"):
+            CP.write_environment_policy_audit(
+                self.stage_policy,
+                branch_policy,
+                self.release_policy,
+                self.release_deployment_policies,
+                REPOSITORY,
+                self.admin_bypass_attestation,
+                GATE_TIME,
+                "v10.19.0-agp9.1",
+                self.root / "branch-policy-audit.json",
             )
 
     def test_policy_audit_fails_closed_for_missing_true_or_stale_admin_bypass_proof(self) -> None:
@@ -1184,8 +1260,16 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         self.assertIn("github.event.release.prerelease == false", workflow)
         self.assertIn('test "$GITHUB_REF" = "refs/tags/$TAG"', workflow)
         self.assertNotIn("tools/release.sh", workflow)
-        self.assertIn("G011_ENVIRONMENT_POLICY_TOKEN", workflow)
-        self.assertIn("G011_ENVIRONMENT_BYPASS_ATTESTATION", workflow)
+        self.assertEqual(
+            workflow.count("G011_ENVIRONMENT_POLICY_TOKEN: ${{ secrets.G011_ENVIRONMENT_POLICY_TOKEN }}"),
+            2,
+        )
+        self.assertEqual(
+            workflow.count(
+                "G011_ENVIRONMENT_BYPASS_ATTESTATION: ${{ secrets.G011_ENVIRONMENT_BYPASS_ATTESTATION }}"
+            ),
+            2,
+        )
         self.assertEqual(workflow.count("--admin-bypass-attestation"), 2)
         self.assertEqual(workflow.count("--gate-time"), 2)
         self.assertIn("audit-environment-policy", workflow)

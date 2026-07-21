@@ -47,6 +47,7 @@ CONSUMER_EVIDENCE_FORMAT = "realm-maven-central-consumer-evidence-v1"
 MIRROR_EVIDENCE_FORMAT = "realm-maven-central-validated-mirror-v1"
 RUNTIME_PROVENANCE_SCHEMA_VERSION = 2
 APPROVED_DEPLOYMENT_TAG_PATTERN = "v10.19.0-agp9.*"
+APPROVED_ENVIRONMENT_REVIEWER = "Leminity"
 ADMIN_BYPASS_PROOF_MAX_AGE_SECONDS = 15 * 60
 RUNTIME_GATE_PATHS = (
     ".github/workflows/ci.yml",
@@ -269,31 +270,43 @@ def verify_runtime_provenance(path: Path, commit: str, core_commit: str) -> Mapp
     }
 
 
-def _reviewer_fingerprints(policy: Mapping[str, object], environment: str) -> set[str]:
+def _solo_reviewer_fingerprints(policy: Mapping[str, object], environment: str) -> set[str]:
+    reviewer_error = (
+        f"{environment}: required reviewer must be exactly {APPROVED_ENVIRONMENT_REVIEWER}"
+    )
     rules = policy.get("protection_rules")
     if not isinstance(rules, list):
-        raise PortalError(f"{environment}: required reviewers are not configured")
-    reviewers: set[str] = set()
-    for rule in rules:
-        if not isinstance(rule, dict) or rule.get("type") != "required_reviewers":
-            continue
-        configured = rule.get("reviewers")
-        if not isinstance(configured, list):
-            continue
-        for reviewer in configured:
-            if not isinstance(reviewer, dict):
-                continue
-            # GitHub's environment API has used both a direct reviewer shape
-            # and ``{type, reviewer: {...}}``; numeric IDs are valid too.
-            nested = reviewer.get("reviewer")
-            candidate = nested if isinstance(nested, dict) else reviewer
-            raw_identity = candidate.get("id") or candidate.get("node_id") or candidate.get("login")
-            identity = str(raw_identity) if raw_identity is not None else None
-            if identity:
-                reviewers.add(hashlib.sha256(identity.encode("utf-8")).hexdigest())
-    if not reviewers:
-        raise PortalError(f"{environment}: required reviewers are not configured")
-    return reviewers
+        raise PortalError(reviewer_error)
+    reviewer_rules = [
+        rule
+        for rule in rules
+        if isinstance(rule, dict) and rule.get("type") == "required_reviewers"
+    ]
+    if len(reviewer_rules) != 1:
+        raise PortalError(reviewer_error)
+    rule = reviewer_rules[0]
+    configured = rule.get("reviewers")
+    if not isinstance(configured, list) or len(configured) != 1:
+        raise PortalError(reviewer_error)
+    reviewer = configured[0]
+    if not isinstance(reviewer, dict):
+        raise PortalError(reviewer_error)
+    # GitHub's environment API has used both a direct reviewer shape and
+    # ``{type, reviewer: {...}}``. The login remains the authoritative,
+    # human-auditable identity for the approved solo reviewer.
+    nested = reviewer.get("reviewer")
+    candidate = nested if isinstance(nested, dict) else reviewer
+    reviewer_type = reviewer.get("type") or candidate.get("type")
+    if (
+        reviewer_type != "User"
+        or candidate.get("login") != APPROVED_ENVIRONMENT_REVIEWER
+    ):
+        raise PortalError(reviewer_error)
+    if rule.get("prevent_self_review") is not False:
+        raise PortalError(f"{environment}: solo reviewer self-review must be enabled")
+    return {
+        hashlib.sha256(APPROVED_ENVIRONMENT_REVIEWER.encode("utf-8")).hexdigest()
+    }
 
 
 def _admin_bypass_proof(
@@ -449,7 +462,7 @@ def _environment_policy_summary(
     release_tag: str,
     gate_time: datetime,
 ) -> Mapping[str, object]:
-    reviewers = _reviewer_fingerprints(policy, environment)
+    reviewers = _solo_reviewer_fingerprints(policy, environment)
     branch_policy = policy.get("deployment_branch_policy")
     if not isinstance(branch_policy, dict) or not (
         branch_policy.get("protected_branches") is False
@@ -463,33 +476,21 @@ def _environment_policy_summary(
         or len(raw_policies) != 1
     ):
         raise PortalError(f"{environment}: custom tag policy list is missing")
-    names = {
-        item.get("name")
+    policies = {
+        (item.get("type"), item.get("name"))
         for item in raw_policies
-        if isinstance(item, dict) and isinstance(item.get("name"), str)
+        if isinstance(item, dict)
     }
-    if names != {APPROVED_DEPLOYMENT_TAG_PATTERN} or not fnmatchcase(
+    if policies != {("tag", APPROVED_DEPLOYMENT_TAG_PATTERN)} or not fnmatchcase(
         release_tag, APPROVED_DEPLOYMENT_TAG_PATTERN
     ):
         raise PortalError(f"{environment}: custom tag policy differs from the approved release family")
-    # GitHub's GET environment response places this setting on the
-    # ``required_reviewers`` protection-rule object, not on the environment
-    # object. Treat every other shape as unproven.
-    rules = policy.get("protection_rules")
-    has_prevent_self_review = isinstance(rules, list) and any(
-        isinstance(rule, dict)
-        and rule.get("type") == "required_reviewers"
-        and rule.get("prevent_self_review") is True
-        for rule in rules
-    )
-    if not has_prevent_self_review:
-        raise PortalError(f"{environment}: prevent-self-review is not enabled")
     return {
         "environment": environment,
-        # Fingerprints retain the independent-reviewer proof without exposing
-        # account names in a durable release artifact.
+        # The fingerprint retains the exact solo-reviewer proof without
+        # exposing the account name in a durable release artifact.
         "reviewer_fingerprints": sorted(reviewers),
-        "prevent_self_review": True,
+        "prevent_self_review": False,
         "protected_or_custom_tag_policy": True,
         "release_tag": release_tag,
         "deployment_tag_policy_sha256": hashlib.sha256(
@@ -552,8 +553,6 @@ def write_environment_policy_audit(
         release_tag,
         parsed_gate_time,
     )
-    if set(stage["reviewer_fingerprints"]) & set(release["reviewer_fingerprints"]):
-        raise PortalError("stage and release required reviewers are not distinct")
     payload: dict[str, object] = {"format": POLICY_AUDIT_FORMAT, "stage": stage, "release": release}
     canonical = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     payload["audit_sha256"] = hashlib.sha256(canonical).hexdigest()
@@ -569,9 +568,14 @@ def verify_environment_policy_audit(path: Path) -> str:
     release = audit.get("release")
     if not isinstance(stage, dict) or not isinstance(release, dict):
         raise PortalError("environment policy audit is incomplete")
+    expected_reviewer_fingerprint = hashlib.sha256(
+        APPROVED_ENVIRONMENT_REVIEWER.encode("utf-8")
+    ).hexdigest()
     for policy, environment in ((stage, "maven-central-stage"), (release, "maven-central-release")):
-        if policy.get("environment") != environment or policy.get("prevent_self_review") is not True:
-            raise PortalError("environment policy audit lacks prevent-self-review")
+        if policy.get("environment") != environment:
+            raise PortalError("environment policy audit environment differs")
+        if policy.get("prevent_self_review") is not False:
+            raise PortalError("environment policy audit does not enable solo reviewer self-review")
         if policy.get("protected_or_custom_tag_policy") is not True:
             raise PortalError("environment policy audit lacks protected/custom tag policy")
         if policy.get("admin_bypass_disabled") is not True:
@@ -596,10 +600,8 @@ def verify_environment_policy_audit(path: Path) -> str:
         if policy.get("deployment_tag_policy_sha256") != expected_policy_sha:
             raise PortalError("environment policy audit tag policy differs")
         reviewers = policy.get("reviewer_fingerprints")
-        if not isinstance(reviewers, list) or not reviewers or any(not SHA256_RE.fullmatch(str(item)) for item in reviewers):
-            raise PortalError("environment policy audit lacks required reviewers")
-    if set(stage["reviewer_fingerprints"]) & set(release["reviewer_fingerprints"]):
-        raise PortalError("environment policy audit reviewers are not distinct")
+        if reviewers != [expected_reviewer_fingerprint]:
+            raise PortalError("environment policy audit lacks the exact solo reviewer")
     if stage["release_tag"] != release["release_tag"]:
         raise PortalError("environment policy audit tags differ")
     expected = audit.get("audit_sha256")
