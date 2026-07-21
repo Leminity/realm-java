@@ -1,0 +1,41 @@
+E.G011 manifest failed: unexpected Core commit/gitlink: 36f5346e8a0841ac6af09a391bd45902b1be0091/d7b52ccbada0283527db36143cfeab18692b4ed0
+EE....
+======================================================================
+ERROR: test_baseline_structure_and_pins (__main__.ManifestTests.test_baseline_structure_and_pins)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/test-g011-evidence-manifest.py", line 39, in test_baseline_structure_and_pins
+    manifest = MODULE.build_manifest(root, "baseline")
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/g011-evidence-manifest.py", line 348, in build_manifest
+    raise ManifestError(f"unexpected Core commit/gitlink: {core_commit}/{core_gitlink}")
+g011_evidence_manifest.ManifestError: unexpected Core commit/gitlink: 36f5346e8a0841ac6af09a391bd45902b1be0091/d7b52ccbada0283527db36143cfeab18692b4ed0
+
+======================================================================
+ERROR: test_cli_baseline_and_runtime_round_trip (__main__.ManifestTests.test_cli_baseline_and_runtime_round_trip)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/test-g011-evidence-manifest.py", line 139, in test_cli_baseline_and_runtime_round_trip
+    subprocess.run([str(SCRIPT), "--mode", "baseline", "--output", str(baseline)], cwd=root, check=True)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/linuxbrew/.linuxbrew/Cellar/python@3.14/3.14.6/lib/python3.14/subprocess.py", line 578, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/g011-evidence-manifest.py', '--mode', 'baseline', '--output', '/tmp/tmpqbn65hul/baseline.json']' returned non-zero exit status 1.
+
+======================================================================
+ERROR: test_runtime_binds_exact_dynamic_head_and_checksums (__main__.ManifestTests.test_runtime_binds_exact_dynamic_head_and_checksums)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/test-g011-evidence-manifest.py", line 65, in test_runtime_binds_exact_dynamic_head_and_checksums
+    manifest = MODULE.build_manifest(root, "runtime", evidence)
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/g011-evidence-manifest.py", line 337, in build_manifest
+    assert_runtime_source_clean(root)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/g011-evidence-manifest.py", line 236, in assert_runtime_source_clean
+    raise ManifestError("runtime source has tracked or staged changes and cannot bind exact HEAD")
+g011_evidence_manifest.ManifestError: runtime source has tracked or staged changes and cannot bind exact HEAD
+
+----------------------------------------------------------------------
+Ran 8 tests in 12.953s
+
+FAILED (errors=3)

@@ -1,0 +1,27 @@
+CHECK focused trust regression
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.224s
+
+OK
+CHECK existing CI contract regression
+.
+----------------------------------------------------------------------
+Ran 1 test in 0.022s
+
+OK
+CHECK Python syntax/type surface
+CHECK Python tabnanny lint
+CHECK YAML parse
+CHECK release workflow unchanged
+CHECK whitespace and conflict markers
+CHECK exact source/toolchain contract remains
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.6.1-bin.zip
+GRADLE_BUILD_TOOLS=9.1.1
+ndkVersion=29.0.14206865
+    project.ext.minSdkVersion = 21
+    project.ext.compileSdkVersion = 37
+    project.ext.targetSdkVersion = 37
+                    abiFilters 'x86_64', 'armeabi-v7a', 'arm64-v8a'
+openjdk version "17.0.19" 2026-04-21
+CHECK PASS
