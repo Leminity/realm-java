@@ -1,0 +1,12 @@
+outer_snapshot_seal=PASS
+source_pre_seal=PASS
+source_post_seal=PASS
+source_committed_seal=PASS
+source_pre_manifest_copy=PASS
+source_post_manifest_copy=PASS
+source_rollback_digest_prefix=PASS
+source_rollback_standard_sha256sum_format=KNOWN_SOURCE_DEFECT
+source_literal_url_scan=PASS
+source_repository_url_key_scan=PASS
+source_portal_deployment_identifier_scan=PASS
+recovered_identity_values_omitted=PASS

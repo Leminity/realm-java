@@ -1,0 +1,7 @@
+approval-response-sanitized.json: OK
+artifacts.json: OK
+failure-summary.json: OK
+failure.txt: OK
+jobs.json: OK
+pending-deployments.json: OK
+run.json: OK

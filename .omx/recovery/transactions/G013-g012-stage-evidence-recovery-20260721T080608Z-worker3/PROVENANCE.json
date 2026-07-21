@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "source_snapshot": ".omx/handoffs/G012-exact-source-stage-failure-20260721T035718Z",
+  "source_slice": "team-state/evidence/worker-3/g012-stage-monitor-20260721T035053Z",
+  "source_file_count": 24,
+  "source_symlink_count": 0,
+  "outer_manifest_sha256": "fc3476bfcbcd1fca8536073e82a5d71a6c387d651ff8fd7cd88af492a78ebe5f",
+  "source_inventory_sha256": "ef91bcf902278c2224bd24c03b4f99018c8662e09c4b70b545886ea498948240",
+  "phase_manifest_sha256": {
+    "pre": "c5258e8f56d2470023eead487d44dd506bd0d769b5e217f75198ac4109716e26",
+    "post": "6aaf3c05b14e7b70620d9242cf5b999cee4d048f8847ff86111e6c8b1fd35a55",
+    "committed": "94efd1fa70309a93351615461e99f86a12b3e7def4478ee2c5be1cfbd37529a7"
+  },
+  "source_rollback_checksum_format": "digest-concatenated-with-filename",
+  "source_rollback_digest_verified": true,
+  "source_bytes_modified": false,
+  "external_side_effects": false
+}

@@ -1,0 +1,34 @@
+{
+  "approval_response": {
+    "approved_count": 1,
+    "response_type": "array",
+    "states": [
+      null
+    ]
+  },
+  "approved_environment": "maven-central-stage",
+  "blocker": "no exact successful unexpired G011 CI artifact for release commit",
+  "central_publish_invoked": false,
+  "evidence_kind": "curated stage-monitor recovery",
+  "interpretation": {
+    "empty_pending_list_is_not_validation_proof": true,
+    "environment_approval_is_not_portal_validation": true,
+    "null_approval_state_is_not_validation_proof": true
+  },
+  "omitted_identity_fields": [
+    "approval actor",
+    "reviewer login",
+    "workflow run identifier",
+    "commit identity",
+    "artifact digest"
+  ],
+  "phase": "failed-closed-before-central-upload",
+  "release_environment_approved": false,
+  "schema_version": 1,
+  "source_goal": "G012",
+  "stage_approval_succeeded": true,
+  "user_managed_upload_invoked": false,
+  "validated_consumer_executed": false,
+  "validated_state_reached": false,
+  "workflow_conclusion": "failure"
+}

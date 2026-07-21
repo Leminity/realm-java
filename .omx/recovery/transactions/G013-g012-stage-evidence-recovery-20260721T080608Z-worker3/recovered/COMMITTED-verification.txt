@@ -1,0 +1,4 @@
+POST.sha256: OK
+PRE.sha256: OK
+ROLLBACK.sha256: OK
+summary.json: OK

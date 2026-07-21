@@ -1,0 +1,8 @@
+operation=read-only recovery of checksum-verified G012 stage-monitor evidence
+source_snapshot=.omx/handoffs/G012-exact-source-stage-failure-20260721T035718Z
+source_slice=team-state/evidence/worker-3/g012-stage-monitor-20260721T035053Z
+recovery_policy=curated identity-free metadata plus immutable source digests
+baseline_commit=9b952eb0c55c280128a9fee910274b6f906fa051
+baseline_tree=6dc202bde8766270aad4127c619b16d76662ccf9
+external_side_effects=forbidden
+ultragoal_mutation=forbidden

@@ -1,0 +1,9 @@
+source_reinventory_match=PASS
+json_parse=PASS
+repository_url_scan=PASS
+portal_deployment_identifier_scan=PASS
+credential_scan=PASS
+identity_value_scan=PASS
+truthful_failure_nonpublication_status=PASS
+source_mutation=NONE
+external_side_effects=NONE
