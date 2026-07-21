@@ -1,0 +1,106 @@
+FFFF
+======================================================================
+FAIL: test_validated_bearer_environment_cannot_overwrite_consumer_isolation (__main__.CentralPortalTests.test_validated_bearer_environment_cannot_overwrite_consumer_isolation) (name='HOME')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 457, in test_validated_bearer_environment_cannot_overwrite_consumer_isolation
+    CP._run_consumer(
+    ~~~~~~~~~~~~~~~~^
+        self.consumer_command,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        runner=self._consumer_runner,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 767, in _run_consumer
+    (runner or (lambda values, env: subprocess.run(values, check=True, env=dict(env))))(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        args, child_env
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 283, in _consumer_runner
+    raise AssertionError("validated consumer did not receive its repository credential")
+AssertionError: validated consumer did not receive its repository credential
+
+======================================================================
+FAIL: test_validated_bearer_environment_cannot_overwrite_consumer_isolation (__main__.CentralPortalTests.test_validated_bearer_environment_cannot_overwrite_consumer_isolation) (name='GRADLE_USER_HOME')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 457, in test_validated_bearer_environment_cannot_overwrite_consumer_isolation
+    CP._run_consumer(
+    ~~~~~~~~~~~~~~~~^
+        self.consumer_command,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        runner=self._consumer_runner,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 767, in _run_consumer
+    (runner or (lambda values, env: subprocess.run(values, check=True, env=dict(env))))(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        args, child_env
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 283, in _consumer_runner
+    raise AssertionError("validated consumer did not receive its repository credential")
+AssertionError: validated consumer did not receive its repository credential
+
+======================================================================
+FAIL: test_validated_bearer_environment_cannot_overwrite_consumer_isolation (__main__.CentralPortalTests.test_validated_bearer_environment_cannot_overwrite_consumer_isolation) (name='PATH')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 457, in test_validated_bearer_environment_cannot_overwrite_consumer_isolation
+    CP._run_consumer(
+    ~~~~~~~~~~~~~~~~^
+        self.consumer_command,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+        runner=self._consumer_runner,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 767, in _run_consumer
+    (runner or (lambda values, env: subprocess.run(values, check=True, env=dict(env))))(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        args, child_env
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 283, in _consumer_runner
+    raise AssertionError("validated consumer did not receive its repository credential")
+AssertionError: validated consumer did not receive its repository credential
+
+======================================================================
+FAIL: test_consumer_home_filesystem_errors_are_portal_errors (__main__.CentralPortalTests.test_consumer_home_filesystem_errors_are_portal_errors)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 764, in _run_consumer
+    child_env = _consumer_environment(gradle_user_home, token_env)
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/central-portal.py", line 707, in _consumer_environment
+    gradle_user_home.mkdir(parents=True, exist_ok=True)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/linuxbrew/.linuxbrew/Cellar/python@3.14/3.14.6/lib/python3.14/pathlib/__init__.py", line 1011, in mkdir
+    os.mkdir(self, mode)
+    ~~~~~~~~^^^^^^^^^^^^
+FileExistsError: [Errno 17] File exists: '/tmp/tmpk7x22a0s/not-a-gradle-home'
+
+The above exception was the direct cause of the following exception:
+
+central_portal.PortalError: exact deployment consumer failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/execute-only-the-reve-835c6090/worktrees/worker-1/tools/test-central-portal.py", line 474, in test_consumer_home_filesystem_errors_are_portal_errors
+    with self.assertRaisesRegex(CP.PortalError, "consumer Gradle home is unavailable"):
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: "consumer Gradle home is unavailable" does not match "exact deployment consumer failed"
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.045s
+
+FAILED (failures=4)
