@@ -1,0 +1,41 @@
+baseline=9b952eb0c55c280128a9fee910274b6f906fa051
+commits=4132d542ab10f9a27360ba787200d04c6f650ef9 4d0731502540e95df10cdd1f238d8b1c1613a322 d7d10330bfed11ffff48e17a13ab6d7269f72f5e b4157c4272bb44c29f0456efc10718a65f0b7b02 0d94d7a341a6074cde272bab093af3353fe61f4f
+[detached HEAD 52bc89538] fix(release): consume exact validated portal deployment
+ Author: Leminity <7123014+Leminity@users.noreply.github.com>
+ Date: Tue Jul 21 17:16:09 2026 +0900
+ 2 files changed, 270 insertions(+), 50 deletions(-)
+[detached HEAD db8e82371] task: redact direct validated repository evidence
+ Author: Leminity <7123014+Leminity@users.noreply.github.com>
+ Date: Tue Jul 21 17:12:11 2026 +0900
+ 6 files changed, 241 insertions(+), 52 deletions(-)
+ create mode 100644 tools/test-g013-direct-validation-workflow.py
+[detached HEAD 62262594f] test: fail closed on retained portal evidence
+ Author: Leminity <7123014+Leminity@users.noreply.github.com>
+ Date: Tue Jul 21 17:19:52 2026 +0900
+ 2 files changed, 21 insertions(+), 3 deletions(-)
+[detached HEAD 1bb97b25e] fix: preserve portal scan status markers
+ Author: Leminity <7123014+Leminity@users.noreply.github.com>
+ Date: Tue Jul 21 17:29:22 2026 +0900
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+[detached HEAD facb2e163] test(release): assert direct validated workflow
+ Author: Leminity <7123014+Leminity@users.noreply.github.com>
+ Date: Tue Jul 21 17:32:48 2026 +0900
+ 1 file changed, 12 insertions(+), 7 deletions(-)
+BASH_N PASS files=2
+AST PASS files=5
+TABNANNY PASS files=5
+YAML PASS
+................................
+----------------------------------------------------------------------
+Ran 32 tests in 1.700s
+
+OK
+...................
+----------------------------------------------------------------------
+Ran 19 tests in 0.308s
+
+OK
+TESTS PASS total=51 portal=32 redaction=19
+INTEGRATION_CONTRACT PASS direct_authenticated=true hash_only=true recursive_scans_fail_closed=true raw_tee=false
+GIT PASS diff_check=true tracked_clean=true
+FINAL_COMBINED_REPLAY PASS
