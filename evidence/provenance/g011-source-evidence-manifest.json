@@ -191,7 +191,7 @@
     "tools/central-portal.py": "be3042dd4a0b6f3a3cb8552dd5e91a5c46ef6506bb9e726c3c27c8ab8a27efc0",
     "tools/g008-publication.py": "579139dfe260fd43741eebec6231b14c585216324784659608b3a1ab74b5c8a0",
     "tools/g011-consume-six.sh": "b484f9643136cbd0855e897f7b062856fe83cc246e323c24f9fbc64391cca10a",
-    "tools/g011-evidence-manifest.py": "0e994e62ee8cfab899878b00dcc4731a8892383bd09593c1b68f093e8f8495d2",
+    "tools/g011-evidence-manifest.py": "bf726356332524d1793a348966a4234ef93d429ff48ebc8050796e153afec326",
     "tools/g011-verify-native-elf.sh": "5d8fa3f9f073bb8e443efb7473e5d2927888dcfc7c7ab48310466419f6406777",
     "tools/publish_release.sh": "bf685d4ccb9ba50b0579397415ec591bb73be2e0830a3a50dacb0df2208278fe",
     "tools/test-ac08-g011-parameterization.py": "a2845ce3e494060498dc9d0c65f0e0481ef0898f6582c36e5483301b1fca539c",
@@ -217,7 +217,7 @@
   "purpose": "G011 reproducible source, WSL, CI and protected-release provenance",
   "schema_version": 2,
   "source": {
-    "baseline_root_commit": "0de73ccbb4a8b42eabb475eca05f94b3599c38bc",
+    "baseline_root_commit": "a3203f001e6bda3ff45ca5315bf09c7cba8cb9c6",
     "core_commit": "d7b52ccbada0283527db36143cfeab18692b4ed0",
     "core_gitlink": "d7b52ccbada0283527db36143cfeab18692b4ed0",
     "core_submodules": {

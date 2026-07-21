@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 UPSTREAM_ROOT = "0ab8d6961afb038d0e0c69478de45dda3958d641"
-REVIEW_ROOT = "36f5346e8a0841ac6af09a391bd45902b1be0091"
+REVIEW_ROOT = "117f0bee2cdea2c4bf75c7d3226dd389a21439bc"
 MODIFICATION_NOTICE = "Modified by Leminity from the upstream Realm Java project."
 FORMAT_CONSTRAINED = {
     "version.txt",

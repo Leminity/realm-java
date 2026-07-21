@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 
-EXPECTED_BASELINE_COMMIT = "0de73ccbb4a8b42eabb475eca05f94b3599c38bc"
+EXPECTED_BASELINE_COMMIT = "a3203f001e6bda3ff45ca5315bf09c7cba8cb9c6"
 EXPECTED_CORE_COMMIT = "d7b52ccbada0283527db36143cfeab18692b4ed0"
 EXPECTED_CORE_PREREQUISITE = "b741862e7ca7cb1b81d276457989067b7737dc86"
 EXPECTED_GRADLE_URL = "https://services.gradle.org/distributions/gradle-9.6.1-bin.zip"

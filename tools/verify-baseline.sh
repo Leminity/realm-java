@@ -5,7 +5,7 @@ set -euo pipefail
 
 readonly EXPECTED_COMMIT=0ab8d6961afb038d0e0c69478de45dda3958d641
 readonly EXPECTED_TAG=v10.19.0
-readonly EXPECTED_APPROVED_FORK_ROOT=36f5346e8a0841ac6af09a391bd45902b1be0091
+readonly EXPECTED_APPROVED_FORK_ROOT=117f0bee2cdea2c4bf75c7d3226dd389a21439bc
 readonly EXPECTED_BASELINE_CORE=5533505d18fda93a7a971d58a191db5005583c92
 readonly EXPECTED_FORK_CORE=d7b52ccbada0283527db36143cfeab18692b4ed0
 readonly EXPECTED_CATCH=3f0283de7a9c43200033da996ff9093be3ac84dc
@@ -234,7 +234,8 @@ is_post_review_allowed_path() {
 
   case "$path" in
     .omx/recovery/transactions/G013-independent-review-remediation-*-worker[123]/*|\
-    .omx/recovery/transactions/G013-independent-review-trust-boundary-*-worker1/*)
+    .omx/recovery/transactions/G013-independent-review-trust-boundary-*-worker1/*|\
+    .omx/recovery/transactions/G013-reboot-safe-history-remediation-*-worker1/*)
       return 0
       ;;
   esac
