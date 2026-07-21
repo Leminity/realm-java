@@ -1,0 +1,38 @@
+bash_syntax_begin
+bash_syntax=PASS
+python_compile_begin
+python_compile=PASS
+source_tree=PASS
+core_gitlink=PASS
+post_source_eligible_delta=0_PASS
+gradle_log=PASS
+targeted_tests=9_of_9_PASS
+task9_checksum_replay_begin
+./AC-MATRIX.md: OK
+./COMMITTED: OK
+./HISTORICAL-AUDIT-PROBES.md: OK
+./LORE.md: OK
+./POST: OK
+./PRE: OK
+./ROLLBACK.md: OK
+./artifacts/execution-audit.json: OK
+./artifacts/integrated-evidence-audit.json: OK
+./artifacts/verify-integrated-evidence.py: OK
+./logs/integrated-evidence-audit.stderr.log: OK
+./logs/integrated-evidence-audit.stdout.log: OK
+./logs/json-validation.log: OK
+./logs/precommit-worktree.log: OK
+./logs/preintegration-audit.stderr.log: OK
+./logs/preintegration-audit.stdout.log: OK
+./logs/privacy-scan.log: OK
+./logs/rollback-audit.log: OK
+./logs/script-validation.log: OK
+./references/EVIDENCE-COMMITS.txt: OK
+./results/integrated-evidence-audit.status: OK
+./results/json-validation.status: OK
+./results/preintegration-audit.status: OK
+./results/privacy-scan.status: OK
+./results/rollback-audit.status: OK
+./results/script-validation.status: OK
+./rollback/no-source-change.patch: OK
+task9_checksum_replay=PASS
