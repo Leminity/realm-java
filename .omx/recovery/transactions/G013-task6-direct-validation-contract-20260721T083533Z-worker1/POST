@@ -1,0 +1,5 @@
+timestamp=2026-07-21T08:35:51Z
+source_commit=0d94d7a341a6074cde272bab093af3353fe61f4f
+combined_replay_head=766f74b9d73a0a3dc98b3c5bc50bc80f46b8350f
+portal_tests=32/32 PASS
+targeted_tests=19/19 PASS

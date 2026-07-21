@@ -1,0 +1,7 @@
+Task 6 tests-first combined replay failure captured before the assertion fix:
+- tools/test-central-portal.py ran 31/32 and failed at the obsolete assertion requiring
+  "validated mirror consumer rejects credentials".
+- Subsequent focused red/green iterations exposed obsolete cross-step
+  steps.portal_stage.outputs.stage_prepared_sha256 and a second tokenless-consumer
+  count; both contradicted the approved same-step direct authenticated finalization.
+- No workflow implementation was changed by worker-1.
