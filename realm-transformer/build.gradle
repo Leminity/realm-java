@@ -1,3 +1,4 @@
+// Modified by Leminity from the upstream Realm Java project.
 buildscript {
     def properties = new Properties()
     properties.load(new FileInputStream("${projectDir}/../dependencies.list"))

@@ -1,3 +1,4 @@
+// Modified by Leminity from the upstream Realm Java project.
 // Shared G008 publication configuration. This file deliberately contains no
 // Central credentials or remote repository endpoints: staging is always a
 // caller-selected local Maven-layout directory.

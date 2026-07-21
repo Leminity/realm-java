@@ -2,7 +2,23 @@ Realm Java Fork Notice
 
 This distribution is a fork of Realm Java 10.19.0. It includes changes
 maintained by Leminity for the local-only Android build and publication
-configuration. Files changed by this fork are changed from the upstream work.
+configuration.
+
+Apache License 2.0 section 4(b) modification policy
+---------------------------------------------------
+
+Upstream text files changed by this fork carry this prominent inline notice:
+
+    Modified by Leminity from the upstream Realm Java project.
+
+The changed `version.txt` entry cannot carry comments without changing its
+machine-readable contract. It is therefore identified explicitly here:
+
+* version.txt changes the upstream version to the fork version 10.19.0-agp9.1.
+
+The entry `realm/realm-library/src/main/cpp/realm-core` is immutable upstream Core gitlink provenance;
+it is not locally modified Core source. The fork pins that gitlink to Realm Core commit
+d7b52ccbada0283527db36143cfeab18692b4ed0 and does not edit Core contents in this repository.
 
 The bundled Realm Core source is retained at commit
 d7b52ccbada0283527db36143cfeab18692b4ed0 with its own LICENSE and bundled

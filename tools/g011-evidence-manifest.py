@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Modified by Leminity from the upstream Realm Java project.
 """Generate and verify G011 baseline and runtime provenance manifests.
 
 The committed baseline binds immutable tracked source/evidence inputs without
@@ -216,15 +217,34 @@ def gitlink_sha(root: Path, relative_path: Path) -> str:
     return fields[2]
 
 
+def core_git_dir(root: Path) -> Path:
+    common = Path(run_git(root, "rev-parse", "--git-common-dir"))
+    if not common.is_absolute():
+        common = root / common
+    git_dir = common / "modules" / EXPECTED_CORE_PATH
+    if not git_dir.is_dir():
+        raise ManifestError(f"missing Realm Core object store: {git_dir}")
+    return git_dir
+
+
+def run_core_git(root: Path, *args: str) -> str:
+    git_dir = core_git_dir(root)
+    completed = subprocess.run(
+        ["git", f"--git-dir={git_dir}", *args],
+        check=False,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    if completed.returncode:
+        raise ManifestError(f"Realm Core git {' '.join(args)}: {completed.stderr.strip()}")
+    return completed.stdout.strip()
+
+
 def exact_core_submodules(root: Path) -> dict[str, str]:
-    core = root / EXPECTED_CORE_PATH
     commits: dict[str, str] = {}
     for relative in EXPECTED_CORE_SUBMODULE_PATHS:
-        gitlink = run_git(core, "rev-parse", f"HEAD:{relative}")
-        worktree = run_git(core / relative, "rev-parse", "HEAD")
-        if worktree != gitlink:
-            raise ManifestError(f"Core submodule {relative} differs from its gitlink: {worktree}/{gitlink}")
-        commits[relative] = worktree
+        commits[relative] = run_core_git(root, "rev-parse", f"{EXPECTED_CORE_COMMIT}:{relative}")
     return commits
 
 
@@ -342,11 +362,24 @@ def build_manifest(root: Path, mode: str = "baseline", runtime_evidence_dir: Pat
     wrappers = parse_wrappers(root)
     build_gradle = parse_build_gradle(root)
     wsl = parse_runtime_fingerprint(root)
-    core_commit = run_git(root, "-C", EXPECTED_CORE_PATH.as_posix(), "rev-parse", "HEAD")
     core_gitlink = gitlink_sha(root, EXPECTED_CORE_PATH)
-    if core_commit != EXPECTED_CORE_COMMIT or core_gitlink != EXPECTED_CORE_COMMIT:
-        raise ManifestError(f"unexpected Core commit/gitlink: {core_commit}/{core_gitlink}")
-    if not git_succeeds(root, "-C", EXPECTED_CORE_PATH.as_posix(), "merge-base", "--is-ancestor", EXPECTED_CORE_PREREQUISITE, "HEAD"):
+    core_commit = core_gitlink
+    if core_gitlink != EXPECTED_CORE_COMMIT:
+        raise ManifestError(f"unexpected Core gitlink: {core_gitlink}")
+    run_core_git(root, "cat-file", "-e", f"{EXPECTED_CORE_COMMIT}^{{commit}}")
+    if subprocess.run(
+        [
+            "git",
+            f"--git-dir={core_git_dir(root)}",
+            "merge-base",
+            "--is-ancestor",
+            EXPECTED_CORE_PREREQUISITE,
+            EXPECTED_CORE_COMMIT,
+        ],
+        check=False,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    ).returncode:
         raise ManifestError("Core prerequisite is not an ancestor")
 
     expected_dependencies = {

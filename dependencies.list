@@ -1,3 +1,4 @@
+# Modified by Leminity from the upstream Realm Java project.
 # Realm Core release used by Realm Java
 # https://github.com/realm/realm-core/releases
 REALM_CORE=13.26.0

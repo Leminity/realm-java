@@ -1,3 +1,4 @@
+// Modified by Leminity from the upstream Realm Java project.
 package io.realm.gradle
 
 import com.android.build.api.dsl.CommonExtension

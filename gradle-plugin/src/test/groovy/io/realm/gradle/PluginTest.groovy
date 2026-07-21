@@ -1,3 +1,4 @@
+// Modified by Leminity from the upstream Realm Java project.
 /*
  * Copyright 2016 Realm Inc.
  *

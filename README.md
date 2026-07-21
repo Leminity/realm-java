@@ -1,15 +1,15 @@
-<picture>
-    <source srcset="./media/logo-dark.svg" media="(prefers-color-scheme: dark)" alt="realm by MongoDB">
-    <img src="./media/logo.svg" alt="realm by MongoDB">
-</picture>
+# Realm Java — Leminity maintenance fork
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.realm/realm-gradle-plugin?colorB=4dc427&label=Maven%20Central)](https://search.maven.org/artifact/io.realm/realm-gradle-plugin)
-[![License](https://img.shields.io/badge/License-Apache-blue.svg)](https://github.com/realm/realm-java/blob/master/LICENSE)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.leminity.realm/realm-gradle-plugin?colorB=4dc427&label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.leminity.realm/realm-gradle-plugin)
+[![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://github.com/Leminity/realm-java/blob/agp9.1/LICENSE)
 
-Realm is a mobile database that runs directly inside phones, tablets or wearables.
-This repository holds the source code for the Java version of Realm, which currently runs only on Android.
+> **Modification notice:** Modified by Leminity from the upstream Realm Java project.
 
-## Leminity maintenance fork (G010)
+This repository is the **unofficial Leminity maintenance fork** of Realm Java for the
+base local Android database. It is not the MongoDB-maintained upstream repository and
+does not claim MongoDB endorsement or trademark rights.
+
+## Fork release contract
 
 This is an **unofficial Leminity maintenance fork** of upstream Realm Java. The reproducible
 fork/release contract, provenance, compatibility boundaries, and local-only verification
@@ -19,7 +19,14 @@ revision `0e8bddf0a46827a7336a6a13406df8e35834db25`; its Realm Core provenance i
 `d7b52ccbada0283527db36143cfeab18692b4ed0`.
 
 The supported surface is the base local database only. Sync and ObjectServer integrations are
-unsupported and excluded from this fork's release contract.
+unsupported and excluded from this fork's release contract. The published coordinates use the
+`io.github.leminity.realm` group; the upstream `io.realm` coordinates are not this fork.
+
+## Upstream project context
+
+Realm is a mobile database that runs directly inside phones, tablets, or wearables. This fork
+retains upstream Realm Java history and documentation where useful, but the fork identity and
+release contract above govern this repository.
 
 ## Realm Kotlin
 
@@ -45,8 +52,8 @@ The API reference is located at [mongodb.com/docs/atlas/device-sdks/sdk/java/api
 ## Getting Help
 
 - **Got a question?**: Look for previous questions on the [#realm tag](https://stackoverflow.com/questions/tagged/realm?sort=newest) — or [ask a new question](http://stackoverflow.com/questions/ask?tags=realm). We actively monitor & answer questions on StackOverflow! You can also check out our [Community Forum](https://developer.mongodb.com/community/forums/tags/c/realm/9/realm-sdk) where general questions about how to do something can be discussed.
-- **Think you found a bug?** [Open an issue](https://github.com/realm/realm-java/issues/new?template=bug_report.md). If possible, include the version of Realm, a full log, the Realm file, and a project that shows the issue.
-- **Have a feature request?** [Open an issue](https://github.com/realm/realm-java/issues/new?template=feature_request.md). Tell us what the feature should do, and why you want the feature.
+- **Think you found a fork bug?** [Open an issue](https://github.com/Leminity/realm-java/issues/new). If possible, include the fork version, a full log, the Realm file, and a project that shows the issue.
+- **Have a fork feature request?** [Open an issue](https://github.com/Leminity/realm-java/issues/new). Tell us what the feature should do and why you want the feature.
 
 ## Using Snapshots
 
@@ -132,13 +139,13 @@ It would be a good idea to add all of the symbol definitions (and their accompan
 You can download the source code of Realm Java by using git. Since realm-java has git submodules, use `--recursive` when cloning the repository.
 
 ```
-git clone git@github.com:realm/realm-java.git --recursive
+git clone git@github.com:Leminity/realm-java.git --recursive
 ```
 
 or
 
 ```
-git clone https://github.com/realm/realm-java.git --recursive
+git clone https://github.com/Leminity/realm-java.git --recursive
 ```
 
 ### Build

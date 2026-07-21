@@ -1,3 +1,4 @@
+// Modified by Leminity from the upstream Realm Java project.
 /*
  * Modified by Leminity for the Realm Java 10.19.0 fork. This file configures
  * the local-only publication metadata and embeds the preserved Apache-2.0

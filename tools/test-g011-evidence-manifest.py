@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Modified by Leminity from the upstream Realm Java project.
 """Regression tests for the deterministic G011 provenance contract."""
 
 from __future__ import annotations
@@ -34,6 +35,17 @@ def write_runtime_evidence(root: Path) -> None:
 
 
 class ManifestTests(unittest.TestCase):
+    def test_core_provenance_uses_gitlink_object_store(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        self.assertEqual(
+            MODULE.EXPECTED_CORE_COMMIT,
+            MODULE.run_core_git(root, "rev-parse", f"{MODULE.EXPECTED_CORE_COMMIT}^{{commit}}"),
+        )
+        self.assertEqual(
+            set(MODULE.EXPECTED_CORE_SUBMODULE_PATHS),
+            set(MODULE.exact_core_submodules(root)),
+        )
+
     def test_baseline_structure_and_pins(self) -> None:
         root = Path(__file__).resolve().parents[1]
         manifest = MODULE.build_manifest(root, "baseline")

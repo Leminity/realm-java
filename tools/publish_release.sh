@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Modified by Leminity from the upstream Realm Java project.
 # Build G008 local publication inputs only. This command has no upload,
 # credential, cloud-storage, notification, or remote publication behavior.
 set -euo pipefail

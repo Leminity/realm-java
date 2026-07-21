@@ -1,3 +1,4 @@
+// Modified by Leminity from the upstream Realm Java project.
 // Legacy OSSRH/Nexus publication was removed for G008. Applying this file is
 // an explicit error so a local verification build can never upload remotely.
 throw new GradleException('Legacy remote Maven publication is disabled. Use g008PublishLocal and g008Bundle.')

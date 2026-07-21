@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# Modified by Leminity from the upstream Realm Java project.
 # This historical script used the retired Maven Central upload/release path.
 # Releases are intentionally possible only through the reviewer-gated Portal
 # workflow, which binds the tag, Core gitlink, policy audit, and consumers.
