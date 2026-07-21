@@ -1,0 +1,7 @@
+format=realm-g013-pre-publication-task1-committed-v1
+source_commit=d39316930fd63e379b58bc6296696781099ca4c7
+source_tree=14be197df3c7f6ec70f613746bbd2b95bcc9d0c1
+core_commit=d7b52ccbada0283527db36143cfeab18692b4ed0
+result=exact source/toolchain/device pinned; AC-01..AC-15 command matrix sealed
+external_actions=none
+evidence_commit=this transaction commit

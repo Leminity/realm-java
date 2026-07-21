@@ -1,0 +1,5 @@
+first_attempt=FAIL
+reason=detached Team worktree submodule uninitialized
+gitlink=d7b52ccbada0283527db36143cfeab18692b4ed0
+recovery=stopped slow remote update; rebound exact leader-local clone to worktree module gitdir; no source change
+first_logs=logs/baseline-manifest.log,logs/baseline-manifest-unit.log

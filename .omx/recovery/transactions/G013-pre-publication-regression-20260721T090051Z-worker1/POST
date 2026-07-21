@@ -1,0 +1,17 @@
+format=realm-g013-pre-publication-task1-post-v1
+timestamp=2026-07-21T09:20:54Z
+source_head=d39316930fd63e379b58bc6296696781099ca4c7
+source_tree=14be197df3c7f6ec70f613746bbd2b95bcc9d0c1
+core_head=d7b52ccbada0283527db36143cfeab18692b4ed0
+core_gitlink=d7b52ccbada0283527db36143cfeab18692b4ed0
+toolchain=PASS
+jdk=17.0.19
+sdk_target=37
+page_size=16384
+avd=realm-api37-ps16k-kvm
+ndk=29.0.14206865
+acceptance_matrix=AC-MATRIX.md
+baseline_manifest=FAIL_STALE_DIGESTS
+source_changes=none
+external_actions=none
+next_task=2
