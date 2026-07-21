@@ -1,0 +1,12 @@
+command=python3 tools/test-g011-verify-native-elf.py
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.267s
+
+OK
+command=python3 tools/test-ac08-g011-parameterization.py
+......
+----------------------------------------------------------------------
+Ran 6 tests in 0.303s
+
+OK

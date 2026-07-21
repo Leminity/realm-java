@@ -1,0 +1,12 @@
+./CHAIN.txt: OK
+./COMMITTED: OK
+./INTEGRATION-REPORT.md: OK
+./LORE.md: OK
+./POST: OK
+./PRE: OK
+./PRIVACY-SCAN.log: OK
+./ROLLBACK.md: OK
+./ROOT-FINAL-GRADLE.log: OK
+./ROOT-TARGETED-TESTS.log: OK
+./VERIFICATION.log: OK
+./rollback/no-source-change.patch: OK

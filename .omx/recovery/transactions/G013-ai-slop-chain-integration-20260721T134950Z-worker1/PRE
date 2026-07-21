@@ -1,0 +1,17 @@
+operation=fast-forward exact ai-slop evidence chain into leader root
+worker=worker-1
+branch=agp9.1
+pre_head=6f089da04c48f129d38086bbe9ecad80bf6c4458
+chain_commit_1=10a2af980793e728fc41c9bf5bab61ad2f2b1d8b
+chain_commit_2=1e12ec9713555e5c34c82009c3b4075a82d9420a
+chain_commit_3=0cebcbb95358b7c35063df00e8ffe02ab78d8ac0
+expected_fast_forward_head=0cebcbb95358b7c35063df00e8ffe02ab78d8ac0
+rollback_ref=refs/omx/rollback/g013-ai-slop-chain-integration-20260721T134950Z-worker1
+source_under_test=188f0832252172a5ca93204292a65a0f8fe4f4f3
+source_tree=4e99f91dfe86abbc957e5f9596de454d90c075aa
+core_commit=d7b52ccbada0283527db36143cfeab18692b4ed0
+pre_tracked_worktree_clean=true
+pre_standard_untracked=0
+source_changes=none
+external_actions=none
+ultragoal_or_codex_goal_mutation=none
