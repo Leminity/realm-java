@@ -46,6 +46,7 @@ RUNTIME_CHECKSUM_LOG = "checksum-verify.log"
 
 GATE_PATHS = (
     ".github/workflows/ci.yml",
+    ".github/workflows/pull-request.yml",
     ".github/workflows/release.yml",
     "tools/publish_release.sh",
     "tools/g008-publication.py",
@@ -73,6 +74,7 @@ GATE_PATHS = (
     "tools/verify-toolchain.sh",
     "tools/g011-evidence-manifest.py",
     "tools/test-g011-evidence-manifest.py",
+    "tools/test-g013-workflow-trust.py",
 )
 
 RUNTIME_REQUIRED_EXACT = (

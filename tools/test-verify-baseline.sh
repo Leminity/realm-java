@@ -60,9 +60,15 @@ for worker in worker1 worker2 worker3; do
     exit 1
   fi
 done
+if ! is_post_review_allowed_path \
+  '.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T000000Z-worker1/PRE'; then
+  printf 'worker1 trust-boundary transaction evidence path was rejected\n' >&2
+  exit 1
+fi
 for disallowed in \
   '.github/workflows/unreviewed.yml' \
   '.omx/recovery/transactions/G013-unrelated-worker1/PRE' \
+  '.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T000000Z-worker2/PRE' \
   'realm/realm-library/src/main/java/io/realm/Realm.java' \
   'tools/unapproved-helper.sh'; do
   if is_post_review_allowed_path "$disallowed"; then
