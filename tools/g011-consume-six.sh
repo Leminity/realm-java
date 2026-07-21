@@ -4,6 +4,7 @@
 set -euo pipefail
 
 FORK_GROUP='io.github.leminity.realm'
+REDACTED_VALIDATED_REPOSITORY='<redacted-validated-repository>'
 
 usage() {
   cat >&2 <<'USAGE'
@@ -30,6 +31,7 @@ bearer_env=''
 gradle_user_home=''
 evidence=''
 dry_run=false
+validated_deployment_id=''
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --mode) require_value "$@"; mode=$2; shift 2 ;;
@@ -52,6 +54,7 @@ case "$mode" in
     [[ -d $repository ]] || fail "local repository does not exist: $repository"
     repository="$(cd "$repository" && pwd)"
     fork_url="file://$repository"
+    fork_evidence_url=$fork_url
     ;;
   validated)
     [[ -z $repository && -n $repository_url && -n $bearer_env ]] || usage
@@ -59,7 +62,10 @@ case "$mode" in
     valid_env_name "$bearer_env" || fail 'bearer environment variable name is invalid'
     bearer_value="${!bearer_env:-}"
     [[ -n $bearer_value ]] || fail "validated mode requires non-empty bearer environment variable: $bearer_env"
+    validated_deployment_id=${repository_url#*/deployment/}
+    validated_deployment_id=${validated_deployment_id%/download*}
     fork_url=$repository_url
+    fork_evidence_url=$REDACTED_VALIDATED_REPOSITORY
     ;;
   validated-mirror)
     [[ -z $repository && -n $repository_url && -z $bearer_env ]] || usage
@@ -67,12 +73,45 @@ case "$mode" in
     mirror_path=${repository_url#file://}
     [[ -d $mirror_path ]] || fail "validated mirror repository does not exist: $mirror_path"
     fork_url=$repository_url
+    fork_evidence_url=$fork_url
     ;;
   central)
     [[ -z $repository && -z $repository_url && -z $bearer_env ]] || usage
     fork_url='mavenCentral()'
+    fork_evidence_url=$fork_url
     ;;
 esac
+
+redact_validated_stream() {
+  if [[ $mode != validated ]]; then
+    cat
+    return
+  fi
+  python3 -c 'import sys
+replacements = tuple((value.encode(), replacement) for value, replacement in ((sys.argv[1], b"<redacted-validated-repository>"), (sys.argv[2], b"<redacted-deployment-id>")) if value)
+for line in sys.stdin.buffer:
+    for value, replacement in replacements:
+        line = line.replace(value, replacement)
+    sys.stdout.buffer.write(line)
+    sys.stdout.buffer.flush()' "$repository_url" "$validated_deployment_id"
+}
+
+assert_validated_evidence_redacted() {
+  [[ $mode == validated ]] || return 0
+  python3 - "$evidence" "$repository_url" "$validated_deployment_id" <<'PY'
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+forbidden = [value.encode() for value in sys.argv[2:] if value]
+for path in root.rglob("*"):
+    if path.is_file() and (
+        any(value in path.read_bytes() for value in forbidden)
+        or (sys.argv[3] and sys.argv[3] in path.as_posix())
+    ):
+        raise SystemExit(f"validated repository identifier leaked into evidence: {path}")
+PY
+}
 
 prepare_fresh_evidence() {
   local directory="$1"
@@ -186,7 +225,7 @@ cp "$consumer/build.gradle" "$evidence/build.gradle"
 {
   printf 'mode=%s\n' "$mode"
   printf 'fork_group=%s\n' "$FORK_GROUP"
-  printf 'fork_repository=%s\n' "$fork_url"
+  printf 'fork_repository=%s\n' "$fork_evidence_url"
   printf 'exclusive_dependency_resolution=PASS\n'
   printf 'exclusive_plugin_resolution=PASS\n'
   printf 'maven_local=absent\n'
@@ -197,7 +236,7 @@ cp "$consumer/build.gradle" "$evidence/build.gradle"
 command=("$root/gradlew" -g "$gradle_user_home" -p "$consumer" --no-daemon --console=plain verifyG011ExactSix)
 {
   printf 'env G011_REPOSITORY_MODE=%q ' "$mode"
-  [[ $mode != central ]] && printf 'G011_FORK_REPOSITORY_URL=%q ' "$fork_url"
+  [[ $mode != central ]] && printf 'G011_FORK_REPOSITORY_URL=%q ' "$fork_evidence_url"
   [[ $mode == validated ]] && printf 'G011_FORK_BEARER=<redacted> '
   printf 'GRADLE_USER_HOME=%q ' "$gradle_user_home"
   printf '%q ' "${command[@]}"
@@ -211,17 +250,23 @@ else
   set +e
   if [[ $mode == validated ]]; then
     env G011_REPOSITORY_MODE="$mode" G011_FORK_REPOSITORY_URL="$fork_url" G011_FORK_BEARER="$bearer_value" \
-      GRADLE_USER_HOME="$gradle_user_home" "${command[@]}" > "$evidence/dependency-report.txt" 2>&1
+      GRADLE_USER_HOME="$gradle_user_home" "${command[@]}" 2>&1 \
+      | redact_validated_stream > "$evidence/dependency-report.txt"
+    pipeline_status=("${PIPESTATUS[@]}")
+    status=${pipeline_status[0]}
+    [[ ${pipeline_status[1]} -eq 0 ]] || status=${pipeline_status[1]}
   elif [[ $mode == local || $mode == validated-mirror ]]; then
     env G011_REPOSITORY_MODE="$mode" G011_FORK_REPOSITORY_URL="$fork_url" \
       GRADLE_USER_HOME="$gradle_user_home" "${command[@]}" > "$evidence/dependency-report.txt" 2>&1
+    status=$?
   else
     env G011_REPOSITORY_MODE="$mode" GRADLE_USER_HOME="$gradle_user_home" "${command[@]}" > "$evidence/dependency-report.txt" 2>&1
+    status=$?
   fi
-  status=$?
   set -e
 fi
 printf 'gradle_exit=%s\n' "$status" > "$evidence/result.txt"
+assert_validated_evidence_redacted
 write_checksums() {
   local manifest_tmp="$evidence/.SHA256SUMS.tmp"
   local verify_tmp="$evidence/.checksum-verify.tmp"

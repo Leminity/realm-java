@@ -3,6 +3,8 @@
 # Device execution remains locked to the API 37 / 16 KiB acceptance gates below.
 set -euo pipefail
 
+REDACTED_VALIDATED_REPOSITORY='<redacted-validated-repository>'
+
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 LEADER_ROOT=/mnt/d/workspace/jiran/realm
 PROJECT="$ROOT/compatibility-fixtures/ac08-api37-ps16k-runtime"
@@ -108,6 +110,13 @@ case "$MODE" in
     ;;
 esac
 fi
+FORK_REPOSITORY_EVIDENCE=${FORK_REPOSITORY_URL:-}
+VALIDATED_DEPLOYMENT_ID=''
+if [[ $MODE == validated ]]; then
+  VALIDATED_DEPLOYMENT_ID=${REPOSITORY_URL#*/deployment/}
+  VALIDATED_DEPLOYMENT_ID=${VALIDATED_DEPLOYMENT_ID%/download*}
+  FORK_REPOSITORY_EVIDENCE=$REDACTED_VALIDATED_REPOSITORY
+fi
 if [[ $MODE != local || $OFFICIAL_INPUTS_PREFLIGHT_ONLY == true ]]; then
   [[ -n $OFFICIAL_GRADLE_HOME_ARCHIVE && $OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 =~ ^[0-9a-f]{64}$ ]] ||
     fail 'remote mode requires a checksum-bound prewarmed official Gradle home archive'
@@ -158,10 +167,41 @@ print_command() {
   for arg in "$@"; do
     if [[ $arg == G011_FORK_BEARER=* ]]; then
       printf '%q ' 'G011_FORK_BEARER=<redacted>'
+    elif [[ $MODE == validated && $arg == G008_STAGING_REPOSITORY=* ]]; then
+      printf '%q ' "G008_STAGING_REPOSITORY=$REDACTED_VALIDATED_REPOSITORY"
     else
       printf '%q ' "$arg"
     fi
   done
+}
+redact_validated_stream() {
+  if [[ $MODE != validated ]]; then
+    cat
+    return
+  fi
+  python3 -c 'import sys
+replacements = tuple((value.encode(), replacement) for value, replacement in ((sys.argv[1], b"<redacted-validated-repository>"), (sys.argv[2], b"<redacted-deployment-id>")) if value)
+for line in sys.stdin.buffer:
+    for value, replacement in replacements:
+        line = line.replace(value, replacement)
+    sys.stdout.buffer.write(line)
+    sys.stdout.buffer.flush()' "$REPOSITORY_URL" "$VALIDATED_DEPLOYMENT_ID"
+}
+assert_validated_evidence_redacted() {
+  [[ $MODE == validated ]] || return 0
+  python3 - "$EVIDENCE" "$REPOSITORY_URL" "$VALIDATED_DEPLOYMENT_ID" <<'PY'
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+forbidden = [value.encode() for value in sys.argv[2:] if value]
+for path in root.rglob("*"):
+    if path.is_file() and (
+        any(value in path.read_bytes() for value in forbidden)
+        or (sys.argv[3] and sys.argv[3] in path.as_posix())
+    ):
+        raise SystemExit(f"validated repository identifier leaked into AC08 evidence: {path}")
+PY
 }
 run() {
   local name="$1"
@@ -177,7 +217,7 @@ run() {
     set -e
     printf '[exit=%s]\n' "$status"
     exit "$status"
-  } 2>&1 | tee "$EVIDENCE/${name}.log"
+  } 2>&1 | redact_validated_stream | tee "$EVIDENCE/${name}.log"
 }
 prepare_fresh_evidence() {
   local directory="$1"
@@ -276,7 +316,7 @@ fi
 
 prepare_fresh_evidence "$EVIDENCE"
 {
-  printf 'run_id=%s\nmode=%s\nrepository=%s\nserial=%s\nexpected_avd=%s\n' "$RUN_ID" "$MODE" "$FORK_REPOSITORY_URL" "$SERIAL" "$EXPECTED_AVD"
+  printf 'run_id=%s\nmode=%s\nrepository=%s\nserial=%s\nexpected_avd=%s\n' "$RUN_ID" "$MODE" "$FORK_REPOSITORY_EVIDENCE" "$SERIAL" "$EXPECTED_AVD"
   [[ $MODE != local ]] && printf 'gradle_user_home=%s\n' "$GRADLE_USER_HOME"
   [[ $MODE != local ]] && printf 'official_gradle_home_archive_sha256=%s\n' "$OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256"
   printf 'bearer=redacted\n'
@@ -289,7 +329,7 @@ if [[ $DRY_RUN == true ]]; then
   {
     printf 'DRY_RUN=PASS\n'
     printf 'fork_repository_mode=%s\n' "$MODE"
-    printf 'fork_repository=%s\n' "$FORK_REPOSITORY_URL"
+    printf 'fork_repository=%s\n' "$FORK_REPOSITORY_EVIDENCE"
     printf 'exclusive_buildscript_routing=PASS\nexclusive_dependency_routing=PASS\n'
     if [[ $MODE != local ]]; then
       printf 'official_build_command=%q -g %q -p %q --offline --no-daemon --console=plain\n' \
@@ -300,7 +340,7 @@ if [[ $DRY_RUN == true ]]; then
     if [[ $MODE == local ]]; then
       printf 'env G011_REPOSITORY_MODE=local G008_STAGING_REPOSITORY=%q ' "$FORK_REPOSITORY_URL"
     elif [[ $MODE == validated ]]; then
-      printf 'env G011_REPOSITORY_MODE=validated G008_STAGING_REPOSITORY=%q G011_FORK_BEARER=<redacted> GRADLE_USER_HOME=%q ' "$FORK_REPOSITORY_URL" "$GRADLE_USER_HOME"
+      printf 'env G011_REPOSITORY_MODE=validated G008_STAGING_REPOSITORY=%q G011_FORK_BEARER=<redacted> GRADLE_USER_HOME=%q ' "$FORK_REPOSITORY_EVIDENCE" "$GRADLE_USER_HOME"
     elif [[ $MODE == validated-mirror ]]; then
       printf 'env G011_REPOSITORY_MODE=validated-mirror G008_STAGING_REPOSITORY=%q GRADLE_USER_HOME=%q ' "$FORK_REPOSITORY_URL" "$GRADLE_USER_HOME"
     else
@@ -312,6 +352,7 @@ if [[ $DRY_RUN == true ]]; then
     printf 'device_identity=SDK=%s PAGE_SIZE=%s AVD=%s linker=%s package_compatibility=%s\n' "$sdk" "$page" "$avd" "$linker" "$compatibility"
   } > "$EVIDENCE/dry-run-command-plan.txt"
   printf 'AC08=DRY_RUN_PASS\n' > "$EVIDENCE/result.txt"
+  assert_validated_evidence_redacted
   write_checksums
   exit 0
 fi
@@ -347,7 +388,7 @@ grep -Fq 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.1' "$EVIDE
 if [[ $MODE == local ]]; then
   run g008-artifact-manifest find "$REPOSITORY/io/github/leminity/realm" -type f -maxdepth 6 -print
 else
-  printf 'remote_repository=%s\nexact_fork_routing=PASS\n' "$FORK_REPOSITORY_URL" > "$EVIDENCE/fork-repository-routing.txt"
+  printf 'remote_repository=%s\nexact_fork_routing=PASS\n' "$FORK_REPOSITORY_EVIDENCE" > "$EVIDENCE/fork-repository-routing.txt"
 fi
 if grep -Rqi 'jitpack\.io' "$PROJECT"/*.gradle "$PROJECT"/*/build.gradle "$PROJECT"/*/settings.gradle; then
   fail 'AC-08 harness must not configure JitPack'
@@ -455,5 +496,6 @@ if grep -Fq 'android.permission.INTERNET' "$EVIDENCE/fork-package.log"; then
 fi
 run fork-logcat "$ADB" -s "$SERIAL" logcat -d -v threadtime
 
-write_checksums
 printf 'AC08=PASS\n' | tee "$EVIDENCE/result.txt"
+assert_validated_evidence_redacted
+write_checksums

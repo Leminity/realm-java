@@ -337,27 +337,25 @@ jobs:
           cat > build/run-g011-consumer.sh <<'SH'
           #!/usr/bin/env bash
           set -euo pipefail
-          url=''; mode=''; home=''; evidence=''
+          url=''; mode=''; home=''; evidence=''; bearer_env=''
           while [[ $# -gt 0 ]]; do case "$1" in
             --repository-url) url="$2"; shift 2;; --mode) mode="$2"; shift 2;;
             --gradle-user-home) home="$2"; shift 2;; --evidence-dir) evidence="$2"; shift 2;;
-            --bearer-env) echo 'validated mirror consumer rejects credentials' >&2; exit 2;; *) exit 2;; esac; done
-          [[ "$mode" == validated-mirror && "$url" == file://* ]] || exit 2
-          tools/g011-consume-six.sh --repository-url "$url" --mode validated-mirror \
+            --bearer-env) bearer_env="$2"; shift 2;; *) exit 2;; esac; done
+          [[ "$mode" == validated && "$url" == https://* && "$url" != *'?'* && "$url" != *'#'* ]] || exit 2
+          [[ "$url" =~ /deployment/[A-Za-z0-9._-]+/download/?$ ]] || exit 2
+          [[ "$bearer_env" =~ ^[A-Za-z_][A-Za-z0-9_]*$ && -n "${!bearer_env:-}" ]] || exit 2
+          tools/g011-consume-six.sh --repository-url "$url" --mode validated --bearer-env "$bearer_env" \
             --gradle-user-home "$home/six" --evidence-dir "$evidence/six"
           # Task32 parameterizes the existing AC08 semantic harness; it
           # rejects API/4KiB/AVD/property substitutions rather than falling
           # back to the historical local/offline runner.
-          ac08=(--mode validated-mirror --repository-url "$url" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --official-gradle-home-archive "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE" --official-gradle-home-archive-sha256 "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
+          ac08=(--mode validated --repository-url "$url" --bearer-env "$bearer_env" --sdk-root "$ANDROID_SDK_ROOT" --serial emulator-5654 --expected-avd realm-api37-ps16k-kvm --official-gradle "$G011_OFFICIAL_GRADLE_75" --official-gradle-home-archive "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE" --official-gradle-home-archive-sha256 "$G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256" --immutable-encrypted "$G011_OFFICIAL_ENCRYPTED_REALM" --gradle-user-home "$home/ac08" --evidence-dir "$evidence/ac08" --run-id "$GITHUB_RUN_ID")
           compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh "${ac08[@]}"
-          mirror="$(python3 - "$url" <<'PY'
-          import pathlib, sys, urllib.parse
-          parsed = urllib.parse.urlparse(sys.argv[1])
-          if parsed.scheme != 'file' or parsed.netloc not in ('', 'localhost'):
-              raise SystemExit('validated mirror URL is invalid')
-          print(pathlib.Path(urllib.parse.unquote(parsed.path)))
-          PY
-          )"
+          # The byte-verified mirror is supplementary native-inspection input;
+          # both Gradle consumers above resolve only from the authenticated URL.
+          mirror="$evidence/validated-deployment-mirror"
+          [[ -d "$mirror" ]] || { echo 'supplementary validated mirror is missing' >&2; exit 1; }
           version="$(tr -d '[:space:]' < version.txt)"
           aar="$mirror/io/github/leminity/realm/realm-android-library/$version/realm-android-library-$version.aar"
           tools/g011-verify-native-elf.sh --aar "$aar" --evidence-dir "$evidence/native-elf" --ndk-root "$ANDROID_SDK_ROOT/ndk/29.0.14206865"
@@ -381,7 +379,7 @@ jobs:
           python3 - "$evidence/consumer-evidence.json" "$mode" "$url" "$evidence/SHA256SUMS" <<'PY'
           import hashlib, json, pathlib, sys
           output = pathlib.Path(sys.argv[1]); sums = pathlib.Path(sys.argv[4])
-          output.write_text(json.dumps({'format':'realm-maven-central-consumer-evidence-v1','mode':sys.argv[2],'repository_url':sys.argv[3],'exact_six':'PASS','ac08':'PASS','native_elf':'PASS','sha256sums_sha256':hashlib.sha256(sums.read_bytes()).hexdigest()}, sort_keys=True)+'\n')
+          output.write_text(json.dumps({'format':'realm-maven-central-consumer-evidence-v1','mode':sys.argv[2],'repository_url_sha256':hashlib.sha256(sys.argv[3].encode()).hexdigest(),'exact_six':'PASS','ac08':'PASS','native_elf':'PASS','sha256sums_sha256':hashlib.sha256(sums.read_bytes()).hexdigest()}, sort_keys=True)+'\n')
           PY
           SH
           chmod 700 build/run-g011-consumer.sh
@@ -446,14 +444,20 @@ jobs:
           path: build/maven-central-stage-intent.json
           if-no-files-found: error
           retention-days: 90
-      - name: Upload exactly one USER_MANAGED deployment and prepare a verified mirror
+      - name: Upload one USER_MANAGED deployment and directly validate its exact repository
         id: portal_stage
         if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
         env:
           CENTRAL_PORTAL_BEARER_TOKEN: ${{ secrets.CENTRAL_PORTAL_BEARER_TOKEN }}
+          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
+          G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
+          G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
+          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
         run: |
           set -euo pipefail
           : > build/maven-central-stage-entered
+          validated_home="$RUNNER_TEMP/g011-gradle-validated"
+          trap 'rm -rf "$validated_home"' EXIT
           python3 tools/central-portal.py stage \
             --bundle build/g008-maven-central-bundle.zip --source-manifest build/g008-publication-manifest.json \
             --tag '${{ github.event.release.tag_name }}' --version '${{ steps.source.outputs.version }}' \
@@ -468,30 +472,28 @@ jobs:
             --stage-manifest build/maven-central-stage-manifest.json \
             --token-env CENTRAL_PORTAL_BEARER_TOKEN \
             --drop-failed-deployment --allow-network \
-            | tee build/maven-central-stage-portal-result.json
+            --result-file build/maven-central-stage-portal-result.json \
+            > /dev/null
           stage_prepared_sha256="$(python3 -c 'import json; print(json.load(open("build/maven-central-stage-portal-result.json", encoding="utf-8"))["stage_prepared_sha256"])')"
           [[ "$stage_prepared_sha256" =~ ^[0-9a-f]{64}$ ]] || { echo "Portal stage returned an invalid prepared SHA-256" >&2; exit 1; }
           printf 'stage_prepared_sha256=%s\n' "$stage_prepared_sha256" >> "$GITHUB_OUTPUT"
-      - name: Consume the validated mirror in a separate tokenless process
-        if: ${{ steps.stage_recovery.outputs.recovered != 'true' }}
-        env:
-          STAGE_PREPARED_SHA256: ${{ steps.portal_stage.outputs.stage_prepared_sha256 }}
-          G011_OFFICIAL_GRADLE_75: ${{ vars.G011_OFFICIAL_GRADLE_75 }}
-          G011_OFFICIAL_GRADLE_HOME_ARCHIVE: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE }}
-          G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256: ${{ vars.G011_OFFICIAL_GRADLE_HOME_ARCHIVE_SHA256 }}
-          G011_OFFICIAL_ENCRYPTED_REALM: ${{ vars.G011_OFFICIAL_ENCRYPTED_REALM }}
-        run: |
-          set -euo pipefail
-          for name in CENTRAL_PORTAL_BEARER_TOKEN CENTRAL_PORTAL_TOKEN PORTAL_TOKEN G011_ENVIRONMENT_POLICY_TOKEN G011_ENVIRONMENT_BYPASS_ATTESTATION POLICY_TOKEN BYPASS_ATTESTATION GITHUB_TOKEN GH_TOKEN MAVEN_SIGNING_KEY MAVEN_SIGNING_PASSWORD SIGNING_KEY SIGNING_PASSWORD g008SigningKey g008SigningPassword; do
-            [[ -z "${!name+x}" ]] || { echo "protected credential variable reached tokenless stage consumer: $name" >&2; exit 1; }
-          done
-          prepared=build/maven-central-stage-prepared.json
           python3 tools/central-portal.py finalize-stage \
-            --stage-prepared "$prepared" --stage-prepared-sha256 "$STAGE_PREPARED_SHA256" \
+            --stage-prepared build/maven-central-stage-prepared.json \
+            --stage-prepared-sha256 "$stage_prepared_sha256" \
             --validated-consumer-command build/run-g011-consumer.sh \
-            --validated-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-validated" \
+            --validated-consumer-bearer-env CENTRAL_PORTAL_BEARER_TOKEN \
+            --validated-consumer-gradle-home "$validated_home" \
             --validated-consumer-evidence "$RUNNER_TEMP/g011-consumer-validated" \
-            --stage-manifest build/maven-central-stage-manifest.json
+            --stage-manifest build/maven-central-stage-manifest.json \
+            --result-file build/maven-central-stage-result.json \
+            > /dev/null
+          stage_manifest_sha256="$(python3 -c 'import json; print(json.load(open("build/maven-central-stage-result.json", encoding="utf-8"))["stage_manifest_sha256"])')"
+          [[ "$stage_manifest_sha256" == "$(sha256sum build/maven-central-stage-manifest.json | awk '{print $1}')" ]] || {
+            echo 'Portal finalize-stage returned a mismatched manifest SHA-256' >&2
+            exit 1
+          }
+          rm -rf "$validated_home"
+          trap - EXIT
       - name: Expose immutable stage manifest to reviewer-gated release
         id: stage_manifest
         run: |
@@ -512,13 +514,31 @@ jobs:
           set -euo pipefail
           status=0
           python3 - build "$RUNNER_TEMP/g011-consumer-validated" "$RUNNER_TEMP/g011-gradle-validated" <<'PY' || status=$?
-          import os, pathlib, sys
+          import json, os, pathlib, sys
           secrets = [
               value.encode()
               for name in ('PORTAL_TOKEN', 'POLICY_TOKEN', 'BYPASS_ATTESTATION', 'SIGNING_KEY', 'SIGNING_PASSWORD')
               if (value := os.environ.get(name))
           ]
           forbidden = secrets + [b'BEGIN PGP PRIVATE KEY BLOCK', b'Authorization: Bearer ']
+          prepared_path = pathlib.Path('build/maven-central-stage-prepared.json')
+          prepared = json.loads(prepared_path.read_text(encoding='utf-8')) if prepared_path.is_file() else {}
+          repository_template = str(prepared.get('deployment_repository', ''))
+          repository_url = repository_template.removesuffix('/{relative_path}')
+          deployment_id = prepared['deployment_id'] if prepared else ''
+          repository_identifiers = [
+              value.encode() for value in (repository_url, deployment_id) if value
+          ]
+          protected = {
+              path.resolve()
+              for path in (
+                  prepared_path,
+                  pathlib.Path('build/maven-central-stage-manifest.json'),
+                  pathlib.Path('build/maven-central-stage-manifest.json.failed.json'),
+                  pathlib.Path(os.environ['RUNNER_TEMP']) / 'g011-consumer-validated/validated-deployment-mirror-evidence.json',
+              )
+              if path.is_file()
+          }
           for root_name in sys.argv[1:]:
               root = pathlib.Path(root_name)
               candidates = [root] if root.is_file() else root.rglob('*') if root.exists() else []
@@ -531,7 +551,9 @@ jobs:
                   data = path.read_bytes()
                   if any(value and value in data for value in forbidden):
                       raise SystemExit(f'credential material detected in retained evidence: {path}')
-          print('stage evidence secret scan PASS')
+                  if path.resolve() not in protected and any(value in data for value in repository_identifiers):
+                      raise SystemExit(f'validated repository identifier detected in retained evidence: {path}')
+          print('stage evidence credential/repository scan PASS')
           PY
           rm -rf "$RUNNER_TEMP/g011-gradle-validated"
           exit "$status"
@@ -567,6 +589,8 @@ jobs:
             build/maven-central-stage-prepared.json
             build/maven-central-stage-manifest.json
             build/maven-central-stage-manifest.json.failed.json
+            build/maven-central-stage-portal-result.json
+            build/maven-central-stage-result.json
             ${{ runner.temp }}/g011-consumer-validated
           if-no-files-found: error
           retention-days: 90
@@ -580,6 +604,8 @@ jobs:
             build/maven-central-stage-entered
             build/maven-central-stage-prepared.json
             build/maven-central-stage-manifest.json.failed.json
+            build/maven-central-stage-portal-result.json
+            build/maven-central-stage-result.json
           if-no-files-found: warn
           retention-days: 90
 
@@ -885,7 +911,8 @@ jobs:
             --release-prepared build/maven-central-release-prepared.json \
             --release-evidence build/maven-central-release-evidence.json \
             --token-env CENTRAL_PORTAL_BEARER_TOKEN --allow-network \
-            | tee build/maven-central-release-portal-result.json
+            --result-file build/maven-central-release-portal-result.json \
+            > /dev/null
           release_prepared_sha256="$(python3 -c 'import json; print(json.load(open("build/maven-central-release-portal-result.json", encoding="utf-8"))["release_prepared_sha256"])')"
           [[ "$release_prepared_sha256" =~ ^[0-9a-f]{64}$ ]] || { echo "Portal release returned an invalid prepared SHA-256" >&2; exit 1; }
           printf 'release_prepared_sha256=%s\n' "$release_prepared_sha256" >> "$GITHUB_OUTPUT"
@@ -910,7 +937,8 @@ jobs:
             --published-consumer-gradle-home "$RUNNER_TEMP/g011-gradle-central" \
             --published-consumer-evidence "$RUNNER_TEMP/g011-consumer-central" \
             --release-evidence build/maven-central-release-evidence.json \
-            | tee build/maven-central-release-result.json
+            --result-file build/maven-central-release-result.json \
+            > /dev/null
       - name: Verify retained release evidence contains no credential material
         id: release_secret_scan
         if: ${{ always() }}
@@ -922,13 +950,25 @@ jobs:
           set -euo pipefail
           status=0
           python3 - stage-manifest.json build "$RUNNER_TEMP/g011-consumer-central" "$RUNNER_TEMP/g011-gradle-central" <<'PY' || status=$?
-          import os, pathlib, sys
+          import json, os, pathlib, sys
           secrets = [
               value.encode()
               for name in ('PORTAL_TOKEN', 'POLICY_TOKEN', 'BYPASS_ATTESTATION')
               if (value := os.environ.get(name))
           ]
           forbidden = secrets + [b'Authorization: Bearer ']
+          stage_manifest = pathlib.Path('stage-manifest.json')
+          deployment_id = json.loads(stage_manifest.read_text(encoding='utf-8'))['deployment_id']
+          protected = {
+              path.resolve()
+              for path in (
+                  stage_manifest,
+                  pathlib.Path('build/maven-central-release-intent.json'),
+                  pathlib.Path('build/maven-central-release-prepared.json'),
+                  pathlib.Path('build/maven-central-release-evidence.json'),
+              )
+              if path.is_file()
+          }
           for root_name in sys.argv[1:]:
               root = pathlib.Path(root_name)
               candidates = [root] if root.is_file() else root.rglob('*') if root.exists() else []
@@ -941,7 +981,9 @@ jobs:
                   data = path.read_bytes()
                   if any(value and value in data for value in forbidden):
                       raise SystemExit(f'credential material detected in retained evidence: {path}')
-          print('release evidence secret scan PASS')
+                  if path.resolve() not in protected and deployment_id.encode() in data:
+                      raise SystemExit(f'deployment identifier detected in retained release evidence: {path}')
+          print('release evidence credential/deployment scan PASS')
           PY
           rm -rf "$RUNNER_TEMP/g011-gradle-central"
           exit "$status"

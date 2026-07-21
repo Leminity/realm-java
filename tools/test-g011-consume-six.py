@@ -22,9 +22,10 @@ class G011ConsumeSixTests(unittest.TestCase):
             evidence = root / "evidence"
             home = root / "home"
             secret = "do-not-write-this-bearer"
+            repository_url = "https://central.example/api/v1/publisher/deployment/deploy-123/download"
             result = self.run_script(
                 "--mode", "validated",
-                "--repository-url", "https://central.example/api/v1/publisher/deployment/deploy-123/download",
+                "--repository-url", repository_url,
                 "--bearer-env", "G011_TEST_BEARER",
                 "--gradle-user-home", str(home),
                 "--evidence-dir", str(evidence),
@@ -38,7 +39,11 @@ class G011ConsumeSixTests(unittest.TestCase):
             self.assertIn("excludeGroup('io.github.leminity.realm')", settings)
             self.assertIn("gradlePluginPortal", settings)
             self.assertIn("G011_FORK_BEARER=<redacted>", command)
-            self.assertNotIn(secret, "\n".join(p.read_text(errors="replace") for p in evidence.rglob("*") if p.is_file()))
+            all_text = "\n".join(p.read_text(errors="replace") for p in evidence.rglob("*") if p.is_file())
+            self.assertIn("<redacted-validated-repository>", all_text)
+            self.assertNotIn(repository_url, all_text)
+            self.assertNotIn("deploy-123", all_text)
+            self.assertNotIn(secret, all_text)
             self.assertTrue((evidence / "SHA256SUMS").is_file())
             self.assertTrue((evidence / "checksum-verify.log").is_file())
             checksum = subprocess.run(["sha256sum", "-c", "SHA256SUMS"], cwd=evidence, text=True, capture_output=True)

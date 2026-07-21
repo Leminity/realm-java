@@ -27,9 +27,10 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = pathlib.Path(tmp)
             secret = "ac08-bearer-must-not-appear"
+            repository_url = "https://central.example/api/v1/publisher/deployment/deploy-123/download"
             result = self.run_script(
                 "--mode", "validated",
-                "--repository-url", "https://central.example/api/v1/publisher/deployment/deploy-123/download",
+                "--repository-url", repository_url,
                 "--bearer-env", "AC08_TEST_TOKEN",
                 "--sdk-root", "/not-used-by-dry-run",
                 "--serial", "emulator-5554",
@@ -51,6 +52,9 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
             fork_plan = next(line for line in plan.splitlines() if line.startswith("fork_build_command="))
             self.assertNotIn("--offline", fork_plan)
             self.assertIn("--offline", next(line for line in plan.splitlines() if line.startswith("official_build_command=")))
+            self.assertIn("<redacted-validated-repository>", all_text)
+            self.assertNotIn(repository_url, all_text)
+            self.assertNotIn("deploy-123", all_text)
             self.assertNotIn(secret, all_text)
             self.assertTrue((evidence / "SHA256SUMS").is_file())
             checksum = subprocess.run(["sha256sum", "-c", "SHA256SUMS"], cwd=evidence, text=True, capture_output=True)
