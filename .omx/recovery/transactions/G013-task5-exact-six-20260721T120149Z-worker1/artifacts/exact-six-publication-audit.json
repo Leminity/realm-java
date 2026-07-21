@@ -1,0 +1,70 @@
+{
+  "artifact_file_counts": {
+    "realm-android-kotlin-extensions": 24,
+    "realm-android-library": 24,
+    "realm-annotations": 24,
+    "realm-annotations-processor": 24,
+    "realm-gradle-plugin": 24,
+    "realm-transformer": 24
+  },
+  "bundle_listing_entries_verified": 144,
+  "bundle_sha256": "1fc4bcfddb24a214ed89f646007bbe14cb466924bfb948c65a64309253678cf0",
+  "checksum_payloads_verified": 92,
+  "consumer": {
+    "exclusive_dependency_resolution": "PASS",
+    "exclusive_plugin_resolution": "PASS",
+    "fork_group": "io.github.leminity.realm",
+    "gradle_exit": 0,
+    "jitpack": "absent",
+    "maven_local": "absent",
+    "mode": "local"
+  },
+  "coordinate_count": 6,
+  "coordinates": [
+    "io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-transformer:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-annotations:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-annotations-processor:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-android-library:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-android-kotlin-extensions:10.19.0-agp9.1"
+  ],
+  "external_actions": "none",
+  "group": "io.github.leminity.realm",
+  "license_cross_bindings_verified": 6,
+  "logical_inventory_entries_verified": 144,
+  "manifest_files": 144,
+  "manifest_schema_keys": [
+    "artifacts",
+    "coordinates",
+    "dynamic_plugin_injection",
+    "files",
+    "format",
+    "group",
+    "normalized_pom_dependencies",
+    "version"
+  ],
+  "omitted_payload": {
+    "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar",
+    "sha256": "af0c1fb414dac2fec16cadcf5fbf7cc1cbea209a4c07d7ea2c7675d5043fba4d"
+  },
+  "omitted_payload_checksum_sidecars_authenticated": 4,
+  "omitted_payload_count": 1,
+  "poms_metadata_and_dependencies_verified": 6,
+  "primary_artifacts": 6,
+  "result": "PASS",
+  "retained_files_hash_verified": 143,
+  "signature_packets_parsed": 24,
+  "source_under_test": "188f0832252172a5ca93204292a65a0f8fe4f4f3",
+  "suffix_counts": {
+    "asc": 24,
+    "javadoc": 6,
+    "md5": 24,
+    "pom": 6,
+    "sha1": 24,
+    "sha256": 24,
+    "sha512": 24,
+    "sources": 6
+  },
+  "task2_evidence_commit": "285617b195f03d703795115f5ada8de14b4d1e60",
+  "version": "10.19.0-agp9.1"
+}
