@@ -233,7 +233,8 @@ is_post_review_allowed_path() {
   done
 
   case "$path" in
-    .omx/recovery/transactions/G013-independent-review-remediation-*-worker[123]/*)
+    .omx/recovery/transactions/G013-independent-review-remediation-*-worker[123]/*|\
+    .omx/recovery/transactions/G013-independent-review-trust-boundary-*-worker1/*)
       return 0
       ;;
   esac
