@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/tmp/w3-task9-draft-20260721T1240Z/artifacts/verify-integrated-evidence.py", line 295, in <module>
+    main()
+    ~~~~^^
+  File "/tmp/w3-task9-draft-20260721T1240Z/artifacts/verify-integrated-evidence.py", line 201, in main
+    assert run(
+           ^^^^
+        repo, "merge-base", "--is-ancestor", commit, head, check=False
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ).returncode == 0, f"Task {task} evidence commit is not integrated"
+    ^^^^^^^^^^^^^^^^^
+AssertionError: Task 2 evidence commit is not integrated

@@ -1,0 +1,9 @@
+result=PASS
+task2_manifest_rollback_sha256=4922ac89c02abc8c64daf69469922e8e0c45de3be8b429786202e2fc6311bf6b
+task2_manifest_rollback_apply_check=PASS
+task4_empty_no_source_patch=PASS
+task5_empty_no_source_patch=PASS
+task6_empty_no_source_patch=PASS
+task9_empty_no_source_patch=PASS
+task10_rollback_ref=refs/omx/rollback/g013-task10-worker1-chain-20260721T124752Z
+task10_rollback_target=ef8ed3f52ece1a092bc2480533656bba4e76609f

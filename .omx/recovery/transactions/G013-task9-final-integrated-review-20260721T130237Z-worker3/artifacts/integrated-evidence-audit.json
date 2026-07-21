@@ -1,0 +1,183 @@
+{
+  "acceptance": {
+    "AC-01": "PASS",
+    "AC-02": "PASS",
+    "AC-03": "PASS",
+    "AC-04": "PASS",
+    "AC-05": "PASS",
+    "AC-06": "PASS",
+    "AC-07": "PASS",
+    "AC-08": "PASS",
+    "AC-09": "PASS",
+    "AC-10": "PASS",
+    "AC-11": "PASS",
+    "AC-12": "LOCAL_CONTRACT_PASS_EXTERNAL_STAGE_PENDING",
+    "AC-13": "EXTERNAL_GATE_PENDING",
+    "AC-14": "PASS",
+    "AC-15": "PASS"
+  },
+  "core_commit": "d7b52ccbada0283527db36143cfeab18692b4ed0",
+  "external_actions": "none",
+  "historical_findings_remediated": true,
+  "historical_nonzero_statuses": {
+    "Task1": [
+      "baseline-manifest.status=1",
+      "baseline-manifest-unit.status=1"
+    ],
+    "Task2": [
+      "manifest-unit.status=1"
+    ]
+  },
+  "integrated_changes": 525,
+  "integrated_head": "7e3da3b708d5aa0c0f24ceca09358fc1eed4420d",
+  "local_failures": [],
+  "nested_seal_entries_replayed": 36,
+  "result": "PASS",
+  "source_refresh_paths": [
+    "evidence/provenance/g011-source-evidence-manifest.json"
+  ],
+  "source_tree": "4e99f91dfe86abbc957e5f9596de454d90c075aa",
+  "source_under_test": "188f0832252172a5ca93204292a65a0f8fe4f4f3",
+  "task_states": {
+    "1": "completed",
+    "10": "completed",
+    "2": "completed",
+    "3": "completed",
+    "4": "completed",
+    "5": "completed",
+    "6": "completed",
+    "7": "completed",
+    "8": "completed",
+    "9": "in_progress"
+  },
+  "tasks": [
+    {
+      "commit_paths": 35,
+      "integrated_commit": "a4cdb89565f3dc3a3c41ef99e027d096de9e9924",
+      "nested_seal_entries": 0,
+      "original_commit": "a4cdb89565f3dc3a3c41ef99e027d096de9e9924",
+      "parent": "d39316930fd63e379b58bc6296696781099ca4c7",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 33,
+      "status_counts": {
+        "0": 2,
+        "1": 2
+      },
+      "subtree_integrated_exactly": true,
+      "task": 1,
+      "transaction": ".omx/recovery/transactions/G013-pre-publication-regression-20260721T090051Z-worker1"
+    },
+    {
+      "commit_paths": 296,
+      "integrated_commit": "285617b195f03d703795115f5ada8de14b4d1e60",
+      "nested_seal_entries": 0,
+      "original_commit": "285617b195f03d703795115f5ada8de14b4d1e60",
+      "parent": "188f0832252172a5ca93204292a65a0f8fe4f4f3",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 294,
+      "status_counts": {
+        "0": 25,
+        "1": 1
+      },
+      "subtree_integrated_exactly": true,
+      "task": 2,
+      "transaction": ".omx/recovery/transactions/G013-task2-local-acceptance-20260721T092343Z-worker1"
+    },
+    {
+      "commit_paths": 94,
+      "integrated_commit": "36b5c4ef8f076e39d194edb76f78a0ace2c0ed86",
+      "nested_seal_entries": 32,
+      "original_commit": "42affb8d4e2a1fc078b1916ba653e8e1c99df135",
+      "parent": "d39316930fd63e379b58bc6296696781099ca4c7",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 90,
+      "status_counts": {},
+      "subtree_integrated_exactly": true,
+      "task": 3,
+      "transaction": "evidence/g013/task3-abi-native/20260721T090205Z"
+    },
+    {
+      "commit_paths": 33,
+      "integrated_commit": "5f866d2479a69b9e4c19435041ce4e846e024695",
+      "nested_seal_entries": 0,
+      "original_commit": "5f866d2479a69b9e4c19435041ce4e846e024695",
+      "parent": "285617b195f03d703795115f5ada8de14b4d1e60",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 31,
+      "status_counts": {
+        "0": 8
+      },
+      "subtree_integrated_exactly": true,
+      "task": 4,
+      "transaction": ".omx/recovery/transactions/G013-task4-plugin-api-20260721T115459Z-worker1"
+    },
+    {
+      "commit_paths": 33,
+      "integrated_commit": "f5f46a5ca910ea419996daa52c44d7d93a8efcdf",
+      "nested_seal_entries": 0,
+      "original_commit": "f5f46a5ca910ea419996daa52c44d7d93a8efcdf",
+      "parent": "5f866d2479a69b9e4c19435041ce4e846e024695",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 31,
+      "status_counts": {
+        "0": 8
+      },
+      "subtree_integrated_exactly": true,
+      "task": 5,
+      "transaction": ".omx/recovery/transactions/G013-task5-exact-six-20260721T120149Z-worker1"
+    },
+    {
+      "commit_paths": 21,
+      "integrated_commit": "bb3416016a6d2cceb612bffb55f5e6aea84fb690",
+      "nested_seal_entries": 0,
+      "original_commit": "bb3416016a6d2cceb612bffb55f5e6aea84fb690",
+      "parent": "f5f46a5ca910ea419996daa52c44d7d93a8efcdf",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 19,
+      "status_counts": {
+        "0": 3
+      },
+      "subtree_integrated_exactly": true,
+      "task": 6,
+      "transaction": ".omx/recovery/transactions/G013-task6-worker1-summary-20260721T122044Z-worker1"
+    },
+    {
+      "commit_paths": 20,
+      "integrated_commit": "ef8ed3f52ece1a092bc2480533656bba4e76609f",
+      "nested_seal_entries": 0,
+      "original_commit": "c7f1e465d081eeacc89eae0844c793ac22d1746c",
+      "parent": "d39316930fd63e379b58bc6296696781099ca4c7",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 18,
+      "status_counts": {},
+      "subtree_integrated_exactly": true,
+      "task": 7,
+      "transaction": ".omx/recovery/transactions/G013-task7-portal-redaction-workflow-20260721T091005Z-worker3"
+    },
+    {
+      "commit_paths": 28,
+      "integrated_commit": "3e1d5407d860dcacb760042b53912e5908defe21",
+      "nested_seal_entries": 4,
+      "original_commit": "40ba23b408d0f20b95e09a27b4dab3fbe3c538ee",
+      "parent": "42affb8d4e2a1fc078b1916ba653e8e1c99df135",
+      "privacy_evidence_pass": true,
+      "rollback_present": true,
+      "seal_entries": 25,
+      "status_counts": {},
+      "subtree_integrated_exactly": true,
+      "task": 8,
+      "transaction": "evidence/g013/task8-native-runtime-audit/20260721T094802Z"
+    }
+  ],
+  "top_level_seal_entries_replayed": 541,
+  "top_level_transaction_paths": 560,
+  "ultragoal_or_codex_goal_mutation": "none",
+  "unexpected_non_evidence_changes": []
+}
