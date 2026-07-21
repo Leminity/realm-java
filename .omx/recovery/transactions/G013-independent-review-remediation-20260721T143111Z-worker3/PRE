@@ -1,0 +1,15 @@
+operation=G013 independent-review remediation cross-lane verification and integration planning
+worker=worker-3
+task=3
+baseline_commit=36f5346e8a0841ac6af09a391bd45902b1be0091
+baseline_tree=d24b12bb03b110aa8f2aea3bb26fbcf3f88a2de4
+rollback_ref=refs/omx/rollback/g013-independent-review-worker3-20260721T143111Z
+rollback_ref_target=36f5346e8a0841ac6af09a391bd45902b1be0091
+pre_tracked_diff=clean
+pre_index_diff=clean
+source_contract=AGP-9.1.1,Gradle-9.6.1,SDK-37,minSdk-21,NDK-29.0.14206865,JDK-17,local-DB-only
+required_abis=armeabi-v7a,arm64-v8a,x86_64
+external_actions=forbidden
+credentials_or_deployment_ids=forbidden
+ultragoal_or_codex_goal_mutation=forbidden
+source_changes=none

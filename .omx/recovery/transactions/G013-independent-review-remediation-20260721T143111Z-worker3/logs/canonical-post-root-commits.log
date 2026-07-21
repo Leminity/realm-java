@@ -1,0 +1,20 @@
+=== 665dbcd89e03922b2d6c859bad013921e48a848a ===
+commit=665dbcd89e03922b2d6c859bad013921e48a848a
+parents=36f5346e8a0841ac6af09a391bd45902b1be0091
+author=Leminity <7123014+Leminity@users.noreply.github.com>
+author_date=2026-07-21T23:31:36+09:00
+committer=Leminity <7123014+Leminity@users.noreply.github.com>
+committer_date=2026-07-21T23:31:36+09:00
+subject=omx(team): checkpoint worker-1 shutdown changes
+body=
+M	realm/realm-library/src/main/cpp/realm-core
+=== ed12cfc5594e41637c18a9e1898ec4dff72dab98 ===
+commit=ed12cfc5594e41637c18a9e1898ec4dff72dab98
+parents=36f5346e8a0841ac6af09a391bd45902b1be0091 665dbcd89e03922b2d6c859bad013921e48a848a
+author=Leminity <7123014+Leminity@users.noreply.github.com>
+author_date=2026-07-21T23:32:10+09:00
+committer=Leminity <7123014+Leminity@users.noreply.github.com>
+committer_date=2026-07-21T23:32:10+09:00
+subject=Merge commit '665dbcd89e03922b2d6c859bad013921e48a848a' into agp9.1
+body=
+M	realm/realm-library/src/main/cpp/realm-core

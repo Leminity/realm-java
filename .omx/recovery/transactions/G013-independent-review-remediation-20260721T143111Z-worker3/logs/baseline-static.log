@@ -1,0 +1,7 @@
+baseline_commit=36f5346e8a0841ac6af09a391bd45902b1be0091
+ci_has_pull_request=1
+ci_self_hosted_jobs=1
+ci_push_only_job_conditions=0
+readme_upstream_license_links=1
+tracked_pyc_count=2
+gitignore_python_bytecode_rules=0

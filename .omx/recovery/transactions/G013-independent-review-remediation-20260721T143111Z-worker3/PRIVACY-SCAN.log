@@ -1,0 +1,4 @@
+Scope: worker-1/worker-2 reviewed diffs plus worker-3 transaction metadata.
+Patterns checked: GitHub token prefixes, AWS access keys, private-key PEM headers, quoted literal Maven/signing credentials, and quoted concrete deployment identifiers.
+Result: PASS — no credential values or deployment identifiers introduced.
+External actions: none.

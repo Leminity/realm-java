@@ -1,0 +1,9 @@
+=== recovered leader-root G011 manifest unit ===
+........
+----------------------------------------------------------------------
+Ran 8 tests in 105.462s
+
+OK
+rc=0
+=== recovered leader-root exact manifest verify ===
+rc=0

@@ -1,0 +1,15 @@
+=== worker2 remediation test interim ===
+......
+----------------------------------------------------------------------
+Ran 6 tests in 1.792s
+
+OK
+rc=0
+=== worker2 baseline test interim ===
+immutable baseline manifest digest mismatch: 497d6669d8e846eea2f590031cda36fce3c5985f22c492e0e2e4961298731538
+validated tag=v10.19.0-agp9.1 pom_version=10.19.0-agp9.1
+validated tag=v10.19.0-agp9.27 pom_version=10.19.0-agp9.27
+release-tag parser tests: PASS
+baseline provenance verification: PASS
+baseline verifier regression tests: PASS
+rc=0

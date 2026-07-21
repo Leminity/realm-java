@@ -1,0 +1,11 @@
+=== canonical branch ancestry ===
+canonical_head=ed12cfc5594e41637c18a9e1898ec4dff72dab98
+baseline_is_ancestor=yes
+ed12cfc5594e41637c18a9e1898ec4dff72dab98 Merge commit '665dbcd89e03922b2d6c859bad013921e48a848a' into agp9.1
+665dbcd89e03922b2d6c859bad013921e48a848a omx(team): checkpoint worker-1 shutdown changes
+=== list-835c6090 ===
+d
+d worktrees
+=== g013-review-remediati-835c6090 ===
+d
+d worktrees

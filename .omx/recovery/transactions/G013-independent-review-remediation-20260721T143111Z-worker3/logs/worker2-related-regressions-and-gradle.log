@@ -1,0 +1,63 @@
+===== g010-license =====
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.012s
+
+OK
+PASS
+===== g010-scope =====
+bash: tools/test-verify-g010-scope.sh: No such file or directory
+FAIL rc=127
+===== g008-publication =====
+test_base_library_aar_rejects_x86_or_missing_abi (__main__.G008PublicationTests.test_base_library_aar_rejects_x86_or_missing_abi) ... ok
+test_checksum_writer_removes_gradle_signature_checksum_recursion (__main__.G008PublicationTests.test_checksum_writer_removes_gradle_signature_checksum_recursion) ... ok
+test_exact_six_repository_validates_and_bundle_is_repeatable (__main__.G008PublicationTests.test_exact_six_repository_validates_and_bundle_is_repeatable) ... ok
+test_external_pom_edges_match_the_pinned_official_oracle (__main__.G008PublicationTests.test_external_pom_edges_match_the_pinned_official_oracle) ... ok
+test_extra_classifier_and_checksum_recursion_are_rejected (__main__.G008PublicationTests.test_extra_classifier_and_checksum_recursion_are_rejected) ... ok
+test_extra_coordinate_is_rejected (__main__.G008PublicationTests.test_extra_coordinate_is_rejected) ... ok
+test_g008_gradle_tasks_use_the_gradle9_execution_api (__main__.G008PublicationTests.test_g008_gradle_tasks_use_the_gradle9_execution_api) ... ok
+test_module_metadata_and_secret_payload_are_rejected (__main__.G008PublicationTests.test_module_metadata_and_secret_payload_are_rejected) ... ok
+test_required_signatures_are_cryptographically_enforced (__main__.G008PublicationTests.test_required_signatures_are_cryptographically_enforced) ... ok
+test_version_file_is_the_only_release_version_source (__main__.G008PublicationTests.test_version_file_is_the_only_release_version_source) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.899s
+
+OK
+PASS
+===== gradle-type-graph =====
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+
+> Task :help
+
+Welcome to Gradle 9.6.1.
+
+To run a build, run gradlew <task> ...
+
+To see a list of available tasks, run gradlew tasks
+
+To see more detail about a task, run gradlew help --task <task>
+
+To see a list of command-line options, run gradlew --help
+
+For more detail on using Gradle, see https://docs.gradle.org/9.6.1/userguide/command_line_interface.html
+
+For troubleshooting, visit https://help.gradle.org
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-2/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 3s
+1 actionable task: 1 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
+PASS
+===== g010-scope corrected =====
+Previous .sh invocation was a reviewer command typo (file is .py).
+G010 scope verifier regression tests: PASS
+PASS
