@@ -1,0 +1,30 @@
+plugins { id 'java' }
+configurations {
+    g009RealmArtifacts
+    g009OfficialProcessor
+    g009ForkProcessor
+}
+dependencies {
+    g009RealmArtifacts 'io.realm:realm-gradle-plugin:10.19.0'
+    g009RealmArtifacts 'io.realm:realm-transformer:10.19.0'
+    g009RealmArtifacts 'io.realm:realm-annotations:10.19.0'
+    g009RealmArtifacts 'io.realm:realm-annotations-processor:10.19.0'
+    g009RealmArtifacts 'io.realm:realm-android-library:10.19.0@aar'
+    g009RealmArtifacts 'io.realm:realm-android-kotlin-extensions:10.19.0@aar'
+    g009OfficialProcessor 'org.jetbrains.kotlin:kotlin-stdlib:1.6.21'
+    g009OfficialProcessor 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21'
+    g009OfficialProcessor 'com.squareup:javawriter:2.5.1'
+    g009OfficialProcessor 'org.mongodb:bson:3.12.1'
+    g009ForkProcessor 'org.jetbrains.kotlin:kotlin-stdlib:2.2.10'
+    g009ForkProcessor 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.10'
+    g009ForkProcessor 'com.squareup:javawriter:2.5.1'
+    g009ForkProcessor 'org.mongodb:bson:3.12.1'
+}
+tasks.register('resolveG009Official') {
+    doLast {
+        [configurations.g009RealmArtifacts, configurations.g009OfficialProcessor,
+         configurations.g009ForkProcessor].each { configuration ->
+            configuration.files.sort().each { println it.name }
+        }
+    }
+}

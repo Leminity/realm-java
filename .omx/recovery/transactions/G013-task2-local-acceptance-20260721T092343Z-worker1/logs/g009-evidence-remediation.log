@@ -1,0 +1,7 @@
+canonical_verifier=PASS
+canonical_unit=PASS
+logical_inventory=logical-digest-inventory.txt
+logical_inventory_replayable=no
+filesystem_seal=SHA256SUMS
+filesystem_seal_replay=PASS
+official_cache_fresh=PASS

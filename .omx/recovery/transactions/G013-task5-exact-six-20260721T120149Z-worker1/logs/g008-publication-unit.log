@@ -1,0 +1,15 @@
+test_base_library_aar_rejects_x86_or_missing_abi (__main__.G008PublicationTests.test_base_library_aar_rejects_x86_or_missing_abi) ... ok
+test_checksum_writer_removes_gradle_signature_checksum_recursion (__main__.G008PublicationTests.test_checksum_writer_removes_gradle_signature_checksum_recursion) ... ok
+test_exact_six_repository_validates_and_bundle_is_repeatable (__main__.G008PublicationTests.test_exact_six_repository_validates_and_bundle_is_repeatable) ... ok
+test_external_pom_edges_match_the_pinned_official_oracle (__main__.G008PublicationTests.test_external_pom_edges_match_the_pinned_official_oracle) ... ok
+test_extra_classifier_and_checksum_recursion_are_rejected (__main__.G008PublicationTests.test_extra_classifier_and_checksum_recursion_are_rejected) ... ok
+test_extra_coordinate_is_rejected (__main__.G008PublicationTests.test_extra_coordinate_is_rejected) ... ok
+test_g008_gradle_tasks_use_the_gradle9_execution_api (__main__.G008PublicationTests.test_g008_gradle_tasks_use_the_gradle9_execution_api) ... ok
+test_module_metadata_and_secret_payload_are_rejected (__main__.G008PublicationTests.test_module_metadata_and_secret_payload_are_rejected) ... ok
+test_required_signatures_are_cryptographically_enforced (__main__.G008PublicationTests.test_required_signatures_are_cryptographically_enforced) ... ok
+test_version_file_is_the_only_release_version_source (__main__.G008PublicationTests.test_version_file_is_the_only_release_version_source) ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 1.469s
+
+OK

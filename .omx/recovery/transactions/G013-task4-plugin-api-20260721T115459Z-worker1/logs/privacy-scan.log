@@ -1,0 +1,5 @@
+files_scanned=30
+excluded=logs/privacy-scan.log,SHA256SUMS,CHECKSUM-VERIFY.log
+hits=0
+private_keyring_files=0
+result=PASS

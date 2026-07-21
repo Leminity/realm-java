@@ -1,0 +1,4 @@
+scope=supported execution logs
+patterns=static\.realm\.io,oss\.sonatype\.org,s3\.amazonaws\.com,object[- ]server,/api/v1/publisher/upload
+hits=0
+result=PASS

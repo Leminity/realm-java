@@ -1,0 +1,9 @@
+transaction=G013-task5-exact-six
+task_id=5
+source_under_test=188f0832252172a5ca93204292a65a0f8fe4f4f3
+source_tree=4e99f91dfe86abbc957e5f9596de454d90c075aa
+core_commit=d7b52ccbada0283527db36143cfeab18692b4ed0
+evidence_parent=5f866d2479a69b9e4c19435041ce4e846e024695
+evidence_commit=this transaction commit
+lore_format=true
+result=PASS

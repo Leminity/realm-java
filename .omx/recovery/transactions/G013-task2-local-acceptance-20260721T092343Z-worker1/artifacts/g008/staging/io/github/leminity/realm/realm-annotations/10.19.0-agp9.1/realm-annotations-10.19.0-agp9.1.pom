@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.leminity.realm</groupId>
+  <artifactId>realm-annotations</artifactId>
+  <version>10.19.0-agp9.1</version>
+  <name>realm-annotations</name>
+  <description>Annotations for Realm. Realm is a mobile database: Build better apps, faster.</description>
+  <url>https://github.com/Leminity/realm-java</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>leminity</id>
+      <name>Leminity</name>
+      <url>https://github.com/Leminity</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/Leminity/realm-java.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/Leminity/realm-java.git</developerConnection>
+    <url>https://github.com/Leminity/realm-java</url>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/Leminity/realm-java/issues</url>
+  </issueManagement>
+</project>

@@ -1,0 +1,37 @@
+pluginManagement {
+    repositories {
+        maven {
+            url = uri(System.getenv('G011_FORK_REPOSITORY_URL'))
+            content { includeGroup('io.github.leminity.realm') }
+            if (System.getenv('G011_REPOSITORY_MODE') == 'validated') {
+                credentials(HttpHeaderCredentials) {
+                    name = 'Authorization'
+                    value = 'Bearer ' + System.getenv('G011_FORK_BEARER')
+                }
+                authentication { header(HttpHeaderAuthentication) }
+            }
+        }
+        google { content { excludeGroup('io.github.leminity.realm') } }
+        mavenCentral { content { excludeGroup('io.github.leminity.realm') } }
+        gradlePluginPortal { content { excludeGroup('io.github.leminity.realm') } }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        maven {
+            url = uri(System.getenv('G011_FORK_REPOSITORY_URL'))
+            content { includeGroup('io.github.leminity.realm') }
+            if (System.getenv('G011_REPOSITORY_MODE') == 'validated') {
+                credentials(HttpHeaderCredentials) {
+                    name = 'Authorization'
+                    value = 'Bearer ' + System.getenv('G011_FORK_BEARER')
+                }
+                authentication { header(HttpHeaderAuthentication) }
+            }
+        }
+        google { content { excludeGroup('io.github.leminity.realm') } }
+        mavenCentral { content { excludeGroup('io.github.leminity.realm') } }
+    }
+}
+rootProject.name = 'g011-exact-six-consumer'

@@ -1,0 +1,12 @@
+transaction=G013-task6-worker1-summary
+task_id=6
+worker=worker-1
+started_at_utc=20260721T122044Z
+evidence_parent=f5f46a5ca910ea419996daa52c44d7d93a8efcdf
+source_under_test=188f0832252172a5ca93204292a65a0f8fe4f4f3
+source_tree=4e99f91dfe86abbc957e5f9596de454d90c075aa
+core_commit=d7b52ccbada0283527db36143cfeab18692b4ed0
+scope=sanitized AC-01..05/07/09..11/15 synthesis and committed-clean proof
+source_changes=none
+external_actions=forbidden
+serial_searches_before_skip=3

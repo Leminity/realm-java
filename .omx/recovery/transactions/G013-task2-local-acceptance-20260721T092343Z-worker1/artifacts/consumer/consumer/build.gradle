@@ -1,0 +1,28 @@
+plugins { id 'java' }
+
+configurations { g011 }
+dependencies {
+    g011 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1'
+    g011 'io.github.leminity.realm:realm-transformer:10.19.0-agp9.1'
+    g011 'io.github.leminity.realm:realm-annotations:10.19.0-agp9.1'
+    g011 'io.github.leminity.realm:realm-annotations-processor:10.19.0-agp9.1'
+    g011 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.1'
+    g011 'io.github.leminity.realm:realm-android-kotlin-extensions:10.19.0-agp9.1'
+}
+
+tasks.register('verifyG011ExactSix') {
+    doLast {
+        def resolved = configurations.g011.resolvedConfiguration.resolvedArtifacts.collect {
+            "${it.moduleVersion.id.group}:${it.name}:${it.moduleVersion.id.version}"
+        }.findAll { it.startsWith('io.github.leminity.realm:') }.toSet()
+        def expected = [
+            'realm-gradle-plugin', 'realm-transformer', 'realm-annotations',
+            'realm-annotations-processor', 'realm-android-library',
+            'realm-android-kotlin-extensions'
+        ].collect { "io.github.leminity.realm:${it}:10.19.0-agp9.1" }.toSet()
+        if (resolved != expected) {
+            throw new GradleException("G011 exact-six consumer resolved ${resolved}; expected ${expected}")
+        }
+        println 'G011 exact-six consumer: PASS'
+    }
+}

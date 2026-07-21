@@ -1,0 +1,6 @@
+build.gradle: OK
+command.redacted.txt: OK
+dependency-report.txt: OK
+result.txt: OK
+routing-proof.txt: OK
+settings.gradle.redacted: OK

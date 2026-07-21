@@ -1,0 +1,5 @@
+Manifest review PASS: one generated file, canonical byte identity, 28/28 gate digests, baseline verify PASS, unit 8/8 PASS.
+Rollback review PASS: true reverse patch sha256 4922ac89..., normal apply check PASS, restored PRE manifest sha256 10f6ec77....
+G009 remedy PASS: logical inventory classified, real SHA256SUMS replays 3/3, fresh resolver/gate/unit status 0, independent report byte identity.
+G005 review PASS: BUILD SUCCESSFUL in 32m52s; XML 48 tests, 0 failures, 0 errors, 11 expected skips, 12/12 parameter cells; denylist markers 0.
+Reviewer: worker-3. No external actions or edits.

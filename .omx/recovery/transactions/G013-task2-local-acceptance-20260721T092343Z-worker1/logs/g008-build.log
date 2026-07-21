@@ -1,0 +1,189 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :cleanG008LocalStaging
+> Task :realm-annotations:compileJava UP-TO-DATE
+> Task :realm-annotations:processResources NO-SOURCE
+> Task :realm-annotations:classes UP-TO-DATE
+> Task :realm-annotations:jar UP-TO-DATE
+> Task :realm-annotations:javadoc UP-TO-DATE
+> Task :realm-annotations:javadocJar UP-TO-DATE
+> Task :realm-annotations:sourcesJar UP-TO-DATE
+> Task :realm-annotations:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm-annotations:generatePomFileForRealmPublication
+> Task :realm-annotations:signRealmPublication
+> Task :realm-annotations:publishRealmPublicationToG008LocalStagingRepository
+> Task :g008PublishAnnotations
+> Task :realm-transformer:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm-transformer:generateVersionClass
+> Task :realm-transformer:compileKotlin UP-TO-DATE
+> Task :realm-transformer:compileJava UP-TO-DATE
+> Task :realm-transformer:processResources NO-SOURCE
+> Task :realm-transformer:classes UP-TO-DATE
+> Task :realm-transformer:jar UP-TO-DATE
+> Task :realm-transformer:javadoc UP-TO-DATE
+> Task :realm-transformer:javadocJar UP-TO-DATE
+> Task :realm-transformer:sourcesJar UP-TO-DATE
+> Task :realm-transformer:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm-transformer:generatePomFileForRealmPublication
+> Task :realm-transformer:signRealmPublication
+> Task :realm-transformer:publishRealmPublicationToG008LocalStagingRepository
+> Task :g008PublishTransformer
+> Task :library-build-transformer:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :library-build-transformer:compileKotlin UP-TO-DATE
+> Task :library-build-transformer:compileJava NO-SOURCE
+> Task :library-build-transformer:processResources NO-SOURCE
+> Task :library-build-transformer:classes UP-TO-DATE
+> Task :library-build-transformer:jar UP-TO-DATE
+> Task :library-build-transformer:generateMetadataFileForRealmPublication
+> Task :library-build-transformer:generatePomFileForRealmPublication
+> Task :library-build-transformer:publishRealmPublicationToMavenLocal
+> Task :library-build-transformer:publishToMavenLocal
+> Task :installBuildTransformer
+
+> Configure project :realm:kotlin-extensions
+WARNING: The option setting 'android.experimental.androidTest.useUnifiedTestPlatform=false' is deprecated.
+The current default is 'true'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+WARNING: The option setting 'android.enableJetifier=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 10.0 of the Android Gradle plugin.
+
+> Task :realm:realm-annotations-processor:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :realm:realm-annotations-processor:generateVersionClass
+> Task :realm:realm-annotations-processor:compileKotlin UP-TO-DATE
+> Task :realm:realm-annotations-processor:compileJava UP-TO-DATE
+> Task :realm:realm-annotations-processor:processResources UP-TO-DATE
+> Task :realm:realm-annotations-processor:classes UP-TO-DATE
+> Task :realm:realm-annotations-processor:jar UP-TO-DATE
+> Task :realm:realm-annotations-processor:javadoc FROM-CACHE
+> Task :realm:realm-annotations-processor:javadocJar
+> Task :realm:realm-annotations-processor:sourcesJar
+> Task :realm:realm-annotations-processor:generateMetadataFileForRealmPublication SKIPPED
+> Task :realm:realm-annotations-processor:generatePomFileForRealmPublication
+> Task :realm:realm-annotations-processor:signRealmPublication
+> Task :realm:realm-annotations-processor:publishRealmPublicationToG008LocalStagingRepository
+> Task :realm:realm-library:generatePomFileForBasePublicationPublication
+> Task :realm:realm-library:javadoc UP-TO-DATE
+> Task :realm:realm-library:javadocJar UP-TO-DATE
+> Task :realm:realm-library:sourcesJar UP-TO-DATE
+> Task :realm:realm-library:preBuild UP-TO-DATE
+> Task :realm:realm-library:stageBaseReleaseJniHeaderSnapshot UP-TO-DATE
+> Task :realm:realm-library:preBaseReleaseBuild UP-TO-DATE
+> Task :realm:realm-library:checkBaseReleaseAarMetadata UP-TO-DATE
+
+> Task :realm:realm-library:configureCMakeRelWithDebInfo[arm64-v8a]
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+[CXX5304] This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+
+> Task :realm:realm-library:buildCMakeRelWithDebInfo[arm64-v8a][realm-jni]
+> Task :g008PublishRealm
+> Task :realm:realm-library:configureCMakeRelWithDebInfo[armeabi-v7a]
+> Task :realm:realm-library:buildCMakeRelWithDebInfo[armeabi-v7a][realm-jni]
+> Task :realm:realm-library:configureCMakeRelWithDebInfo[x86_64]
+> Task :realm:realm-library:buildCMakeRelWithDebInfo[x86_64][realm-jni]
+> Task :realm:realm-library:mergeBaseReleaseJniLibFolders UP-TO-DATE
+> Task :realm:realm-library:mergeBaseReleaseNativeLibs UP-TO-DATE
+> Task :realm:realm-library:stripBaseReleaseDebugSymbols UP-TO-DATE
+> Task :realm:realm-library:copyBaseReleaseJniLibsProjectAndLocalJars UP-TO-DATE
+> Task :realm:realm-library:generateBaseReleaseBuildConfig UP-TO-DATE
+> Task :realm:realm-library:generateBaseReleaseResources UP-TO-DATE
+> Task :realm:realm-library:packageBaseReleaseResources UP-TO-DATE
+> Task :realm:realm-library:processBaseReleaseNavigationResources UP-TO-DATE
+> Task :realm:realm-library:parseBaseReleaseLocalResources UP-TO-DATE
+> Task :realm:realm-library:generateBaseReleaseRFile UP-TO-DATE
+> Task :realm:realm-library:extractBaseReleaseAnnotations UP-TO-DATE
+> Task :realm:realm-library:extractDeepLinksForAarBaseRelease UP-TO-DATE
+> Task :realm:realm-library:generateBaseReleaseAssets UP-TO-DATE
+> Task :realm:realm-library:mergeBaseReleaseAssets UP-TO-DATE
+> Task :realm:realm-library:cleanBaseReleaseJniHeaderValidation
+> Task :realm:realm-library:kaptGenerateStubsBaseReleaseKotlin UP-TO-DATE
+> Task :realm:realm-library:kaptBaseReleaseKotlin UP-TO-DATE
+> Task :realm:realm-library:compileBaseReleaseKotlin UP-TO-DATE
+> Task :realm:realm-library:javaPreCompileBaseRelease UP-TO-DATE
+> Task :realm:realm-library:compileBaseReleaseJavaWithJavac
+> Task :realm:realm-library:compileBaseReleaseJavaWithJavac FROM-CACHE
+> Task :realm:realm-library:baseReleaseRealmBuildTransformer UP-TO-DATE
+> Task :realm:realm-library:mergeBaseReleaseGeneratedProguardFiles UP-TO-DATE
+> Task :realm:realm-library:mergeBaseReleaseConsumerProguardFiles UP-TO-DATE
+> Task :realm:realm-library:prepareBaseReleaseArtProfile UP-TO-DATE
+> Task :realm:realm-library:prepareLintJarForPublish UP-TO-DATE
+> Task :realm:realm-library:processBaseReleaseManifest UP-TO-DATE
+> Task :realm:realm-library:processBaseReleaseJavaRes UP-TO-DATE
+> Task :realm:realm-library:mergeBaseReleaseJavaResource UP-TO-DATE
+> Task :realm:realm-library:syncBaseReleaseLibJars UP-TO-DATE
+> Task :realm:realm-library:writeBaseReleaseAarMetadata UP-TO-DATE
+> Task :realm:realm-library:bundleBaseReleaseAar UP-TO-DATE
+> Task :realm:realm-library:verifyBaseReleaseJniHeaders
+> Task :realm:realm-library:signBasePublicationPublication
+> Task :realm:realm-library:publishBasePublicationPublicationToG008LocalStagingRepository
+> Task :realm:kotlin-extensions:preBuild UP-TO-DATE
+> Task :realm:kotlin-extensions:preBaseReleaseBuild UP-TO-DATE
+> Task :realm:kotlin-extensions:checkBaseReleaseAarMetadata
+> Task :realm:kotlin-extensions:mergeBaseReleaseJniLibFolders
+> Task :realm:kotlin-extensions:mergeBaseReleaseNativeLibs NO-SOURCE
+> Task :realm:kotlin-extensions:stripBaseReleaseDebugSymbols NO-SOURCE
+> Task :realm:kotlin-extensions:copyBaseReleaseJniLibsProjectAndLocalJars
+> Task :realm:kotlin-extensions:generateBaseReleaseBuildConfig FROM-CACHE
+> Task :realm:kotlin-extensions:generateBaseReleaseResources FROM-CACHE
+> Task :realm:kotlin-extensions:packageBaseReleaseResources FROM-CACHE
+> Task :realm:kotlin-extensions:processBaseReleaseNavigationResources FROM-CACHE
+> Task :realm:kotlin-extensions:parseBaseReleaseLocalResources FROM-CACHE
+> Task :realm:kotlin-extensions:generateBaseReleaseRFile FROM-CACHE
+> Task :realm:kotlin-extensions:extractDeepLinksForAarBaseRelease FROM-CACHE
+> Task :realm:kotlin-extensions:generateBaseReleaseAssets UP-TO-DATE
+> Task :realm:kotlin-extensions:mergeBaseReleaseAssets
+> Task :realm:kotlin-extensions:javaPreCompileBaseRelease FROM-CACHE
+> Task :realm:kotlin-extensions:prepareBaseReleaseArtProfile
+> Task :realm:kotlin-extensions:prepareLintJarForPublish
+> Task :realm:realm-library:bundleLibCompileToJarBaseRelease
+> Task :realm:kotlin-extensions:processBaseReleaseManifest FROM-CACHE
+> Task :realm:kotlin-extensions:extractBaseReleaseAnnotations FROM-CACHE
+> Task :realm:kotlin-extensions:kaptGenerateStubsBaseReleaseKotlin FROM-CACHE
+> Task :realm:kotlin-extensions:kaptBaseReleaseKotlin SKIPPED
+> Task :realm:kotlin-extensions:compileBaseReleaseKotlin FROM-CACHE
+> Task :realm:kotlin-extensions:compileBaseReleaseJavaWithJavac FROM-CACHE
+> Task :realm:kotlin-extensions:mergeBaseReleaseGeneratedProguardFiles
+> Task :realm:kotlin-extensions:mergeBaseReleaseConsumerProguardFiles
+> Task :realm:kotlin-extensions:processBaseReleaseJavaRes
+> Task :realm:kotlin-extensions:writeBaseReleaseAarMetadata
+> Task :realm:kotlin-extensions:generatePomFileForRealmPublication
+> Task :realm:kotlin-extensions:dokkaHtml FROM-CACHE
+> Task :realm:kotlin-extensions:javadocJar
+> Task :realm:kotlin-extensions:mergeBaseReleaseJavaResource
+> Task :realm:kotlin-extensions:sourcesJar
+> Task :realm:kotlin-extensions:syncBaseReleaseLibJars FROM-CACHE
+> Task :realm:kotlin-extensions:bundleBaseReleaseAar
+> Task :realm:kotlin-extensions:signRealmPublication
+> Task :realm:kotlin-extensions:publishRealmPublicationToG008LocalStagingRepository
+> Task :gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:generateVersionClass
+> Task :gradle-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:compileGroovy NO-SOURCE
+> Task :gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:javadoc NO-SOURCE
+> Task :gradle-plugin:javadocJar
+> Task :gradle-plugin:sourcesJar
+> Task :gradle-plugin:generateMetadataFileForRealmPublication SKIPPED
+> Task :gradle-plugin:generatePomFileForRealmPublication
+> Task :gradle-plugin:signRealmPublication
+> Task :gradle-plugin:publishRealmPublicationToG008LocalStagingRepository
+> Task :g008PublishGradlePlugin
+> Task :g008PublishLocal
+> Task :g008VerifyLocalStaging
+> Task :g008Bundle
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-1/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 4m 57s
+8 actionable tasks: 8 executed
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html

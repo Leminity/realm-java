@@ -1,0 +1,6 @@
+first_manifest_unit=FAIL
+reason=runtime-source-clean invariant rejects the approved generated manifest while uncommitted
+tests=6 passed,2 errors in runtime clean-HEAD assertions
+remediation=commit exactly generated manifest, then replay unchanged suite
+2026-07-21T10:39Z: first G008 launch was rejected pre-execution by command safety due cleanup syntax; no process or filesystem mutation occurred. Relaunched with Python cleanup.
+2026-07-21T11:29Z: DrvFS case-insensitive path alias made checksum-verify.log and CHECKSUM-VERIFY.log the same file; duplicate cp was rejected after a successful replay. Canonicalized to uppercase via temporary rename and resealed.

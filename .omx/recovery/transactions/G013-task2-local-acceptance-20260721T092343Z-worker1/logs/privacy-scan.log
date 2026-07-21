@@ -1,0 +1,8 @@
+files_scanned=293
+excluded=logs/privacy-scan.log,SHA256SUMS,CHECKSUM-VERIFY.log
+secret_patterns=5
+environment_secret_values=0
+hits=0
+private_keyring_files=0
+private_keyring_removed=PASS
+result=PASS

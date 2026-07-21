@@ -1,0 +1,22 @@
+Task5 audit-probe pre-fix failures (evidence audit only; product gates remained PASS):
+1. Initial local assertion incorrectly required the JSON artifacts mapping iteration order
+   to equal the semantic coordinate order. The manifest's coordinates list is
+   authoritative; artifacts is a mapping and is compared as an exact key set.
+2. Independent backup audit observed a KeyError after assuming a top-level mode key.
+   The immutable manifest has exactly eight keys: artifacts, coordinates,
+   dynamic_plugin_injection, files, format, group, normalized_pom_dependencies,
+   and version. Signature/checksum semantics are encoded by the 24 suffix-classified
+   filenames per coordinate, not by a mode field.
+Remedy: schema-aware verification only. No source or Task2 evidence changed.
+3. The schema-aware local rerun correctly used those eight manifest keys but
+   incorrectly expected consumer mode in result.txt. The actual consumer schema
+   stores only gradle_exit in result.txt; mode and fork_group are in
+   routing-proof.txt. The final verifier checks those two files separately.
+4. The next local rerun used the corrected consumer split but assumed the project
+   and SCM URL ended in /realm. The immutable POMs consistently use the actual
+   fork repository /realm-java (including scm:git); the verifier now checks those
+   exact values. This was another evidence-audit assumption, not a product failure.
+5. POM normalization initially treated every dependency scope as an explicit XML
+   element. Maven's schema defaults an omitted scope to compile; the immutable
+   manifest already stores that normalized value. The final audit applies this
+   schema default before comparing the exact dependency multiset.

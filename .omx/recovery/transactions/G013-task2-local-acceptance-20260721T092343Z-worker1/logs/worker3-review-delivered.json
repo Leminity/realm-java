@@ -1,0 +1,1 @@
+{"schema_version":"1.0","timestamp":"2026-07-21T09:37:11.456Z","command":"omx team api mailbox-mark-delivered","ok":true,"operation":"mailbox-mark-delivered","data":{"worker":"worker-1","message_id":"c104c1db-e1c3-4b1a-9fb8-d7dbf2c6af31","updated":true,"dispatch_request_id":"746f78cc-d664-4459-9fb8-1a99499a96d9","dispatch_updated":true}}

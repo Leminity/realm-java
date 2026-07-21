@@ -1,0 +1,10 @@
+format=realm-g013-task2-pre-v1
+timestamp=2026-07-21T09:23:43Z
+task_base_commit=a4cdb89565f3dc3a3c41ef99e027d096de9e9924
+integrated_source_commit=d39316930fd63e379b58bc6296696781099ca4c7
+integrated_source_tree=14be197df3c7f6ec70f613746bbd2b95bcc9d0c1
+core_commit=d7b52ccbada0283527db36143cfeab18692b4ed0
+tests_first_failure=.omx/recovery/transactions/G013-pre-publication-regression-20260721T090051Z-worker1/logs/baseline-manifest.diff
+approved_change=evidence/provenance/g011-source-evidence-manifest.json generated refresh only
+external_actions=forbidden
+subagent_skip_reason=native spawn surface cannot enforce requested gpt-5.6-terra routing; optional delegation skipped
