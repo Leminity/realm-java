@@ -1,0 +1,15 @@
+G003 static independent-build verification: PASS
+G003 annotations-help: help
+G003 annotations-test-metadata: test generatePomFileForRealmPublication publishToMavenLocal
+G003 transformer-help: help
+G003 transformer-test-metadata: test generatePomFileForRealmPublication publishToMavenLocal
+G003 build-transformer-help: help
+G003 build-transformer-test-metadata: test generatePomFileForRealmPublication publishToMavenLocal
+G003 realm-help: help
+G003 realm-base-local-stage: :realm-library:publishBasePublicationToMavenLocal
+G003 realm-processor-metadata: :realm-annotations-processor:test :realm-annotations-processor:generatePomFileForRealmPublication
+G003 realm-base-metadata: :realm-library:generatePomFileForBasePublication :kotlin-extensions:generatePomFileForRealmPublication
+G003 gradle-plugin-help: help
+G003 gradle-plugin-test-metadata: test generatePomFileForRealmPublication
+G003 root-installRealmJava-dry-run: --dry-run installRealmJava
+G003 independent-build matrix: PASS (evidence: .omx/recovery/transactions/G013-task2-local-acceptance-20260721T092343Z-worker1/artifacts/g003/matrix)

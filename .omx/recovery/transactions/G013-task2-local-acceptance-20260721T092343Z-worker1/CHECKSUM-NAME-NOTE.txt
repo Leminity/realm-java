@@ -1,0 +1,3 @@
+This worktree is on a case-insensitive DrvFS mount, so checksum-verify.log and
+CHECKSUM-VERIFY.log resolve to the same filesystem entry. The canonical retained
+path is CHECKSUM-VERIFY.log. A duplicate case-only copy is impossible here.

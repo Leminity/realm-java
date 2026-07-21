@@ -1,0 +1,4 @@
+gpg: keybox '/tmp/realm-worker1-g008-signing.CV7l4D/pubring.kbx' created
+gpg: /tmp/realm-worker1-g008-signing.CV7l4D/trustdb.gpg: trustdb created
+gpg: directory '/tmp/realm-worker1-g008-signing.CV7l4D/openpgp-revocs.d' created
+gpg: revocation certificate stored as '/tmp/realm-worker1-g008-signing.CV7l4D/openpgp-revocs.d/8793ECB22C2C832F8BE092C1FB0B8D81A81199FA.rev'

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>io.github.leminity.realm</groupId>
+  <artifactId>realm-gradle-plugin</artifactId>
+  <version>10.19.0-agp9.1</version>
+  <name>realm-gradle-plugin</name>
+  <description>Gradle plugin for Realm. Realm is a mobile database: Build better apps, faster.</description>
+  <url>https://github.com/Leminity/realm-java</url>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>leminity</id>
+      <name>Leminity</name>
+      <url>https://github.com/Leminity</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/Leminity/realm-java.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/Leminity/realm-java.git</developerConnection>
+    <url>https://github.com/Leminity/realm-java</url>
+  </scm>
+  <issueManagement>
+    <system>github</system>
+    <url>https://github.com/Leminity/realm-java/issues</url>
+  </issueManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-stdlib-jdk8</artifactId>
+      <version>2.2.10</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.github.leminity.realm</groupId>
+      <artifactId>realm-transformer</artifactId>
+      <version>10.19.0-agp9.1</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+</project>

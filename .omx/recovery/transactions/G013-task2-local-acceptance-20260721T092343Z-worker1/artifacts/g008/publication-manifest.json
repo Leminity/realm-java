@@ -1,0 +1,1076 @@
+{
+  "artifacts": {
+    "realm-android-kotlin-extensions": [
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.asc",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.md5",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.sha1",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.sha256",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.sha512",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.asc",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.md5",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.sha1",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.sha256",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.sha512",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.aar",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.aar.asc",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.aar.md5",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.aar.sha1",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.aar.sha256",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.aar.sha512",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.pom",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.pom.asc",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.pom.md5",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.pom.sha1",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.pom.sha256",
+      "realm-android-kotlin-extensions-10.19.0-agp9.1.pom.sha512"
+    ],
+    "realm-android-library": [
+      "realm-android-library-10.19.0-agp9.1-javadoc.jar",
+      "realm-android-library-10.19.0-agp9.1-javadoc.jar.asc",
+      "realm-android-library-10.19.0-agp9.1-javadoc.jar.md5",
+      "realm-android-library-10.19.0-agp9.1-javadoc.jar.sha1",
+      "realm-android-library-10.19.0-agp9.1-javadoc.jar.sha256",
+      "realm-android-library-10.19.0-agp9.1-javadoc.jar.sha512",
+      "realm-android-library-10.19.0-agp9.1-sources.jar",
+      "realm-android-library-10.19.0-agp9.1-sources.jar.asc",
+      "realm-android-library-10.19.0-agp9.1-sources.jar.md5",
+      "realm-android-library-10.19.0-agp9.1-sources.jar.sha1",
+      "realm-android-library-10.19.0-agp9.1-sources.jar.sha256",
+      "realm-android-library-10.19.0-agp9.1-sources.jar.sha512",
+      "realm-android-library-10.19.0-agp9.1.aar",
+      "realm-android-library-10.19.0-agp9.1.aar.asc",
+      "realm-android-library-10.19.0-agp9.1.aar.md5",
+      "realm-android-library-10.19.0-agp9.1.aar.sha1",
+      "realm-android-library-10.19.0-agp9.1.aar.sha256",
+      "realm-android-library-10.19.0-agp9.1.aar.sha512",
+      "realm-android-library-10.19.0-agp9.1.pom",
+      "realm-android-library-10.19.0-agp9.1.pom.asc",
+      "realm-android-library-10.19.0-agp9.1.pom.md5",
+      "realm-android-library-10.19.0-agp9.1.pom.sha1",
+      "realm-android-library-10.19.0-agp9.1.pom.sha256",
+      "realm-android-library-10.19.0-agp9.1.pom.sha512"
+    ],
+    "realm-annotations": [
+      "realm-annotations-10.19.0-agp9.1-javadoc.jar",
+      "realm-annotations-10.19.0-agp9.1-javadoc.jar.asc",
+      "realm-annotations-10.19.0-agp9.1-javadoc.jar.md5",
+      "realm-annotations-10.19.0-agp9.1-javadoc.jar.sha1",
+      "realm-annotations-10.19.0-agp9.1-javadoc.jar.sha256",
+      "realm-annotations-10.19.0-agp9.1-javadoc.jar.sha512",
+      "realm-annotations-10.19.0-agp9.1-sources.jar",
+      "realm-annotations-10.19.0-agp9.1-sources.jar.asc",
+      "realm-annotations-10.19.0-agp9.1-sources.jar.md5",
+      "realm-annotations-10.19.0-agp9.1-sources.jar.sha1",
+      "realm-annotations-10.19.0-agp9.1-sources.jar.sha256",
+      "realm-annotations-10.19.0-agp9.1-sources.jar.sha512",
+      "realm-annotations-10.19.0-agp9.1.jar",
+      "realm-annotations-10.19.0-agp9.1.jar.asc",
+      "realm-annotations-10.19.0-agp9.1.jar.md5",
+      "realm-annotations-10.19.0-agp9.1.jar.sha1",
+      "realm-annotations-10.19.0-agp9.1.jar.sha256",
+      "realm-annotations-10.19.0-agp9.1.jar.sha512",
+      "realm-annotations-10.19.0-agp9.1.pom",
+      "realm-annotations-10.19.0-agp9.1.pom.asc",
+      "realm-annotations-10.19.0-agp9.1.pom.md5",
+      "realm-annotations-10.19.0-agp9.1.pom.sha1",
+      "realm-annotations-10.19.0-agp9.1.pom.sha256",
+      "realm-annotations-10.19.0-agp9.1.pom.sha512"
+    ],
+    "realm-annotations-processor": [
+      "realm-annotations-processor-10.19.0-agp9.1-javadoc.jar",
+      "realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.asc",
+      "realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.md5",
+      "realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.sha1",
+      "realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.sha256",
+      "realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.sha512",
+      "realm-annotations-processor-10.19.0-agp9.1-sources.jar",
+      "realm-annotations-processor-10.19.0-agp9.1-sources.jar.asc",
+      "realm-annotations-processor-10.19.0-agp9.1-sources.jar.md5",
+      "realm-annotations-processor-10.19.0-agp9.1-sources.jar.sha1",
+      "realm-annotations-processor-10.19.0-agp9.1-sources.jar.sha256",
+      "realm-annotations-processor-10.19.0-agp9.1-sources.jar.sha512",
+      "realm-annotations-processor-10.19.0-agp9.1.jar",
+      "realm-annotations-processor-10.19.0-agp9.1.jar.asc",
+      "realm-annotations-processor-10.19.0-agp9.1.jar.md5",
+      "realm-annotations-processor-10.19.0-agp9.1.jar.sha1",
+      "realm-annotations-processor-10.19.0-agp9.1.jar.sha256",
+      "realm-annotations-processor-10.19.0-agp9.1.jar.sha512",
+      "realm-annotations-processor-10.19.0-agp9.1.pom",
+      "realm-annotations-processor-10.19.0-agp9.1.pom.asc",
+      "realm-annotations-processor-10.19.0-agp9.1.pom.md5",
+      "realm-annotations-processor-10.19.0-agp9.1.pom.sha1",
+      "realm-annotations-processor-10.19.0-agp9.1.pom.sha256",
+      "realm-annotations-processor-10.19.0-agp9.1.pom.sha512"
+    ],
+    "realm-gradle-plugin": [
+      "realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar",
+      "realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.asc",
+      "realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.md5",
+      "realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.sha1",
+      "realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.sha256",
+      "realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.sha512",
+      "realm-gradle-plugin-10.19.0-agp9.1-sources.jar",
+      "realm-gradle-plugin-10.19.0-agp9.1-sources.jar.asc",
+      "realm-gradle-plugin-10.19.0-agp9.1-sources.jar.md5",
+      "realm-gradle-plugin-10.19.0-agp9.1-sources.jar.sha1",
+      "realm-gradle-plugin-10.19.0-agp9.1-sources.jar.sha256",
+      "realm-gradle-plugin-10.19.0-agp9.1-sources.jar.sha512",
+      "realm-gradle-plugin-10.19.0-agp9.1.jar",
+      "realm-gradle-plugin-10.19.0-agp9.1.jar.asc",
+      "realm-gradle-plugin-10.19.0-agp9.1.jar.md5",
+      "realm-gradle-plugin-10.19.0-agp9.1.jar.sha1",
+      "realm-gradle-plugin-10.19.0-agp9.1.jar.sha256",
+      "realm-gradle-plugin-10.19.0-agp9.1.jar.sha512",
+      "realm-gradle-plugin-10.19.0-agp9.1.pom",
+      "realm-gradle-plugin-10.19.0-agp9.1.pom.asc",
+      "realm-gradle-plugin-10.19.0-agp9.1.pom.md5",
+      "realm-gradle-plugin-10.19.0-agp9.1.pom.sha1",
+      "realm-gradle-plugin-10.19.0-agp9.1.pom.sha256",
+      "realm-gradle-plugin-10.19.0-agp9.1.pom.sha512"
+    ],
+    "realm-transformer": [
+      "realm-transformer-10.19.0-agp9.1-javadoc.jar",
+      "realm-transformer-10.19.0-agp9.1-javadoc.jar.asc",
+      "realm-transformer-10.19.0-agp9.1-javadoc.jar.md5",
+      "realm-transformer-10.19.0-agp9.1-javadoc.jar.sha1",
+      "realm-transformer-10.19.0-agp9.1-javadoc.jar.sha256",
+      "realm-transformer-10.19.0-agp9.1-javadoc.jar.sha512",
+      "realm-transformer-10.19.0-agp9.1-sources.jar",
+      "realm-transformer-10.19.0-agp9.1-sources.jar.asc",
+      "realm-transformer-10.19.0-agp9.1-sources.jar.md5",
+      "realm-transformer-10.19.0-agp9.1-sources.jar.sha1",
+      "realm-transformer-10.19.0-agp9.1-sources.jar.sha256",
+      "realm-transformer-10.19.0-agp9.1-sources.jar.sha512",
+      "realm-transformer-10.19.0-agp9.1.jar",
+      "realm-transformer-10.19.0-agp9.1.jar.asc",
+      "realm-transformer-10.19.0-agp9.1.jar.md5",
+      "realm-transformer-10.19.0-agp9.1.jar.sha1",
+      "realm-transformer-10.19.0-agp9.1.jar.sha256",
+      "realm-transformer-10.19.0-agp9.1.jar.sha512",
+      "realm-transformer-10.19.0-agp9.1.pom",
+      "realm-transformer-10.19.0-agp9.1.pom.asc",
+      "realm-transformer-10.19.0-agp9.1.pom.md5",
+      "realm-transformer-10.19.0-agp9.1.pom.sha1",
+      "realm-transformer-10.19.0-agp9.1.pom.sha256",
+      "realm-transformer-10.19.0-agp9.1.pom.sha512"
+    ]
+  },
+  "coordinates": [
+    "io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-transformer:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-annotations:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-annotations-processor:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-android-library:10.19.0-agp9.1",
+    "io.github.leminity.realm:realm-android-kotlin-extensions:10.19.0-agp9.1"
+  ],
+  "dynamic_plugin_injection": [
+    {
+      "artifactId": "realm-annotations",
+      "kind": "annotation-api"
+    },
+    {
+      "artifactId": "realm-annotations-processor",
+      "kind": "annotation-processor"
+    },
+    {
+      "artifactId": "realm-android-library",
+      "kind": "base-library"
+    },
+    {
+      "artifactId": "realm-android-kotlin-extensions",
+      "kind": "kotlin-extension"
+    }
+  ],
+  "files": [
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar",
+      "sha256": "7d79a087f9d49e8bf4fab29e5abb9f061d1089d20d3bf24f5fa11ac5cd29da96",
+      "size": 4365
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.asc",
+      "sha256": "6ddaf1b048e684b8ad49fc97c9272d3da4aac88ff0584c95ba70340be4cba6ae",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.md5",
+      "sha256": "1eb2d730c341454f77837b9dd382769acf6d55fc6a0441a4e6dcbbdbce2eb855",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.sha1",
+      "sha256": "46fa3893f0de210c8ccde58d54c281a9c1443821aa99dbf194c95d62594d69dc",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.sha256",
+      "sha256": "0351e6e765e7d739bd916556eb1a304769164962d568300866d18c8411eb4ea1",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-javadoc.jar.sha512",
+      "sha256": "6d150524afe11ebf2f33d018666c21c5ba55c5e20c38cc7b774b7b9f83bc3a17",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar",
+      "sha256": "7c1bd34f38ed1cb58906d2481b8ba47909c14fde07c30508d1ed561f348a345a",
+      "size": 16758
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.asc",
+      "sha256": "e555e9cb8b6a79dab00304e9fcb1676bed7fbe4f8ebb2bdfdb500036e044ce92",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.md5",
+      "sha256": "b3744327c825dcbc9f54b1894f1a33640509256744af5c417e23321939e45ddc",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.sha1",
+      "sha256": "2166de9b8aece072efd17b534c4093bff6ad68b66d7ee62cc9bf2c0e2531f86d",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.sha256",
+      "sha256": "7722b8062e508e9f5c51cf9377a0758fa94632e2b8f5495de42d2314261c6fb8",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1-sources.jar.sha512",
+      "sha256": "37b8acf4c2d46712f28caeb68804b2dde1a1fa371862286b2a9ba7ed6135922b",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.aar",
+      "sha256": "f18913dc971db12effb8891ed0d898a245307af320039697e46b9f8845fc6860",
+      "size": 18918
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.aar.asc",
+      "sha256": "521aa7bbddc0ef136b5feab11d8ac24f54efe97b34445a5648519bd2b3287db5",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.aar.md5",
+      "sha256": "5b231cfc411a64d2701621165682a38f8d0750cec63ab1dc539ae1928e9e48d0",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.aar.sha1",
+      "sha256": "950f755014b6a3158f97c3645012164a524c259d7bf11e4bcef60b6cec2d4ba1",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.aar.sha256",
+      "sha256": "9a3865ebd7c399ed205049e15ae7f5e3a5dfcfb9c766d1b85f9e50f0e3f50e87",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.aar.sha512",
+      "sha256": "de12329d094e14404ae57967f98d53344c62acf234b861673088509f7a440038",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.pom",
+      "sha256": "a71f1832b65e770e39fd04e584703ee3f6ba8a08c9bda81236d223ea1cb67047",
+      "size": 1958
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.pom.asc",
+      "sha256": "90403eb909e29d8d31e1feab8c2304ae41a5e02ab6ed8dd7c27547a8c4611336",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.pom.md5",
+      "sha256": "9998c75ee4bebfcc69c1af8d9044a789a88e9f32cfadf3e37de607eaa4cefb47",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.pom.sha1",
+      "sha256": "66ed7548745468434e84045bf50fa443da5e538733a9042105f61526200eeaff",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.pom.sha256",
+      "sha256": "e9c8837ad98e0573add652a8d0c230b95e3b6421c7bda36ec6d9cc1966f33a99",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-kotlin-extensions/10.19.0-agp9.1/realm-android-kotlin-extensions-10.19.0-agp9.1.pom.sha512",
+      "sha256": "7e1d50b50d3a3ea4fc2595f000953714191883596d1e985b8d050571524fcf6d",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-javadoc.jar",
+      "sha256": "3e4c1366f053e28c774e8999de0300569fb4b9d70bb72beecdf2ae2be64de49e",
+      "size": 107841
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-javadoc.jar.asc",
+      "sha256": "d714baec44c47e33fc880c11982a738b03333eaddd2ff09f3e71fafc90d025ac",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-javadoc.jar.md5",
+      "sha256": "95b875df8875b887028eed80c2996d639cc4c54c5560eb0f392fd9516556a091",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-javadoc.jar.sha1",
+      "sha256": "37adb2ca5915455e3bda7064bcc769c623528ea521a68518f61e2d53227715b9",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-javadoc.jar.sha256",
+      "sha256": "a47bfc4efe03ac808882cc797940a565dd23331b067a91d7a7fcea622308e3d3",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-javadoc.jar.sha512",
+      "sha256": "7f7ea7664dec7380d6c16dcf38bc4ca21a56d5714cbeda155b5a28b4f260cbdd",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-sources.jar",
+      "sha256": "aa457f6b78eaf5bcd6637f3240f3442bb9f3fa9f211f6bf40061b80917b4fa73",
+      "size": 376502
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-sources.jar.asc",
+      "sha256": "09d01fd60b795ee8b28394bad838cc629ffd4c7ffef0483a9fb2ac373cf147a8",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-sources.jar.md5",
+      "sha256": "d0d39d19a8283a4051639d7ca4863fb28c27eb8f67683da17738567f1c4cf6bf",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-sources.jar.sha1",
+      "sha256": "c3578fa775144a99343105fabb2a347b0bb84409f2a37d1e8ce246f856b3ede6",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-sources.jar.sha256",
+      "sha256": "6dded458f9ba9bdcb1bd8b31910a2f705b2f44d1282390498a87c3f9d9845baf",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1-sources.jar.sha512",
+      "sha256": "11e5b9f03cf8922bffa612ccac2d4983efc7c4ec1f3d4c01b228f8c69d70b71f",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar",
+      "sha256": "af0c1fb414dac2fec16cadcf5fbf7cc1cbea209a4c07d7ea2c7675d5043fba4d",
+      "size": 10673642
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar.asc",
+      "sha256": "a2fb8b48af1b509c47653491ae92810dd1517de8e7f673305fc2a68a4b12ba70",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar.md5",
+      "sha256": "08a1b6a708de7a452195abd069b40c1bd511b0c2c662a23802700f9ac54afa04",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar.sha1",
+      "sha256": "22690ee133e8d381db10077b53edd954fea972dd9bf31cc3538b0a8a6c0fec62",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar.sha256",
+      "sha256": "0816bfe6fd6dfed88f56ebd40150779515de7804fef85f2a16048d4ab8200696",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar.sha512",
+      "sha256": "1c524f1ecffad3a0f5e68ada7a50a916a3f5276e1d2f92a06e1a9ad0ded53d0d",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.pom",
+      "sha256": "bc382e940913ce2f6c17fde82b89063805df4c2dde95e277e59866e449f1f330",
+      "size": 2687
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.pom.asc",
+      "sha256": "04a3f686f79c8e19e0f20edaae559e08a1405480c875c8ac488a903cf31e8f63",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.pom.md5",
+      "sha256": "b9b7c198361f6e4bddde4d1bb1f83dddb87f1905257bf8e521a799a7fb24c0e2",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.pom.sha1",
+      "sha256": "aeb1e1676cbf2d77c8fc3dafac684bdf5b3215eb85c76c027c66c764a2064619",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.pom.sha256",
+      "sha256": "77764d0f31d3d8e6d8cf539840964e1159db60c566345e945068590779db9b7d",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.pom.sha512",
+      "sha256": "e274831d1633df1a33b3e957f51641460c95ed4d1794998358434b9538ec474e",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-javadoc.jar",
+      "sha256": "f95fb69a9e7108ae8d4d2d3c44925e2851c5aa218b1da59a7a418809dc8017f1",
+      "size": 110532
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-javadoc.jar.asc",
+      "sha256": "b8313d8355570d65f9968b10719b1ba52c631fc2de16c06beda6d812b4b866ca",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-javadoc.jar.md5",
+      "sha256": "80c5d9a379f609d3a981620fd9c68449a16f3052a6a276657cef052953a2d846",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-javadoc.jar.sha1",
+      "sha256": "2dc16d474a9cc6d5db5289a6bdd6048dba77fb6610989c10b378a9bc5d1e246e",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-javadoc.jar.sha256",
+      "sha256": "3be6505c1658fdbc08fe1525de02a5681eb79600c284f61b4de6fc360cd5c32d",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-javadoc.jar.sha512",
+      "sha256": "3a40ae6f044090be97a04c24a2d5f5673e0c3e0d5f171d2bc7f01c2346567da2",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-sources.jar",
+      "sha256": "c44259d8b62b175fb0fbe05e9598de613f18e3cfd87b1df3f02718e2717be04c",
+      "size": 17917
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-sources.jar.asc",
+      "sha256": "97d3919524368ae6fe762d33090f5a7324a1ec63651997dc894d2faf686d8672",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-sources.jar.md5",
+      "sha256": "96d92989115e21962ed40cfe178a921045b52a155a103b6c314e8c0a80c7943d",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-sources.jar.sha1",
+      "sha256": "b4ad86e53164aafbbdca0d5748e9ccf73bae76df75a42205ab55f3b685656efc",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-sources.jar.sha256",
+      "sha256": "404e087a55d9a2ab6a5a3bbbaed17f74d5b2851d739cf706c09d8b1f643a470b",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1-sources.jar.sha512",
+      "sha256": "3de5f1b8e1326f9dfad8df27726bb26a5a5667e8a5c7c45696c93522d73828ef",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar",
+      "sha256": "dd49624ab0d1bb8db7549afe724674bf9a05b37e4994789e6b7b1c4c10fd03bd",
+      "size": 9333
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar.asc",
+      "sha256": "c867008512f1047913a0cf1490a9c01029f1d33dead2821e2f2759fc94a85b0f",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar.md5",
+      "sha256": "bf998cf84b3514b02732ed062284ef0e6b824b66ade04e8842d1c2013bc67fe2",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar.sha1",
+      "sha256": "de23b9cb28956c6d6a0021c29d1b7110d0798c3c5155dd1e8da0a239cece35f0",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar.sha256",
+      "sha256": "77cd6c44d4eec78fa32682c652007393a1b11da290aace2c947db53e61f26f04",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar.sha512",
+      "sha256": "14824a9e09b9a0eacecc1da531558969cd422d0ba5def74a76caedcf3997616b",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom",
+      "sha256": "4238cacedd3da5f3ad5bc82be8308aa401a705a7b8ab9b6f2309bc6098da7597",
+      "size": 1375
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom.asc",
+      "sha256": "266e5e9a2876dd7cb3d5be68eec45de023e8f27b6cad5cc241621bc023815f4f",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom.md5",
+      "sha256": "dee9fea75a51f08d747705814d660a4641373243ce1e36a74ea31788d4f76ffa",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom.sha1",
+      "sha256": "3c8e36460a2ca82a821ccae8b0b716a8507e87b73b2ad40e4405e8b56055f115",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom.sha256",
+      "sha256": "e8645e72c0ee0b3fa3c7d2f0964e85956b48163405fcd264c6d14e551bfa1706",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom.sha512",
+      "sha256": "b4bbd83bda274717969fcbcc4a6acb0ef757cdc5a92a02db56917cb8d8467f50",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-javadoc.jar",
+      "sha256": "6c3e5ea5f97af7dc7051e00cdf9fa2ceaea05d5b6784e6ef24a6760097dac923",
+      "size": 85190
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.asc",
+      "sha256": "3eeb8f7c47eaf8e628fc510c06a272f92dc18efea860666d056c851af9f21f96",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.md5",
+      "sha256": "81db435e5714690abbbfb2954d538c9dcd3da9bd894bffde97dd60a0564263d5",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.sha1",
+      "sha256": "89e1019be19c245a2145ba73d4ecdcd8e86eea0d632c30d945b33f22decabc85",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.sha256",
+      "sha256": "4501cbaeb0ba392aea349a7f6de7488f55d7c9cab5596466f8a7056630b65297",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-javadoc.jar.sha512",
+      "sha256": "b70c666296ea3b84fa7cd7a43d6cbd85bc3a85bab70d5275d83f2d5b0561d283",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-sources.jar",
+      "sha256": "414e19e0de07f9bed51101b34dd53063dacabd220af94ed03538493afbc90a73",
+      "size": 81447
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-sources.jar.asc",
+      "sha256": "51f6078b3c37733157902734893ff319d85cf2c4a7fa37b29e35920c27a016e1",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-sources.jar.md5",
+      "sha256": "1fabc2fb5164cbdd00c760c0419c3388fbacf3b4a2400c552009d35bff802de1",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-sources.jar.sha1",
+      "sha256": "19166c35ff3899de0ad4230032a739c31c21e25b2a5ea9a6da40fee95cfc6f2e",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-sources.jar.sha256",
+      "sha256": "6b9efc2b41249f0a3bd2fbcfa9c73eca4ecc423da6ba419132b1c2991782f863",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1-sources.jar.sha512",
+      "sha256": "56d7fd38cce4bb36d3295a5fbe59ac9ef0282c1d8cbf881bdc2bc81bc73ddaad",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.jar",
+      "sha256": "9282bae1f8f22e96206ec25e61b87aa1947226d70b77f4b4650c60517c549027",
+      "size": 178879
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.jar.asc",
+      "sha256": "5143512c138c19790d950e688145cd895b1592ae7f9baf92592cedb18ac25e1e",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.jar.md5",
+      "sha256": "b698d7be3bed370c725b16c0ce5bdeb5a10905fdf69d00aa63dc90f6169cfdb0",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.jar.sha1",
+      "sha256": "d55104344cea99b83cf379d9855df5fb4ad8640124802c4d73c61d41d4cd5036",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.jar.sha256",
+      "sha256": "c852503f999be49a07f8c2367c183d306a0a7b5e09c9a453b0747b0b39b0812a",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.jar.sha512",
+      "sha256": "c5d4a42ee157a55f34c5a115162fe1a23c8ef1c8ed23f3dde7da4d234ef50c85",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.pom",
+      "sha256": "362d876b97ad19b509034a50f4d6cd49caa59c83e62194de55662d1289830c77",
+      "size": 2178
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.pom.asc",
+      "sha256": "fafa38aafae0d9ad03230da52a2e9f4bde6215656d4f1762c3baa0830269d6f7",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.pom.md5",
+      "sha256": "8534af472c0d5ca7d3c701cfc8e12479b5829739e99be48b763744f725a3d42c",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.pom.sha1",
+      "sha256": "e60f854e739832479360bdd2509a37df690fd85da6f6bd13d8ed3bf044880990",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.pom.sha256",
+      "sha256": "2d2a4bb81820374ea29949aff9439b9894ea11fe526d21422068ee664e0db8ce",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-annotations-processor/10.19.0-agp9.1/realm-annotations-processor-10.19.0-agp9.1.pom.sha512",
+      "sha256": "6a8bf886df068441481ec4cb3098e8700f85030f7a361e4a43982865d508e79c",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar",
+      "sha256": "7d79a087f9d49e8bf4fab29e5abb9f061d1089d20d3bf24f5fa11ac5cd29da96",
+      "size": 4365
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.asc",
+      "sha256": "456e32d28c0591d09c6ade35f2cf3e6b9327b2d76eca75e67dc6d8830e68341b",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.md5",
+      "sha256": "1eb2d730c341454f77837b9dd382769acf6d55fc6a0441a4e6dcbbdbce2eb855",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.sha1",
+      "sha256": "46fa3893f0de210c8ccde58d54c281a9c1443821aa99dbf194c95d62594d69dc",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.sha256",
+      "sha256": "0351e6e765e7d739bd916556eb1a304769164962d568300866d18c8411eb4ea1",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-javadoc.jar.sha512",
+      "sha256": "6d150524afe11ebf2f33d018666c21c5ba55c5e20c38cc7b774b7b9f83bc3a17",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-sources.jar",
+      "sha256": "393fdb2b799a4e43c5a705df170d6c506f0d11f54a4fdd3b6e529007d19d5a7d",
+      "size": 9393
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-sources.jar.asc",
+      "sha256": "dfde7a73c1e6eaf0eee253bf775118c7e18b2de246cc85023ef22c7afe635e6b",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-sources.jar.md5",
+      "sha256": "18d6d9cb6e785cd943b2a271241079301d9467faca6a9f776643808cc2dae7e2",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-sources.jar.sha1",
+      "sha256": "c62e1be3d8d981b4ffaa7371c3a5fa184b300a7e34b4d2bc9799aa25d1c8784f",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-sources.jar.sha256",
+      "sha256": "9897db8b99d55218a2d21b86d12abc2eaea12394d4aa85daf2833b2b05316b97",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1-sources.jar.sha512",
+      "sha256": "3c97e1def8c14c552730e48f4e7f0b131aec95048f63002bbdba05feabe0348e",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.jar",
+      "sha256": "fd73d7f801403226705eff2fe5c554fc590fbbdbbb5a44ca8ceb624670bed8a0",
+      "size": 26740
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.jar.asc",
+      "sha256": "ea6f602cf4ec7f4d4d3b1259ce6da105f6af9b48c7fe3735c5fb3fbb38d4cfd0",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.jar.md5",
+      "sha256": "9bcb64a6eaaa8a458a523456b15bfe70208762e3416bd5b35cf9af77022c1dc0",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.jar.sha1",
+      "sha256": "179e947e3346c8849b35722b832bdaab787762f2d72a34e34d5b05b2d61e9b19",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.jar.sha256",
+      "sha256": "fec35d86069f57efb93341dc46d8f63935f1b6bc85b883b62dfc644dc7deb02e",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.jar.sha512",
+      "sha256": "438f2aed20f82546dc1be138e3939730092c06dab69485109ad839561a1c8cc8",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.pom",
+      "sha256": "30875769f27d785a5ecc59a1f9b5e08d05469ed28f8c56e882a561a6d4aee195",
+      "size": 1811
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.pom.asc",
+      "sha256": "8c274fbadee210ae2ebe021e38b7083f8dd296b9e668c51bbd4642d62aad91ff",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.pom.md5",
+      "sha256": "57529abdb60fd4dbd0828149b59b09a30d433275fa7b526a051f14a070f59e66",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.pom.sha1",
+      "sha256": "24bb56d8f88e0e2ecda3943e0658a2d89549aaf92dcdc65eaba540f34b3f019f",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.pom.sha256",
+      "sha256": "f0d8f20a78ed3870d5e4505d277d76a0688e722e7559f2bcdff0a7219450ae26",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-gradle-plugin/10.19.0-agp9.1/realm-gradle-plugin-10.19.0-agp9.1.pom.sha512",
+      "sha256": "efd39b3112d5df9310bdb0939e1f8dd0cc80100e14ee92d333ccf3fd915fc640",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-javadoc.jar",
+      "sha256": "1070e5888372699639ad834d8b1226ffe83f4dd402e7bd4ecc1d58ab2a4f4428",
+      "size": 95436
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-javadoc.jar.asc",
+      "sha256": "a20b321a3488f91a2fc76f27752d2cfbba07b4f18be1ad89e9f5d86cc9343988",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-javadoc.jar.md5",
+      "sha256": "2d10f856ab02c06099bec480806a4204adb0b82f6203ad2b40b816e2e7a25114",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-javadoc.jar.sha1",
+      "sha256": "a85bcfa8995008126f2a4b7c16e24e6b4077e936c762270cecebe37404493d09",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-javadoc.jar.sha256",
+      "sha256": "06fccfd9363a16da74142c0e0cc24284925fcd54d389e4e73635cc692d037de6",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-javadoc.jar.sha512",
+      "sha256": "3d279e5adbd836b6d12e5e8b6e093442530d8210f67ec499537bce99f97b447b",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-sources.jar",
+      "sha256": "34bdcac106a8217c47f37629ee9be72c61331bc08ead977ffa4961207252ffea",
+      "size": 31052
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-sources.jar.asc",
+      "sha256": "5139b1c42bf0d9668c31f492df85983313434b7511e454b49f22e1356b3aea55",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-sources.jar.md5",
+      "sha256": "30d9b7607852c123a5803e98b34b533bc599925ea871aa9eaedf1e1d57f59519",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-sources.jar.sha1",
+      "sha256": "b2e4c85e040363bfbe2ef9ecea103dc94982f1ab0e04a7436dba2369984f3e05",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-sources.jar.sha256",
+      "sha256": "f0e7cd4756f24136b0438cb0b4e645099ab9f51005fb925f7af7e69963323d22",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1-sources.jar.sha512",
+      "sha256": "d13cdc87b23c1cf36cdc3604224b37342d6ced4b4cc4a09ad58d5de3cd179048",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.jar",
+      "sha256": "61553e174fa5f8a2539656d13dbae97cb19bafef91c9ee0c1a7b25834fcf07c2",
+      "size": 83770
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.jar.asc",
+      "sha256": "1ae491dff13610fb66674f759c9089ec94bb18f809c1ebdc85fbf00f86b5915a",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.jar.md5",
+      "sha256": "c0cc01fa8f392fef67d333b7bcec2b72eee11d92e50da54fa400a2c8b8b8748c",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.jar.sha1",
+      "sha256": "eda55c8c32d2a9fd05a2793069e78104f1b16ded06988d43b6599ad463e5d41c",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.jar.sha256",
+      "sha256": "d7460be0c23ec3dd31fb78d8bb909f5a1f60d98cfbb5332dac210d2798199fc7",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.jar.sha512",
+      "sha256": "9049890778944303a720ca4bc4c3fbbe40ae8f9ae79bc4a9a33315b91a1776c6",
+      "size": 129
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.pom",
+      "sha256": "e36f2fde6c63637590934f3ae793ee20ca957372c548ed8d8c883bfd5f9981a7",
+      "size": 2353
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.pom.asc",
+      "sha256": "4bc2497da48b5d67eed8ac25e36fc9b1935bb91ab338a4100037aa3f746212d5",
+      "size": 455
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.pom.md5",
+      "sha256": "82dfba11b9d8ce962fe358186e02b0f3c5323a9dc1687331e8794791a7fb4dcc",
+      "size": 33
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.pom.sha1",
+      "sha256": "97d928a16b81a7791e652cf942a6d4fbe46895f9292dddf1fa2e3eff5bebb356",
+      "size": 41
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.pom.sha256",
+      "sha256": "6296d5d7249eb89cd147c498d0904c7f1c9b02739340d124a942176a4e971307",
+      "size": 65
+    },
+    {
+      "path": "io/github/leminity/realm/realm-transformer/10.19.0-agp9.1/realm-transformer-10.19.0-agp9.1.pom.sha512",
+      "sha256": "4727a309a0a1aa886d2f82700a6204ca787100d976d599f8bcf081ada6b13a71",
+      "size": 129
+    }
+  ],
+  "format": "g008-local-maven-central-inputs-v1",
+  "group": "io.github.leminity.realm",
+  "normalized_pom_dependencies": {
+    "realm-android-kotlin-extensions": [
+      {
+        "artifactId": "kotlin-stdlib-jdk8",
+        "exclusions": [],
+        "groupId": "org.jetbrains.kotlin",
+        "scope": "compile",
+        "version": "2.2.10"
+      },
+      {
+        "artifactId": "kotlinx-coroutines-android",
+        "exclusions": [],
+        "groupId": "org.jetbrains.kotlinx",
+        "scope": "compile",
+        "version": "1.6.0"
+      },
+      {
+        "artifactId": "kotlinx-coroutines-core",
+        "exclusions": [],
+        "groupId": "org.jetbrains.kotlinx",
+        "scope": "compile",
+        "version": "1.6.0"
+      }
+    ],
+    "realm-android-library": [
+      {
+        "artifactId": "relinker",
+        "exclusions": [],
+        "groupId": "com.getkeepsafe.relinker",
+        "scope": "compile",
+        "version": "1.4.3"
+      },
+      {
+        "artifactId": "jsr305",
+        "exclusions": [],
+        "groupId": "com.google.code.findbugs",
+        "scope": "compile",
+        "version": "3.0.2"
+      },
+      {
+        "artifactId": "realm-annotations",
+        "exclusions": [],
+        "groupId": "io.github.leminity.realm",
+        "scope": "compile",
+        "version": "10.19.0-agp9.1"
+      },
+      {
+        "artifactId": "realm-annotations",
+        "exclusions": [],
+        "groupId": "io.github.leminity.realm",
+        "scope": "compile",
+        "version": "10.19.0-agp9.1"
+      },
+      {
+        "artifactId": "rxandroid",
+        "exclusions": [
+          [
+            "io.reactivex.rxjava2",
+            "rxjava"
+          ]
+        ],
+        "groupId": "io.reactivex.rxjava2",
+        "scope": "compile",
+        "version": "2.1.1"
+      },
+      {
+        "artifactId": "bson",
+        "exclusions": [],
+        "groupId": "org.mongodb",
+        "scope": "compile",
+        "version": "3.12.1"
+      },
+      {
+        "artifactId": "bson",
+        "exclusions": [],
+        "groupId": "org.mongodb",
+        "scope": "compile",
+        "version": "3.12.1"
+      }
+    ],
+    "realm-annotations": [],
+    "realm-annotations-processor": [
+      {
+        "artifactId": "javawriter",
+        "exclusions": [],
+        "groupId": "com.squareup",
+        "scope": "runtime",
+        "version": "2.5.1"
+      },
+      {
+        "artifactId": "realm-annotations",
+        "exclusions": [],
+        "groupId": "io.github.leminity.realm",
+        "scope": "runtime",
+        "version": "10.19.0-agp9.1"
+      },
+      {
+        "artifactId": "kotlin-stdlib-jdk8",
+        "exclusions": [],
+        "groupId": "org.jetbrains.kotlin",
+        "scope": "runtime",
+        "version": "2.2.10"
+      },
+      {
+        "artifactId": "bson",
+        "exclusions": [],
+        "groupId": "org.mongodb",
+        "scope": "runtime",
+        "version": "3.12.1"
+      }
+    ],
+    "realm-gradle-plugin": [
+      {
+        "artifactId": "realm-transformer",
+        "exclusions": [],
+        "groupId": "io.github.leminity.realm",
+        "scope": "runtime",
+        "version": "10.19.0-agp9.1"
+      },
+      {
+        "artifactId": "kotlin-stdlib-jdk8",
+        "exclusions": [],
+        "groupId": "org.jetbrains.kotlin",
+        "scope": "compile",
+        "version": "2.2.10"
+      }
+    ],
+    "realm-transformer": [
+      {
+        "artifactId": "guava",
+        "exclusions": [],
+        "groupId": "com.google.guava",
+        "scope": "runtime",
+        "version": "31.0.1-jre"
+      },
+      {
+        "artifactId": "realm-annotations",
+        "exclusions": [],
+        "groupId": "io.github.leminity.realm",
+        "scope": "runtime",
+        "version": "10.19.0-agp9.1"
+      },
+      {
+        "artifactId": "jaxb-api",
+        "exclusions": [],
+        "groupId": "javax.xml.bind",
+        "scope": "runtime",
+        "version": "2.3.1"
+      },
+      {
+        "artifactId": "javassist",
+        "exclusions": [],
+        "groupId": "org.javassist",
+        "scope": "runtime",
+        "version": "3.25.0-GA"
+      },
+      {
+        "artifactId": "kotlin-stdlib-jdk8",
+        "exclusions": [],
+        "groupId": "org.jetbrains.kotlin",
+        "scope": "runtime",
+        "version": "2.2.10"
+      }
+    ]
+  },
+  "version": "10.19.0-agp9.1"
+}

@@ -1,0 +1,32 @@
+diff --git a/evidence/provenance/g011-source-evidence-manifest.json b/evidence/provenance/g011-source-evidence-manifest.json
+index d492b9320..0777167aa 100644
+--- a/evidence/provenance/g011-source-evidence-manifest.json
++++ b/evidence/provenance/g011-source-evidence-manifest.json
+@@ -183,20 +183,20 @@
+   },
+   "gate_digests": {
+     ".github/workflows/ci.yml": "b55d535033af8d31c8e7e91dbaaf08bc81ffdce4e752554d9cd152304c72a72f",
+-    ".github/workflows/release.yml": "1024bbce154fde7213e43a67f9ea58f56e454f432c6f06ea4a635cd366a901f4",
+-    "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "5acc84ec63c7282a84ff01befecd97fe16e00b782c413daf2bf915d38e3322f5",
++    ".github/workflows/release.yml": "e25449ab5de359c9f8eae21ba77641a577529c7e6cbca33688c51473859f20d8",
++    "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "a0c40aefa5aecb14a41eec4daa461fa2541d41eeedbd02a19cf3e91dccaa4ea4",
+     "gradle-plugin/src/main/kotlin/io/realm/gradle/Realm.kt": "4b9ae4bbd29654faafe107eeb31dc2d246404f19bf095a789d2e92b2ae27d981",
+     "gradle-plugin/src/test/groovy/io/realm/gradle/PluginTest.groovy": "3e3929b3fb5dad2aa5eab4ec947d2447168e55fdfd4e8509d5a1131c418c335b",
+-    "tools/central-portal.py": "be3042dd4a0b6f3a3cb8552dd5e91a5c46ef6506bb9e726c3c27c8ab8a27efc0",
++    "tools/central-portal.py": "227802152c3ce95ea373664530cf3d1106c97ac659b9ec12d511c67cea04b165",
+     "tools/g008-publication.py": "579139dfe260fd43741eebec6231b14c585216324784659608b3a1ab74b5c8a0",
+-    "tools/g011-consume-six.sh": "b484f9643136cbd0855e897f7b062856fe83cc246e323c24f9fbc64391cca10a",
++    "tools/g011-consume-six.sh": "0f0160d76856731ef441988006f2517b922e1733f38f32cdedade510290c6d9b",
+     "tools/g011-evidence-manifest.py": "ff9b53b9c74d4911e6cf03534a8b15c3504f1a128559894d2e5d7dc591294d96",
+     "tools/g011-verify-native-elf.sh": "5d8fa3f9f073bb8e443efb7473e5d2927888dcfc7c7ab48310466419f6406777",
+     "tools/publish_release.sh": "7fbe0e767c85c43b2a3c1fd88e94953e44bab33cb33619c4d2ee1b3a89816a8c",
+-    "tools/test-ac08-g011-parameterization.py": "a2845ce3e494060498dc9d0c65f0e0481ef0898f6582c36e5483301b1fca539c",
+-    "tools/test-central-portal.py": "e03a24b79278781089f5130b8bf99365c1f0650a2ea9a69b79bb2b2f62d81bf4",
++    "tools/test-ac08-g011-parameterization.py": "64a88e8039a92da7a7c070503f6ed482f5b0cc19edde61a3e75fb5fc77391813",
++    "tools/test-central-portal.py": "a247ec0177193df6d77005a92ad394123ced7add614ffb2cbc2bcbddee45712c",
+     "tools/test-g008-publication.py": "459d2567e7bd05403f9fe20bc7e0969d58a50e888e9da19f9214e10b930dcac0",
+-    "tools/test-g011-consume-six.py": "ef70efd81817cfaf8082a98962a6805b3f39e726414b5c407ab838cb49bdc700",
++    "tools/test-g011-consume-six.py": "7e9b0d70649ad776b2f7608e238af42c144f183355f22fd00ae544125dc07675",
+     "tools/test-g011-evidence-manifest.py": "d5a46d101947f4e3b5e76cec595f1fa343bdb8b9f68710db2a6afe4888776f3a",
+     "tools/test-g011-verify-native-elf.py": "c01d1bd02c87c5461eaa30d5caa87521d66111e39b95dba983f6224e93ecaac3",
+     "tools/test-verify-g003-independent-builds.sh": "d9a033c9f8b4138f86fa98c27df0ee10c359ccbd5805762386df3e0c07f3cfb6",

@@ -1,0 +1,80 @@
+{
+  "artifacts": {
+    "realm-android-kotlin-extensions": {
+      "javadoc": {
+        "sha256": "7d79a087f9d49e8bf4fab29e5abb9f061d1089d20d3bf24f5fa11ac5cd29da96"
+      },
+      "pom_sha256": "a71f1832b65e770e39fd04e584703ee3f6ba8a08c9bda81236d223ea1cb67047",
+      "primary": {
+        "sha256": "f18913dc971db12effb8891ed0d898a245307af320039697e46b9f8845fc6860"
+      },
+      "sources": {
+        "sha256": "7c1bd34f38ed1cb58906d2481b8ba47909c14fde07c30508d1ed561f348a345a"
+      }
+    },
+    "realm-android-library": {
+      "javadoc": {
+        "sha256": "3e4c1366f053e28c774e8999de0300569fb4b9d70bb72beecdf2ae2be64de49e"
+      },
+      "pom_sha256": "bc382e940913ce2f6c17fde82b89063805df4c2dde95e277e59866e449f1f330",
+      "primary": {
+        "sha256": "af0c1fb414dac2fec16cadcf5fbf7cc1cbea209a4c07d7ea2c7675d5043fba4d"
+      },
+      "sources": {
+        "sha256": "aa457f6b78eaf5bcd6637f3240f3442bb9f3fa9f211f6bf40061b80917b4fa73"
+      }
+    },
+    "realm-annotations": {
+      "javadoc": {
+        "sha256": "f95fb69a9e7108ae8d4d2d3c44925e2851c5aa218b1da59a7a418809dc8017f1"
+      },
+      "pom_sha256": "4238cacedd3da5f3ad5bc82be8308aa401a705a7b8ab9b6f2309bc6098da7597",
+      "primary": {
+        "sha256": "dd49624ab0d1bb8db7549afe724674bf9a05b37e4994789e6b7b1c4c10fd03bd"
+      },
+      "sources": {
+        "sha256": "c44259d8b62b175fb0fbe05e9598de613f18e3cfd87b1df3f02718e2717be04c"
+      }
+    },
+    "realm-annotations-processor": {
+      "javadoc": {
+        "sha256": "6c3e5ea5f97af7dc7051e00cdf9fa2ceaea05d5b6784e6ef24a6760097dac923"
+      },
+      "pom_sha256": "362d876b97ad19b509034a50f4d6cd49caa59c83e62194de55662d1289830c77",
+      "primary": {
+        "sha256": "9282bae1f8f22e96206ec25e61b87aa1947226d70b77f4b4650c60517c549027"
+      },
+      "sources": {
+        "sha256": "414e19e0de07f9bed51101b34dd53063dacabd220af94ed03538493afbc90a73"
+      }
+    },
+    "realm-gradle-plugin": {
+      "javadoc": {
+        "sha256": "7d79a087f9d49e8bf4fab29e5abb9f061d1089d20d3bf24f5fa11ac5cd29da96"
+      },
+      "pom_sha256": "30875769f27d785a5ecc59a1f9b5e08d05469ed28f8c56e882a561a6d4aee195",
+      "primary": {
+        "sha256": "fd73d7f801403226705eff2fe5c554fc590fbbdbbb5a44ca8ceb624670bed8a0"
+      },
+      "sources": {
+        "sha256": "393fdb2b799a4e43c5a705df170d6c506f0d11f54a4fdd3b6e529007d19d5a7d"
+      }
+    },
+    "realm-transformer": {
+      "javadoc": {
+        "sha256": "1070e5888372699639ad834d8b1226ffe83f4dd402e7bd4ecc1d58ab2a4f4428"
+      },
+      "pom_sha256": "e36f2fde6c63637590934f3ae793ee20ca957372c548ed8d8c883bfd5f9981a7",
+      "primary": {
+        "sha256": "61553e174fa5f8a2539656d13dbae97cb19bafef91c9ee0c1a7b25834fcf07c2"
+      },
+      "sources": {
+        "sha256": "34bdcac106a8217c47f37629ee9be72c61331bc08ead977ffa4961207252ffea"
+      }
+    }
+  },
+  "format": "g010-apache-notice-v1",
+  "license_sha256": "69849221bfb90053de2134ef5e6d540287b4b98062326492f1f96f5da685524b",
+  "notice_sha256": "c499edc9d31ad5c398d1e1ae6d1c9b6668bce15a3458bcb299a1365c548a0973",
+  "version": "10.19.0-agp9.1"
+}

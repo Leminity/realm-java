@@ -1,0 +1,8 @@
+mode=local
+fork_group=io.github.leminity.realm
+fork_repository=file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-1/.omx/recovery/transactions/G013-task2-local-acceptance-20260721T092343Z-worker1/artifacts/g008/staging
+exclusive_dependency_resolution=PASS
+exclusive_plugin_resolution=PASS
+maven_local=absent
+jitpack=absent
+gradle_user_home_initial_entries=0

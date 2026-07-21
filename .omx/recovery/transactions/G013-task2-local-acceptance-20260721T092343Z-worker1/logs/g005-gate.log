@@ -1,0 +1,410 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :cleanTest
+> Task :checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :generateVersionClass
+> Task :compileKotlin UP-TO-DATE
+> Task :compileJava NO-SOURCE
+> Task :compileGroovy NO-SOURCE
+> Task :pluginDescriptors UP-TO-DATE
+> Task :processResources UP-TO-DATE
+> Task :classes UP-TO-DATE
+> Task :jar UP-TO-DATE
+> Task :compileTestKotlin NO-SOURCE
+> Task :compileTestJava NO-SOURCE
+> Task :compileTestGroovy FROM-CACHE
+> Task :pluginUnderTestMetadata
+> Task :processTestResources NO-SOURCE
+> Task :testClasses UP-TO-DATE
+
+> Task :test
+
+PluginTest > [application-java-android-then-realm] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[application-java-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-java-android-then-realm] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[application-java-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-java-android-then-realm] > explicitSyncFalseKeepsTheLocalRealmContract[application-java-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-java-realm-then-android] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[application-java-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-java-realm-then-android] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[application-java-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-java-realm-then-android] > explicitSyncFalseKeepsTheLocalRealmContract[application-java-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-android-then-realm] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[application-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-android-then-realm] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[application-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-android-then-realm] > kotlinExtensionDslPreservesExplicitFalseAndDefaultsTrue[application-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-android-then-realm] > explicitSyncFalseKeepsTheLocalRealmContract[application-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-realm-then-android] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[application-kotlin-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-realm-then-android] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[application-kotlin-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-kotlin-realm-then-android] > explicitSyncFalseKeepsTheLocalRealmContract[application-kotlin-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-mixed-android-then-realm] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[application-mixed-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-mixed-android-then-realm] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[application-mixed-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-mixed-android-then-realm] > explicitSyncFalseKeepsTheLocalRealmContract[application-mixed-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-mixed-realm-then-android] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[application-mixed-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-mixed-realm-then-android] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[application-mixed-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [application-mixed-realm-then-android] > explicitSyncFalseKeepsTheLocalRealmContract[application-mixed-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-java-android-then-realm] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[library-java-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-java-android-then-realm] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[library-java-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-java-android-then-realm] > explicitSyncFalseKeepsTheLocalRealmContract[library-java-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-java-realm-then-android] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[library-java-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-java-realm-then-android] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[library-java-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-java-realm-then-android] > explicitSyncFalseKeepsTheLocalRealmContract[library-java-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-kotlin-android-then-realm] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[library-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-kotlin-android-then-realm] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[library-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-kotlin-android-then-realm] > explicitSyncFalseKeepsTheLocalRealmContract[library-kotlin-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-kotlin-realm-then-android] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[library-kotlin-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-kotlin-realm-then-android] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[library-kotlin-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-kotlin-realm-then-android] > explicitSyncFalseKeepsTheLocalRealmContract[library-kotlin-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-mixed-android-then-realm] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[library-mixed-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-mixed-android-then-realm] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[library-mixed-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-mixed-android-then-realm] > explicitSyncFalseKeepsTheLocalRealmContract[library-mixed-android-then-realm] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-mixed-realm-then-android] > pluginPreservesTheForkedAndroidContractAcrossTheCompatibilityMatrix[library-mixed-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-mixed-realm-then-android] > syncIsRejectedBeforeAnyObjectServerDependencyCanResolve[library-mixed-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+PluginTest > [library-mixed-realm-then-android] > explicitSyncFalseKeepsTheLocalRealmContract[library-mixed-realm-then-android] STANDARD_ERROR
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+    warning: [options] bootstrap class path not set in conjunction with -source 8
+    1 warning
+
+[Incubating] Problems report is available at: file:///mnt/d/workspace/jiran/realm/.omx/team/at-exact-integrated-s-835c6090/worktrees/worker-1/gradle-plugin/build/reports/problems/problems-report.html
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 10.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/9.6.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 32m 52s
+9 actionable tasks: 4 executed, 1 from cache, 4 up-to-date
+Consider enabling configuration cache to speed up this build: https://docs.gradle.org/9.6.1/userguide/configuration_cache_enabling.html
