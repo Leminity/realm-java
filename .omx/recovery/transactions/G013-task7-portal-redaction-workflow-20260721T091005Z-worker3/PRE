@@ -1,0 +1,11 @@
+operation=Task 7 independent portal/redaction/workflow/privacy replay
+source_head=d39316930fd63e379b58bc6296696781099ca4c7
+required_source_head=d39316930fd63e379b58bc6296696781099ca4c7
+core_gitlink=d7b52ccbada0283527db36143cfeab18692b4ed0
+core_worktree=uninitialized; out-of-scope per leader; native/Core evidence is worker-2-owned
+plan_sha256=f21a0e3d95dc9bafd5029b67f39fd835cb8fb3b05f83abdce9fa2021ee534f1a
+test_spec_sha256=185a65ef3eeaf80693137c36e97cf11e50e7af85fefc64c9828e23288010b8e5
+initial_tracked_status=clean
+initial_untracked_status=clean
+external_actions=FORBIDDEN
+ultragoal_mutation=FORBIDDEN

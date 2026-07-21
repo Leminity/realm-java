@@ -1,0 +1,6 @@
+TASK7_PROVENANCE PASS
+source_head=d39316930fd63e379b58bc6296696781099ca4c7
+required_source_head=d39316930fd63e379b58bc6296696781099ca4c7
+core_gitlink=d7b52ccbada0283527db36143cfeab18692b4ed0
+relevant_source_hash_manifest=PROVENANCE.log
+full_G011_baseline_manifest_verifier=NOT_APPLICABLE (Core/native lane is worker-2-owned; Task 7 is portal/redaction/workflow/privacy only)

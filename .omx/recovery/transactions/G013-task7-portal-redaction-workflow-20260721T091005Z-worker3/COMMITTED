@@ -1,0 +1,7 @@
+prepared_at=2026-07-21T09:21:52Z
+base_head=d39316930fd63e379b58bc6296696781099ca4c7
+commit_subject=task: replay G013 portal privacy gates
+commit_scope=evidence-only
+production_source_changes=NONE
+rollback=ROLLBACK.md
+external_actions=NONE

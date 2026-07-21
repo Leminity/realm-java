@@ -1,0 +1,3 @@
+NETWORK_AUDIT PASS workflow_opt_in_calls=2 parser_opt_in_flags=2
+NO_OPT_IN_FAIL_CLOSED_TESTS PASS count>=2
+EXTERNAL_NETWORK_ACTIONS NONE

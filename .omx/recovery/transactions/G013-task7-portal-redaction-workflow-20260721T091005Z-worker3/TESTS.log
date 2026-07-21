@@ -1,0 +1,3 @@
+PORTAL Ran 32 tests in 4.263s
+REDACTION_WORKFLOW Ran 19 tests in 1.385s
+TESTS PASS total=51 portal=32 redaction_workflow=19

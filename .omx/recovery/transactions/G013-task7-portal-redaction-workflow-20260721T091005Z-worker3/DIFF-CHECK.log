@@ -1,0 +1,3 @@
+DIFF_CHECK PASS relevant_source_unchanged=true index_clean=true
+BYTECODE_CACHE_AUDIT PASS transient_checkpoint_files=0 baseline_tracked=2 worktree_extra=0
+SOURCE_HEAD PASS d39316930fd63e379b58bc6296696781099ca4c7
