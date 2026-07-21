@@ -1,0 +1,13 @@
+./COMMITTED: OK
+./LORE.md: OK
+./PLAN.md: OK
+./POST: OK
+./PRE: OK
+./PRIVACY-SCAN.log: OK
+./ROLLBACK.md: OK
+./SUBAGENT.md: OK
+./logs/final-verification.log: OK
+./logs/pre-remediation-test.log: OK
+./logs/pre-source-commit-verification.log: OK
+./logs/targeted-first-pass.log: OK
+./upstream-delta.txt: OK
