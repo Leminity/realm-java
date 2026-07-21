@@ -252,26 +252,45 @@ class CentralPortalTests(unittest.TestCase):
         prepared_result, stage_prepared, stage_manifest = self._prepare_stage(
             transport, allow_network=allow_network
         )
-        result = CP.finalize_stage(
-            stage_prepared=stage_prepared,
-            stage_prepared_sha256=str(prepared_result["stage_prepared_sha256"]),
-            validated_consumer_command=self.consumer_command,
-            validated_consumer_gradle_home=self.root / "validated-home",
-            validated_consumer_evidence=self.root / "validated-evidence",
-            stage_manifest=stage_manifest,
-            consumer_runner=consumer_runner or self._consumer_runner,
-        )
+        with mock.patch.dict(
+            os.environ, {"CENTRAL_PORTAL_BEARER_TOKEN": SECRET}, clear=False
+        ):
+            result = CP.finalize_stage(
+                stage_prepared=stage_prepared,
+                stage_prepared_sha256=str(prepared_result["stage_prepared_sha256"]),
+                validated_consumer_command=self.consumer_command,
+                validated_consumer_gradle_home=self.root / "validated-home",
+                validated_consumer_evidence=self.root / "validated-evidence",
+                stage_manifest=stage_manifest,
+                consumer_runner=consumer_runner or self._consumer_runner,
+            )
         return dict(result), stage_manifest
 
     @staticmethod
     def _consumer_runner(args: list[str], env: dict[str, str]) -> None:
-        if SECRET in env.values() or "CENTRAL_PORTAL_BEARER_TOKEN" in env:
-            raise AssertionError("Portal token crossed the consumer boundary")
-        if "--bearer-env" in args:
-            raise AssertionError("consumer received a credential argument")
         evidence = Path(args[args.index("--evidence-dir") + 1])
         repository = args[args.index("--repository-url") + 1]
         mode = args[args.index("--mode") + 1]
+        gradle_home = Path(args[args.index("--gradle-user-home") + 1])
+        if mode == "validated":
+            expected_repository = (
+                "https://central.sonatype.com/api/v1/publisher/deployment/"
+                "deployment-123/download"
+            )
+            if repository != expected_repository:
+                raise AssertionError("consumer did not receive the exact deployment repository")
+            if env.get("CENTRAL_PORTAL_BEARER_TOKEN") != SECRET:
+                raise AssertionError("validated consumer did not receive its repository credential")
+            bearer_index = args.index("--bearer-env")
+            if args[bearer_index + 1] != "CENTRAL_PORTAL_BEARER_TOKEN":
+                raise AssertionError("validated consumer received the wrong bearer environment")
+            if not gradle_home.is_dir() or any(gradle_home.iterdir()):
+                raise AssertionError("validated consumer Gradle home was not initially empty")
+        else:
+            if SECRET in env.values() or "CENTRAL_PORTAL_BEARER_TOKEN" in env:
+                raise AssertionError("Portal token crossed a public consumer boundary")
+            if "--bearer-env" in args:
+                raise AssertionError("public consumer received a credential argument")
         evidence.mkdir(parents=True, exist_ok=True)
         checksums = evidence / "SHA256SUMS"
         checksums.write_text("consumer PASS\n", encoding="utf-8")
@@ -280,7 +299,7 @@ class CentralPortalTests(unittest.TestCase):
                 {
                     "format": CP.CONSUMER_EVIDENCE_FORMAT,
                     "mode": mode,
-                    "repository_url": repository,
+                    "repository_url_sha256": hashlib.sha256(repository.encode("utf-8")).hexdigest(),
                     "exact_six": "PASS",
                     "ac08": "PASS",
                     "native_elf": "PASS",
@@ -328,6 +347,9 @@ class CentralPortalTests(unittest.TestCase):
             manifest["validated_deployment_mirror_evidence_sha256"],
             CP.sha256_file(mirror_evidence),
         )
+        mirror_text = mirror_evidence.read_text(encoding="utf-8")
+        self.assertNotIn("deployment-123", mirror_text)
+        self.assertNotIn("/api/v1/publisher/deployment/", mirror_text)
         self.assertTrue(
             (
                 self.root
@@ -428,7 +450,39 @@ class CentralPortalTests(unittest.TestCase):
         self.assertNotIn("MAVEN_SIGNING_KEY", captured)
         self.assertNotIn("GITHUB_TOKEN", captured)
 
-    def test_stage_portal_process_exits_before_tokenless_consumer_process(self) -> None:
+    def test_validated_bearer_environment_cannot_overwrite_consumer_isolation(self) -> None:
+        for name in ("HOME", "GRADLE_USER_HOME", "PATH", "CI", "MAVEN_SIGNING_KEY"):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(CP.PortalError, "collides with consumer environment"):
+                    CP._run_consumer(
+                        self.consumer_command,
+                        repository_url=(
+                            "https://central.sonatype.com/api/v1/publisher/deployment/"
+                            "deployment-123/download"
+                        ),
+                        mode="validated",
+                        token_env=name,
+                        gradle_user_home=self.root / f"collision-{name}",
+                        evidence=self.root / f"collision-evidence-{name}",
+                        bearer_token=SECRET,
+                        runner=self._consumer_runner,
+                    )
+
+    def test_consumer_home_filesystem_errors_are_portal_errors(self) -> None:
+        gradle_home = self.root / "not-a-gradle-home"
+        gradle_home.write_text("not a directory", encoding="utf-8")
+        with self.assertRaisesRegex(CP.PortalError, "consumer Gradle home is unavailable"):
+            CP._run_consumer(
+                self.consumer_command,
+                repository_url="https://repo.maven.apache.org/maven2",
+                mode="central",
+                token_env="CENTRAL_PORTAL_BEARER_TOKEN",
+                gradle_user_home=gradle_home,
+                evidence=self.root / "filesystem-error-evidence",
+                runner=self._consumer_runner,
+            )
+
+    def test_stage_finalizer_consumes_the_exact_validated_repository_with_bearer(self) -> None:
         transport = MockTransport(
             [
                 CP.HttpResponse(201, b"deployment-123"),
@@ -437,9 +491,9 @@ class CentralPortalTests(unittest.TestCase):
         )
         prepared, prepared_path, stage_manifest = self._prepare_stage(transport)
         old = os.environ.get("CENTRAL_PORTAL_BEARER_TOKEN")
-        os.environ["CENTRAL_PORTAL_BEARER_TOKEN"] = SECRET
         try:
-            with self.assertRaisesRegex(CP.PortalError, "tokenless consumer process"):
+            os.environ.pop("CENTRAL_PORTAL_BEARER_TOKEN", None)
+            with self.assertRaisesRegex(CP.PortalError, "Portal credential is not configured"):
                 CP.finalize_stage(
                     stage_prepared=prepared_path,
                     stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
@@ -449,20 +503,21 @@ class CentralPortalTests(unittest.TestCase):
                     stage_manifest=stage_manifest,
                     consumer_runner=self._consumer_runner,
                 )
+            os.environ["CENTRAL_PORTAL_BEARER_TOKEN"] = SECRET
+            result = CP.finalize_stage(
+                stage_prepared=prepared_path,
+                stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
+                validated_consumer_command=self.consumer_command,
+                validated_consumer_gradle_home=self.root / "split-home",
+                validated_consumer_evidence=self.root / "validated-evidence",
+                stage_manifest=stage_manifest,
+                consumer_runner=self._consumer_runner,
+            )
         finally:
             if old is None:
                 os.environ.pop("CENTRAL_PORTAL_BEARER_TOKEN", None)
             else:
                 os.environ["CENTRAL_PORTAL_BEARER_TOKEN"] = old
-        result = CP.finalize_stage(
-            stage_prepared=prepared_path,
-            stage_prepared_sha256=str(prepared["stage_prepared_sha256"]),
-            validated_consumer_command=self.consumer_command,
-            validated_consumer_gradle_home=self.root / "split-home",
-            validated_consumer_evidence=self.root / "validated-evidence",
-            stage_manifest=stage_manifest,
-            consumer_runner=self._consumer_runner,
-        )
         self.assertEqual(result["deployment_id"], "deployment-123")
 
     def test_tokenless_process_rejects_every_protected_alias_in_a_parent(self) -> None:
@@ -623,7 +678,11 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
             (self.root / "central-release-outcome.json").read_text(encoding="utf-8")
         )
         self.assertEqual(release_outcome["result"], "PASS")
-        self.assertEqual(release_outcome["deployment_id"], "deployment-123")
+        self.assertEqual(
+            release_outcome["deployment_id_sha256"],
+            hashlib.sha256(b"deployment-123").hexdigest(),
+        )
+        self.assertNotIn("deployment-123", json.dumps(release_outcome))
         self.assertEqual(release_transport.calls[0][1], "https://central.sonatype.com/api/v1/publisher/status?id=deployment-123")
         self.assertEqual(release_transport.calls[1][1], "https://central.sonatype.com/api/v1/publisher/deployment/deployment-123")
         self.assertTrue(all("deployment-123" in call[1] for call in release_transport.calls))
@@ -822,8 +881,12 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
             )
         outcome = json.loads(evidence.read_text(encoding="utf-8"))
         self.assertEqual(outcome["result"], "FAILED")
-        self.assertEqual(outcome["deployment_id"], "deployment-123")
+        self.assertEqual(
+            outcome["deployment_id_sha256"],
+            hashlib.sha256(b"deployment-123").hexdigest(),
+        )
         self.assertTrue(outcome["publication_state_trace"])
+        self.assertNotIn("deployment-123", evidence.read_text(encoding="utf-8"))
         self.assertNotIn(SECRET, evidence.read_text(encoding="utf-8"))
 
     def test_runtime_provenance_rejects_legacy_ad_hoc_schema(self) -> None:
@@ -919,6 +982,49 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         self.assertIn("network access requires --allow-network", completed.stderr)
         self.assertNotIn("TypeError", completed.stderr)
 
+    def test_verify_stage_manifest_cli_writes_only_a_sanitized_result_projection(self) -> None:
+        stage_transport = MockTransport(
+            [
+                CP.HttpResponse(201, b"deployment-123"),
+                CP.HttpResponse(200, b'{"deploymentState":"VALIDATED"}'),
+            ]
+        )
+        stage_result, stage_manifest = self._stage(stage_transport)
+        result_file = self.root / "verify-stage-result.json"
+        completed = subprocess.run(
+            [
+                sys.executable,
+                str(ROOT / "tools" / "central-portal.py"),
+                "verify-stage-manifest",
+                "--stage-manifest",
+                str(stage_manifest),
+                "--stage-manifest-sha256",
+                str(stage_result["stage_manifest_sha256"]),
+                "--result-file",
+                str(result_file),
+            ],
+            check=False,
+            cwd=ROOT,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr)
+        expected = {
+            "stage_manifest_sha256": stage_result["stage_manifest_sha256"],
+            "status": "VERIFIED",
+        }
+        self.assertEqual(json.loads(completed.stdout), expected)
+        self.assertEqual(json.loads(result_file.read_text(encoding="utf-8")), expected)
+        for sensitive in (
+            "deployment-123",
+            "/api/v1/publisher/deployment/",
+            "deployment_id",
+            "deployment_repository",
+        ):
+            self.assertNotIn(sensitive, completed.stdout)
+            self.assertNotIn(sensitive, result_file.read_text(encoding="utf-8"))
+
     def test_poll_is_bounded_and_preserves_first_terminal_failure(self) -> None:
         transport = MockTransport(
             [
@@ -952,6 +1058,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
         self.assertIn('"observed_state":"FAILED"', first)
         self.assertIn('"drop_policy":"drop-after-evidence"', first)
         self.assertIn('"state_trace":[', first)
+        self.assertNotIn("deployment-123", first)
         self.assertNotIn(SECRET, first)
         self.assertEqual(transport.calls[-1][0], "DELETE")
         self.assertTrue(transport.calls[-1][1].endswith("/deployment/deployment-123"))
@@ -997,7 +1104,11 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
             self._stage(transport, consumer_runner=fail_consumer)
         failure_path = self.root / "stage-manifest.json.failed.json"
         evidence = json.loads(failure_path.read_text(encoding="utf-8"))
-        self.assertEqual(evidence["deployment_id"], "deployment-123")
+        self.assertEqual(
+            evidence["deployment_id_sha256"],
+            hashlib.sha256(b"deployment-123").hexdigest(),
+        )
+        self.assertNotIn("deployment-123", json.dumps(evidence))
         self.assertEqual(evidence["expected_state"], "CONSUMER_PASS")
         self.assertEqual(evidence["drop_policy"], "retain-for-support-or-manual-recovery")
         self.assertFalse(any(call[0] == "DELETE" for call in transport.calls))
