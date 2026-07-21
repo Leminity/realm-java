@@ -1,11 +1,8 @@
 name: CI
 
 on:
-  # The full gate executes release-capable tooling and therefore only runs
-  # after reviewed changes reach the trusted integration branch.
   push:
-    branches:
-      - agp9.1
+  pull_request:
 
 permissions:
   contents: read

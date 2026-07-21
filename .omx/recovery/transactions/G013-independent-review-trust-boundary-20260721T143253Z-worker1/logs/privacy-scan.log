@@ -1,0 +1,3 @@
+privacy_scan_scope=added workflow/test diff only
+privacy_scan=PASS
+existing_ci_ephemeral_test_key_generation=unchanged

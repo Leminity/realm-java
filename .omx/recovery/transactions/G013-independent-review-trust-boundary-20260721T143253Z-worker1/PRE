@@ -1,0 +1,11 @@
+transaction=G013-independent-review-trust-boundary
+worker=worker-1
+created_utc=20260721T143253Z
+exact_root=36f5346e8a0841ac6af09a391bd45902b1be0091
+required_root=36f5346e8a0841ac6af09a391bd45902b1be0091
+rollback_ref=refs/omx/recovery/g013-independent-review-worker1-20260721T143253Z-pre
+worktree_status=clean
+planned_scope=.github/workflows/ci.yml .github/workflows/pull-request.yml tools/test-g013-workflow-trust.py transaction artifacts only
+external_actions=forbidden
+release_workflow_change=forbidden
+ultragoal_change=forbidden

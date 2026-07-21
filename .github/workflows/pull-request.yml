@@ -1,0 +1,21 @@
+name: Pull request validation
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-trust-boundary:
+    name: GitHub-hosted runner trust boundary
+    # Fork pull request code must not reach the persistent API37/ps16k runner.
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout pull request source
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Reject PR-reachable self-hosted jobs
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 tools/test-g013-workflow-trust.py

@@ -1,0 +1,8 @@
+commit_subject=fix(ci): isolate pull requests from release runner
+pre_head=36f5346e8a0841ac6af09a391bd45902b1be0091
+source_scope=.github/workflows/ci.yml .github/workflows/pull-request.yml tools/test-g013-workflow-trust.py
+transaction_scope=PRE POST COMMITTED SHA256SUMS rollback instructions logs and Lore
+commit_identity=bound_by_enclosing_Lore_format_git_commit
+history_policy=no_rewrite
+external_actions=none
+ultragoal_or_codex_goal_mutation=none

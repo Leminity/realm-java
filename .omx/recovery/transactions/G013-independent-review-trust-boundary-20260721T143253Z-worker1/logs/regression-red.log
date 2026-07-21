@@ -1,0 +1,46 @@
+FFE
+======================================================================
+ERROR: test_pull_request_validation_is_focused_and_unprivileged (__main__.WorkflowTrustTests.test_pull_request_validation_is_focused_and_unprivileged)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/test-g013-workflow-trust.py", line 93, in test_pull_request_validation_is_focused_and_unprivileged
+    workflow = (WORKFLOWS / "pull-request.yml").read_text(encoding="utf-8")
+  File "/home/linuxbrew/.linuxbrew/Cellar/python@3.14/3.14.6/lib/python3.14/pathlib/__init__.py", line 787, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/linuxbrew/.linuxbrew/Cellar/python@3.14/3.14.6/lib/python3.14/pathlib/__init__.py", line 771, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/.github/workflows/pull-request.yml'
+
+======================================================================
+FAIL: test_every_pull_request_job_uses_github_hosted_ubuntu (__main__.WorkflowTrustTests.test_every_pull_request_job_uses_github_hosted_ubuntu)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/test-g013-workflow-trust.py", line 74, in test_every_pull_request_job_uses_github_hosted_ubuntu
+    self.assertRegex(
+    ~~~~~~~~~~~~~~~~^
+        runner,
+        ^^^^^^^
+        GITHUB_HOSTED_UBUNTU,
+        ^^^^^^^^^^^^^^^^^^^^^
+        f"{workflow.name}:{job_name} is PR-reachable on non-ephemeral runner {runner!r}",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: Regex didn't match: '^ubuntu-(?:latest|\\d+\\.\\d+)$' not found in '[self-hosted, linux, api37, ps16k]' : ci.yml:provenance-and-gates is PR-reachable on non-ephemeral runner '[self-hosted, linux, api37, ps16k]'
+
+======================================================================
+FAIL: test_full_ci_is_trusted_branch_push_only (__main__.WorkflowTrustTests.test_full_ci_is_trusted_branch_push_only)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/mnt/d/workspace/jiran/realm/.omx/team/g013-independent-revi-835c6090/worktrees/worker-1/tools/test-g013-workflow-trust.py", line 86, in test_full_ci_is_trusted_branch_push_only
+    self.assertFalse(has_trigger(workflow, "pull_request"))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.098s
+
+FAILED (failures=2, errors=1)
+expected_red_exit=1
