@@ -44,7 +44,9 @@ BINDING_ARGS = [
     "--commit", COMMIT,
     "--core-commit", CORE_COMMIT,
 ]
-FINAL_COMMIT = "71908d956e5223a51031b2882dee933350fb0324"
+FINAL_COMMIT = subprocess.check_output(
+    ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+).strip()
 FINAL_CORE_COMMIT = "a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47"
 STALE_COMMIT = "9b952eb0c55c280128a9fee910274b6f906fa051"
 STALE_CORE_COMMIT = "d7b52ccbada0283527db36143cfeab18692b4ed0"
@@ -78,6 +80,13 @@ class MockTransport:
 
 
 class CentralPortalTests(unittest.TestCase):
+    def test_final_binding_tracks_the_checked_out_source(self) -> None:
+        current_head = subprocess.check_output(
+            ["git", "-C", str(ROOT), "rev-parse", "HEAD"], text=True
+        ).strip()
+        self.assertEqual(current_head, FINAL_COMMIT)
+        self.assertIn("tools/test-g014-release-binding.py", CP.RUNTIME_GATE_PATHS)
+
     def setUp(self) -> None:
         self.tempdir = tempfile.TemporaryDirectory()
         self.root = Path(self.tempdir.name)

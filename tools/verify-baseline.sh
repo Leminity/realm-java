@@ -76,15 +76,19 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   "${APPROVED_FORK_MODIFIED_PATHS[@]}"
   .github/workflows/ci.yml
   .github/workflows/pull-request.yml
+  .github/workflows/release.yml
   NOTICE
   docs/release/G010-fork-release.md
   evidence/provenance/g011-source-evidence-manifest.json
   tools/g011-evidence-manifest.py
+  tools/central-portal.py
+  tools/test-central-portal.py
   tools/test-g011-evidence-manifest.py
   tools/__pycache__/g011-evidence-manifest.cpython-314.pyc
   tools/__pycache__/test-g011-evidence-manifest.cpython-314.pyc
   tools/test-g013-independent-review-remediation.py
   tools/test-g013-workflow-trust.py
+  tools/test-g014-release-binding.py
   tools/test-verify-g010-license.py
   tools/test-verify-baseline.sh
   tools/verify-g010-license.py
@@ -334,6 +338,7 @@ main() {
   verify_current_fork_contract
   verify_approved_wrapper_pins
   tools/test-verify-release-tag.sh
+  python3 tools/test-g014-release-binding.py
 
   echo 'baseline provenance verification: PASS'
 }

@@ -9,7 +9,6 @@ import importlib.util
 import subprocess
 import tempfile
 import unittest
-import subprocess
 from pathlib import Path
 
 
@@ -165,6 +164,8 @@ class ManifestTests(unittest.TestCase):
         self.assertIn('report="$evidence/report.txt"', native_verifier)
         self.assertIn("native/report.txt", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertNotIn("native/result.txt", MODULE.RUNTIME_REQUIRED_EXACT)
+        self.assertIn("portal/g014-release-binding-unit.log", MODULE.RUNTIME_REQUIRED_EXACT)
+        self.assertIn("tools/test-g014-release-binding.py", MODULE.GATE_PATHS)
         self.assertIn("permissions:\n  contents: read", workflow)
         self.assertIn("runs-on: [self-hosted, linux, api37, ps16k]", workflow)
         self.assertIn("actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", workflow)
@@ -186,6 +187,7 @@ class ManifestTests(unittest.TestCase):
             "tools/verify-g010-scope.py",
             "tools/verify-g010-license.py",
             "tools/test-central-portal.py",
+            "tools/test-g014-release-binding.py",
             "--mode runtime",
             "--runtime-evidence-dir \"$G011_EVIDENCE_ROOT\"",
             "sha256sum -c SHA256SUMS",

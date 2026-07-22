@@ -75,6 +75,7 @@ GATE_PATHS = (
     "tools/g011-evidence-manifest.py",
     "tools/test-g011-evidence-manifest.py",
     "tools/test-g013-workflow-trust.py",
+    "tools/test-g014-release-binding.py",
 )
 
 RUNTIME_REQUIRED_EXACT = (
@@ -100,6 +101,7 @@ RUNTIME_REQUIRED_EXACT = (
     "g010/license-report.json",
     "g010/license-unit.log",
     "portal/unit.log",
+    "portal/g014-release-binding-unit.log",
 )
 RUNTIME_REQUIRED_PREFIXES = ("g003/matrix/", "g005/test-results/", "ac08/", "g008/staging/")
 

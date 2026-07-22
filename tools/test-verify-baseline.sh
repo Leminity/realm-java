@@ -41,6 +41,17 @@ for allowed in "${APPROVED_POST_REVIEW_PATHS[@]}"; do
   fi
 done
 
+for allowed in \
+  '.github/workflows/release.yml' \
+  'tools/central-portal.py' \
+  'tools/test-central-portal.py' \
+  'tools/test-g014-release-binding.py'; do
+  if ! is_post_review_allowed_path "$allowed"; then
+    printf 'approved G014 remediation path was rejected: %s\n' "$allowed" >&2
+    exit 1
+  fi
+done
+
 mapfile -t actual_fork_modified < <(
   git diff-tree --no-commit-id --name-only -r --diff-filter=M \
     "$EXPECTED_COMMIT" "$EXPECTED_APPROVED_FORK_ROOT" | sort
@@ -72,6 +83,7 @@ if ! is_post_review_allowed_path \
 fi
 for disallowed in \
   '.github/workflows/unreviewed.yml' \
+  '.github/workflows/release-unreviewed.yml' \
   '.omx/recovery/transactions/G013-unrelated-worker1/PRE' \
   '.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T000000Z-worker2/PRE' \
   '.omx/recovery/transactions/G013-reboot-safe-history-remediation-20260722T000000Z-worker2/PRE' \

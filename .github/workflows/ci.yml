@@ -280,6 +280,8 @@ jobs:
           mkdir -p "$G011_EVIDENCE_ROOT/portal"
           python3 tools/test-central-portal.py \
             2>&1 | tee "$G011_EVIDENCE_ROOT/portal/unit.log"
+          python3 tools/test-g014-release-binding.py \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/portal/g014-release-binding-unit.log"
 
       - name: Seal complete evidence and create exact runtime manifest
         env:

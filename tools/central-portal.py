@@ -55,6 +55,7 @@ RUNTIME_GATE_PATHS = (
     ".github/workflows/release.yml",
     "tools/central-portal.py",
     "tools/test-central-portal.py",
+    "tools/test-g014-release-binding.py",
 )
 
 
