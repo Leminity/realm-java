@@ -184,7 +184,7 @@
   "gate_digests": {
     ".github/workflows/ci.yml": "8ceaa42010453963873ca8abc90e1ecc4b180df2fbc774b36c769e5b680129b2",
     ".github/workflows/pull-request.yml": "c8bd71562b92df969b57e3ca382392b5b01866d9a4e7edfddd6c6665313dc59a",
-    ".github/workflows/release.yml": "0f9fc3836ba8643dc6ccdf9415e279ef96883a5a0e0b6c951e0b8a3d43e6a0b7",
+    ".github/workflows/release.yml": "ee0372ea105731abf9cedd244daddd4d7123e2093db351d2dacbb0005457040d",
     "compatibility-fixtures/ac07-bidirectional/run-ac07.sh": "3d83134ad1e71c5f67cca25626e599c04b1ecd0ce5dd4f87184808d17278ba7e",
     "compatibility-fixtures/ac07-bidirectional/verify-ac07-results.py": "c2fd1e16da4c70862a38a8f6891af911ca0e1345fceb289370a10222a45efcfa",
     "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh": "7191a36b1762aad3ae38e1dfd5aa05c39305db932b7dc7b2b34b2b99f3c919ae",
@@ -203,7 +203,7 @@
     "tools/test-g011-evidence-manifest.py": "355481f9cf9f0ab314a801e00a195c595a9fac9aa08c776211c2a7a247b9d710",
     "tools/test-g011-verify-native-elf.py": "c01d1bd02c87c5461eaa30d5caa87521d66111e39b95dba983f6224e93ecaac3",
     "tools/test-g013-workflow-trust.py": "c1a8eb5466efae0589443674d36c6ed003cb7c3a7b67e259cb5c6cbdf7c9ea3a",
-    "tools/test-g014-release-binding.py": "4dba03fd3083d45af5f8f6e493ec3f6c01990c8a0a0644d239bac7551c5f42fb",
+    "tools/test-g014-release-binding.py": "d531b9fee95347ac73e93af26023b6c892aa1ddda53531be0cd4bf1af6441eb6",
     "tools/test-verify-g003-independent-builds.sh": "d9a033c9f8b4138f86fa98c27df0ee10c359ccbd5805762386df3e0c07f3cfb6",
     "tools/test-verify-g004-transformer-public-api.sh": "ac27827c4246b1cacfe5700ab6400aad44396417c382200e58a2eb774f80e2ce",
     "tools/test-verify-g009-ac09-compatibility.py": "bc7d2e741316837007cca471090297ae337c46e30e56ef4e18aaae36727454f3",
