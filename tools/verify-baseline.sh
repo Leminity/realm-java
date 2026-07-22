@@ -78,6 +78,7 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   .github/workflows/pull-request.yml
   .github/workflows/release.yml
   NOTICE
+  compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh
   docs/release/G010-fork-release.md
   evidence/provenance/g011-source-evidence-manifest.json
   tools/g011-evidence-manifest.py
@@ -89,6 +90,7 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   tools/test-g013-independent-review-remediation.py
   tools/test-g013-workflow-trust.py
   tools/test-g014-release-binding.py
+  tools/test-ac08-g011-parameterization.py
   tools/test-verify-g010-license.py
   tools/test-verify-baseline.sh
   tools/verify-g010-license.py
