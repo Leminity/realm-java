@@ -642,6 +642,7 @@ jobs:
             build/maven-central-stage-portal-result.json
             build/maven-central-stage-result.json
             ${{ runner.temp }}/g011-consumer-validated
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 90
       - name: Retain run-scoped pre-transaction diagnostics without poisoning recovery

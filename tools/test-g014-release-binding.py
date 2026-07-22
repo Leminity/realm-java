@@ -35,6 +35,21 @@ class G014ReleaseBindingTests(unittest.TestCase):
             "      - name: Publish the exact staged deployment in a Portal-only process", 1
         )[1].split("      - name: Consume Maven Central", 1)[0]
 
+    def test_ac07_wrapper_is_executable_and_stage_outcome_preserves_hidden_files(self) -> None:
+        import subprocess
+
+        wrapper = ROOT / "compatibility-fixtures/official-10.19.0-generator/gradlew"
+        mode = subprocess.check_output(
+            ["git", "ls-files", "--stage", "--", str(wrapper.relative_to(ROOT))],
+            cwd=ROOT,
+            text=True,
+        ).split()[0]
+        self.assertEqual(mode, "100755")
+        stage_outcome = self.stage_job.split(
+            "      - name: Retain immutable redacted stage transaction outcome", 1
+        )[1].split("      - name: Retain run-scoped pre-transaction diagnostics", 1)[0]
+        self.assertIn("include-hidden-files: true", stage_outcome)
+
     def test_every_mutating_boundary_uses_fresh_run_scoped_remote_refs(self) -> None:
         self.assertIn("FINAL_SOURCE_BRANCH: agp9.1", self.workflow)
         self.assertGreaterEqual(
