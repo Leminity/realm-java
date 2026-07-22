@@ -53,6 +53,7 @@ for allowed in \
 done
 
 for allowed in \
+  'compatibility-fixtures/ac07-bidirectional/run-ac07.sh' \
   'compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh' \
   'tools/test-ac08-g011-parameterization.py'; do
   if ! is_post_review_allowed_path "$allowed"; then
@@ -93,6 +94,7 @@ fi
 for disallowed in \
   '.github/workflows/unreviewed.yml' \
   '.github/workflows/release-unreviewed.yml' \
+  'compatibility-fixtures/ac07-bidirectional/unreviewed.sh' \
   'compatibility-fixtures/ac08-api37-ps16k-runtime/unreviewed.sh' \
   '.omx/recovery/transactions/G013-unrelated-worker1/PRE' \
   '.omx/recovery/transactions/G013-independent-review-trust-boundary-20260721T000000Z-worker2/PRE' \

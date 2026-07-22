@@ -78,6 +78,7 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   .github/workflows/pull-request.yml
   .github/workflows/release.yml
   NOTICE
+  compatibility-fixtures/ac07-bidirectional/run-ac07.sh
   compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh
   docs/release/G010-fork-release.md
   evidence/provenance/g011-source-evidence-manifest.json
