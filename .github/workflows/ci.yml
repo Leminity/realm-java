@@ -177,6 +177,16 @@ jobs:
             --evidence-dir "$G011_EVIDENCE_ROOT/ac08" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
+      - name: G011 AC07 bidirectional oracle gate
+        run: |
+          set -euo pipefail
+          compatibility-fixtures/ac07-bidirectional/run-ac07.sh \
+            --official-fixtures compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle \
+            --fork-repository "$G008_STAGING" \
+            --fork-serial emulator-5654 \
+            --official-serial emulator-5654 \
+            --run-dir "$G011_EVIDENCE_ROOT/ac07"
+
       - name: G008 regression gate
         env:
           PYTHONDONTWRITEBYTECODE: "1"

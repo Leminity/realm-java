@@ -52,6 +52,12 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
             fork_plan = next(line for line in plan.splitlines() if line.startswith("fork_build_command="))
             self.assertNotIn("--offline", fork_plan)
             self.assertIn("--offline", next(line for line in plan.splitlines() if line.startswith("official_build_command=")))
+            self.assertEqual(
+                next(line for line in plan.splitlines() if line.startswith("fork_apk_zipalign_command=")),
+                "fork_apk_zipalign_command="
+                "/not-used-by-dry-run/build-tools/36.0.0/zipalign -c -P 16 -v 4 "
+                f"{FIXTURE / 'fork-app/build/outputs/apk/debug/fork-app-debug.apk'}",
+            )
             self.assertIn("<redacted-validated-repository>", all_text)
             self.assertNotIn(repository_url, all_text)
             self.assertNotIn("deploy-123", all_text)
@@ -107,6 +113,19 @@ class Ac08G011ParameterizationTests(unittest.TestCase):
             self.assertIn("HttpHeaderCredentials", text)
             self.assertIn("mavenCentral { content { includeGroup('io.github.leminity.realm') } }", text)
         self.assertIn("gradlePluginPortal { content { excludeGroup('io.github.leminity.realm') } }", settings)
+
+    def test_fork_apk_zipalign_gate_is_exact_and_precedes_install(self):
+        script = SCRIPT.read_text()
+        exact = 'run fork-apk-zipalign "$ZIPALIGN" -c -P 16 -v 4 "$FORK_APK"'
+        self.assertEqual(script.count(exact), 1)
+        self.assertEqual(script.count("run fork-apk-zipalign "), 1)
+        self.assertLess(script.index(exact), script.index('run install-fork "$ADB"'))
+        for weakened in (
+            'run fork-apk-zipalign "$ZIPALIGN" -c -p -v 4 "$FORK_APK"',
+            'run fork-apk-zipalign "$ZIPALIGN" -c -P 4 -v 4 "$FORK_APK"',
+            'run fork-apk-zipalign "$ZIPALIGN" -c -P 64 -v 4 "$FORK_APK"',
+        ):
+            self.assertNotIn(weakened, script)
 
     def test_official_input_preflight_verifies_archive_fixture_and_offline_build(self):
         with tempfile.TemporaryDirectory() as tmp:

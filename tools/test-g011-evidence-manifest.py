@@ -166,6 +166,21 @@ class ManifestTests(unittest.TestCase):
         self.assertNotIn("native/result.txt", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertIn("portal/g014-release-binding-unit.log", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertIn("tools/test-g014-release-binding.py", MODULE.GATE_PATHS)
+        for required_gate in (
+            "compatibility-fixtures/ac07-bidirectional/run-ac07.sh",
+            "compatibility-fixtures/ac07-bidirectional/verify-ac07-results.py",
+        ):
+            self.assertIn(required_gate, MODULE.GATE_PATHS)
+        for required_evidence in (
+            "ac07/RESULT.txt",
+            "ac07/fork-modified/fork-report.json",
+            "ac07/logs/fork-instrumentation.log",
+            "ac07/logs/official-reverse-instrumentation.log",
+            "ac07/original/immutable-input.sha256",
+            "ac07/original/immutable-input-after.sha256",
+            "ac07/logs/immutable-input-diff.log",
+        ):
+            self.assertIn(required_evidence, MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertIn("permissions:\n  contents: read", workflow)
         self.assertIn("runs-on: [self-hosted, linux, api37, ps16k]", workflow)
         self.assertIn("actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683", workflow)
@@ -227,6 +242,20 @@ class ManifestTests(unittest.TestCase):
         self.assertNotIn("jitpack", g009_step.lower())
         self.assertIn('--mode local \\\n            --repository "$G008_STAGING"', workflow)
         self.assertNotIn("--mode local \\\n            --repository-url", workflow)
+        ac07_command = """compatibility-fixtures/ac07-bidirectional/run-ac07.sh \\
+            --official-fixtures compatibility-fixtures/official-10.19.0-generator/generated/official-10.19.0-oracle \\
+            --fork-repository "$G008_STAGING" \\
+            --fork-serial emulator-5654 \\
+            --official-serial emulator-5654 \\
+            --run-dir "$G011_EVIDENCE_ROOT/ac07"""
+        self.assertEqual(workflow.count(ac07_command), 1)
+        self.assertEqual(workflow.count("compatibility-fixtures/ac07-bidirectional/run-ac07.sh"), 1)
+        release_workflow = (root / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        self.assertNotIn("compatibility-fixtures/ac07-bidirectional/run-ac07.sh", release_workflow)
+        ac07_index = workflow.index(ac07_command)
+        self.assertGreater(ac07_index, workflow.index("tools/g011-verify-native-elf.sh"))
+        self.assertGreater(ac07_index, workflow.index("tools/publish_release.sh"))
+        self.assertLess(ac07_index, workflow.index("Seal complete evidence and create exact runtime manifest"))
         runtime_index = workflow.index("--mode runtime")
         self.assertGreater(runtime_index, workflow.index("G011 AC08 local gate"))
         self.assertGreater(runtime_index, workflow.index("G010 publication and license gate"))

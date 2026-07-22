@@ -124,6 +124,7 @@ fi
 
 ADB="$SDK/platform-tools/adb"
 AAPT2="$SDK/build-tools/36.0.0/aapt2"
+ZIPALIGN="$SDK/build-tools/36.0.0/zipalign"
 OFFICIAL_PACKAGE=io.realm.ac08.official
 FORK_PACKAGE=io.realm.ac08.fork
 EVIDENCE="$EVIDENCE_ROOT/$RUN_ID"
@@ -349,6 +350,8 @@ if [[ $DRY_RUN == true ]]; then
     printf '%q -p %q --no-daemon --console=plain ' "$ROOT/gradlew" "$PROJECT"
     [[ $MODE == local ]] && printf '%s ' '--offline'
     printf ':fork-app:assembleDebug :fork-app:assembleDebugAndroidTest\n'
+    printf 'fork_apk_zipalign_command=%q -c -P 16 -v 4 %q\n' \
+      "$ZIPALIGN" "$PROJECT/fork-app/build/outputs/apk/debug/fork-app-debug.apk"
     printf 'device_identity=SDK=%s PAGE_SIZE=%s AVD=%s linker=%s package_compatibility=%s\n' "$sdk" "$page" "$avd" "$linker" "$compatibility"
   } > "$EVIDENCE/dry-run-command-plan.txt"
   printf 'AC08=DRY_RUN_PASS\n' > "$EVIDENCE/result.txt"
@@ -359,6 +362,7 @@ fi
 
 [[ -x "$ADB" ]] || fail "expected adb at $ADB"
 [[ -x "$AAPT2" ]] || fail "expected aapt2 at $AAPT2"
+[[ -x "$ZIPALIGN" ]] || fail "expected zipalign at $ZIPALIGN"
 if [[ $MODE == local ]]; then
   [[ -d "$REPOSITORY/io/github/leminity/realm" ]] || fail "missing G008 local staging repository: $REPOSITORY"
 fi
@@ -406,6 +410,7 @@ FORK_TEST_APK="$PROJECT/fork-app/build/outputs/apk/androidTest/debug/fork-app-de
 for apk in "$OFFICIAL_APK" "$OFFICIAL_TEST_APK" "$FORK_APK" "$FORK_TEST_APK"; do
   [[ -f "$apk" ]] || fail "missing assembled APK $apk"
 done
+run fork-apk-zipalign "$ZIPALIGN" -c -P 16 -v 4 "$FORK_APK"
 
 run install-official "$ADB" -s "$SERIAL" install -r -t "$OFFICIAL_APK"
 run install-official-test "$ADB" -s "$SERIAL" install -r -t "$OFFICIAL_TEST_APK"
