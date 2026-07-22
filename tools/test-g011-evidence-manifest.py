@@ -161,6 +161,18 @@ class ManifestTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[1]
         workflow = (root / ".github/workflows/ci.yml").read_text(encoding="utf-8")
         native_verifier = (root / "tools/g011-verify-native-elf.sh").read_text(encoding="utf-8")
+        directly_executed_shell_scripts = (
+            "tools/verify-toolchain.sh",
+            "tools/publish_release.sh",
+            "tools/g011-consume-six.sh",
+            "tools/g011-verify-native-elf.sh",
+            "compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh",
+            "compatibility-fixtures/ac07-bidirectional/run-ac07.sh",
+        )
+        for relative in directly_executed_shell_scripts:
+            index_entry = MODULE.run_git(root, "ls-files", "--stage", "--", relative)
+            with self.subTest(relative=relative):
+                self.assertEqual(index_entry.split(maxsplit=1)[0], "100755")
         self.assertIn('report="$evidence/report.txt"', native_verifier)
         self.assertIn("native/report.txt", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertNotIn("native/result.txt", MODULE.RUNTIME_REQUIRED_EXACT)
