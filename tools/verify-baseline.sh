@@ -89,6 +89,7 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   tools/test-g011-evidence-manifest.py
   tools/__pycache__/g011-evidence-manifest.cpython-314.pyc
   tools/__pycache__/test-g011-evidence-manifest.cpython-314.pyc
+  tools/test-g013-direct-validation-workflow.py
   tools/test-g013-independent-review-remediation.py
   tools/test-g013-workflow-trust.py
   tools/test-g014-release-binding.py

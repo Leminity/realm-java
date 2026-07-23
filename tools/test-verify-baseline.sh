@@ -45,6 +45,7 @@ for allowed in \
   '.github/workflows/release.yml' \
   'tools/central-portal.py' \
   'tools/test-central-portal.py' \
+  'tools/test-g013-direct-validation-workflow.py' \
   'tools/test-g014-release-binding.py'; do
   if ! is_post_review_allowed_path "$allowed"; then
     printf 'approved G014 remediation path was rejected: %s\n' "$allowed" >&2
@@ -112,6 +113,7 @@ for disallowed in \
   '.omx/recovery/transactions/G013-reboot-safe-history-remediation-20260722T000000Z-worker2/PRE' \
   'realm/realm-library/src/main/java/io/realm/Realm.java' \
   'tools/test-ac08-g011-unapproved.py' \
+  'tools/test-g013-direct-validation-workflow.py.unreviewed' \
   'tools/unapproved-helper.sh'; do
   if is_post_review_allowed_path "$disallowed"; then
     printf 'unauthorized post-review path was accepted: %s\n' "$disallowed" >&2

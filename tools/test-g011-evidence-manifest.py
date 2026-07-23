@@ -176,7 +176,9 @@ class ManifestTests(unittest.TestCase):
         self.assertIn('report="$evidence/report.txt"', native_verifier)
         self.assertIn("native/report.txt", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertNotIn("native/result.txt", MODULE.RUNTIME_REQUIRED_EXACT)
+        self.assertIn("portal/g013-direct-validation-workflow-unit.log", MODULE.RUNTIME_REQUIRED_EXACT)
         self.assertIn("portal/g014-release-binding-unit.log", MODULE.RUNTIME_REQUIRED_EXACT)
+        self.assertIn("tools/test-g013-direct-validation-workflow.py", MODULE.GATE_PATHS)
         self.assertIn("tools/test-g014-release-binding.py", MODULE.GATE_PATHS)
         for required_gate in (
             "compatibility-fixtures/ac07-bidirectional/run-ac07.sh",
@@ -214,6 +216,7 @@ class ManifestTests(unittest.TestCase):
             "tools/verify-g010-scope.py",
             "tools/verify-g010-license.py",
             "tools/test-central-portal.py",
+            "tools/test-g013-direct-validation-workflow.py",
             "tools/test-g014-release-binding.py",
             "--mode runtime",
             "--runtime-evidence-dir \"$G011_EVIDENCE_ROOT\"",
