@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> **Using Android Gradle Plugin 9.1.1, Gradle 9.6.1, or Android 17 (API 37)?**
+> Use the [`agp9.1` maintenance branch and its setup guide](https://github.com/Leminity/realm-java/tree/agp9.1#readme), then consume the [`v10.19.0-agp9.1` release](https://github.com/Leminity/realm-java/releases/tag/v10.19.0-agp9.1).
+
 > [!WARNING]
 > We announced the deprecation of Atlas Device Sync + Realm SDKs in September 2024. For more information please see:
 > - [SDK Deprecation](https://www.mongodb.com/docs/atlas/device-sdks/deprecation/)
