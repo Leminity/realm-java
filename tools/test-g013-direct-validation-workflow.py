@@ -12,6 +12,9 @@ class G013DirectValidationWorkflowTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.workflow = WORKFLOW.read_text(encoding="utf-8")
         cls.runner = cls.workflow.split("cat > build/run-g011-consumer.sh <<'SH'", 1)[1].split("\n          SH", 1)[0]
+        cls.central_runner = cls.workflow.split(
+            "cat > build/run-g011-central-consumer.sh <<'SH'", 1
+        )[1].split("\n          SH", 1)[0]
 
     def test_stage_consumer_uses_direct_validated_repository_and_bearer(self) -> None:
         self.assertIn('[[ "$mode" == validated', self.runner)
@@ -23,6 +26,13 @@ class G013DirectValidationWorkflowTests(unittest.TestCase):
     def test_consumer_evidence_binds_repository_by_hash_only(self) -> None:
         self.assertIn("'repository_url_sha256':hashlib.sha256(sys.argv[3].encode()).hexdigest()", self.runner)
         self.assertNotIn("'repository_url':sys.argv[3]", self.runner)
+
+    def test_central_consumer_evidence_binds_repository_by_hash_only(self) -> None:
+        self.assertIn(
+            "'repository_url_sha256':hashlib.sha256(sys.argv[2].encode()).hexdigest()",
+            self.central_runner,
+        )
+        self.assertNotIn("'repository_url':sys.argv[2]", self.central_runner)
 
     def test_portal_results_use_files_without_raw_tee(self) -> None:
         for result in (

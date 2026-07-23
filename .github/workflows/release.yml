@@ -897,7 +897,7 @@ jobs:
           python3 - "$evidence/consumer-evidence.json" "$url" "$evidence/SHA256SUMS" <<'PY'
           import hashlib, json, pathlib, sys
           output = pathlib.Path(sys.argv[1]); sums = pathlib.Path(sys.argv[3])
-          output.write_text(json.dumps({'format':'realm-maven-central-consumer-evidence-v1','mode':'central','repository_url':sys.argv[2],'exact_six':'PASS','ac08':'PASS','native_elf':'PASS','sha256sums_sha256':hashlib.sha256(sums.read_bytes()).hexdigest()}, sort_keys=True)+'\n')
+          output.write_text(json.dumps({'format':'realm-maven-central-consumer-evidence-v1','mode':'central','repository_url_sha256':hashlib.sha256(sys.argv[2].encode()).hexdigest(),'exact_six':'PASS','ac08':'PASS','native_elf':'PASS','sha256sums_sha256':hashlib.sha256(sums.read_bytes()).hexdigest()}, sort_keys=True)+'\n')
           PY
           SH
           chmod 700 build/run-g011-central-consumer.sh
