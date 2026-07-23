@@ -62,6 +62,17 @@ for allowed in \
   fi
 done
 
+if ! is_post_review_allowed_path \
+  'compatibility-fixtures/official-10.19.0-generator/gradlew'; then
+  printf 'reviewed official fixture wrapper mode path was rejected\n' >&2
+  exit 1
+fi
+if is_post_review_allowed_path \
+  'compatibility-fixtures/official-10.19.0-generator/gradlew.unreviewed'; then
+  printf 'adjacent unreviewed official fixture wrapper path was accepted\n' >&2
+  exit 1
+fi
+
 mapfile -t actual_fork_modified < <(
   git diff-tree --no-commit-id --name-only -r --diff-filter=M \
     "$EXPECTED_COMMIT" "$EXPECTED_APPROVED_FORK_ROOT" | sort

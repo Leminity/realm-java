@@ -79,6 +79,7 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   .github/workflows/release.yml
   NOTICE
   compatibility-fixtures/ac07-bidirectional/run-ac07.sh
+  compatibility-fixtures/official-10.19.0-generator/gradlew
   compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh
   docs/release/G010-fork-release.md
   evidence/provenance/g011-source-evidence-manifest.json
