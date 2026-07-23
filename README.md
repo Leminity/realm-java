@@ -9,6 +9,278 @@ This repository is the **unofficial Leminity maintenance fork** of Realm Java fo
 base local Android database. It is not the MongoDB-maintained upstream repository and
 does not claim MongoDB endorsement or trademark rights.
 
+## AGP 9.1 maintenance release
+
+This branch maintains the **base local Realm database** from upstream Realm Java `v10.19.0`
+for current Android builds. It replaces the legacy `BaseExtension`/AGP-internal integration that
+fails under AGP 9 while keeping source changes limited to build compatibility. This is an
+unofficial maintenance fork; it is not a new upstream Realm release.
+
+### Supported and verified boundary
+
+| Item | Supported or verified value |
+| --- | --- |
+| Fork version | `10.19.0-agp9.1` |
+| Android Gradle Plugin | `9.1.1` |
+| Gradle wrapper | `9.6.1` |
+| Build JDK | JDK 17 |
+| Android SDK | `compileSdk = 37`, `targetSdk = 37` (Android 17 / API 37) |
+| Minimum Android version | `minSdk = 21` (Android 5.0) |
+| Native toolchain | NDK `29.0.14206865`, CMake `3.27.7` |
+| Kotlin | AGP 9 built-in Kotlin; fork internals/processors built with Kotlin `2.2.10` |
+| Android modules | Application and library modules; Java-only, Kotlin-only, and mixed sources |
+| Gradle behavior | Configuration cache supported by the verified fork build and consumer fixtures |
+| Native ABIs | Exactly `armeabi-v7a`, `arm64-v8a`, and `x86_64`; **no `x86`** |
+| Runtime validation | API 37 with 16 KiB page size, including native ELF/page-size checks |
+
+`minSdk = 21` is the supported installation boundary. API 37 / Android 17 is the specifically
+validated runtime target; do not interpret that validation as a claim that every intervening
+OS/device combination was exhaustively tested.
+
+Only the local database is supported. Atlas Device Sync, ObjectServer, server-backed sessions,
+and their related build variants are excluded. Keep Sync explicitly disabled:
+
+```groovy
+realm {
+    syncEnabled = false
+}
+```
+
+### Maven Central artifacts
+
+Use group `io.github.leminity.realm` and version `10.19.0-agp9.1`. The release contains exactly
+these six artifacts:
+
+- `realm-gradle-plugin`
+- `realm-transformer`
+- `realm-annotations`
+- `realm-annotations-processor`
+- `realm-android-library`
+- `realm-android-kotlin-extensions`
+
+The `realm-android` Gradle plugin adds the matching fork library, annotations, annotation
+processor (KAPT for Kotlin sources or `annotationProcessor` for Java sources), and Kotlin
+extensions when Kotlin sources are present. **Do not also declare upstream
+`io.realm:realm-*` dependencies**, and normally do not declare the fork runtime artifacts by
+hand; the plugin keeps their versions and group consistent.
+
+### Project setup (Groovy DSL)
+
+#### 1. Repositories
+
+In `settings.gradle`, make Google and Maven Central available to plugins and dependencies:
+
+```groovy
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'your-project'
+include ':app'
+```
+
+#### 2. Root build file
+
+When AGP is declared with the plugins DSL, keep Realm on the buildscript classpath because the
+consumer plugin id is the legacy `realm-android` id:
+
+```groovy
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1'
+    }
+}
+
+plugins {
+    id 'com.android.application' version '9.1.1' apply false
+    id 'com.android.library' version '9.1.1' apply false
+}
+```
+
+A classic root `build.gradle` is also supported:
+
+```groovy
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.1.1'
+        classpath 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1'
+    }
+}
+```
+
+Use only one AGP declaration style in a project.
+
+#### 3. Gradle wrapper
+
+Set `gradle/wrapper/gradle-wrapper.properties` to Gradle 9.6.1:
+
+```properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-9.6.1-bin.zip
+```
+
+#### 4. App or library module
+
+Apply the Android plugin first and then `realm-android`. For an application module:
+
+```groovy
+plugins {
+    id 'com.android.application'
+}
+
+apply plugin: 'realm-android'
+
+android {
+    namespace 'com.example.app'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId 'com.example.app'
+        minSdk 21
+        targetSdk 37
+
+        // Optional: constrain packaging to the three published ABIs.
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a', 'x86_64'
+        }
+    }
+}
+
+realm {
+    syncEnabled = false
+}
+```
+
+For an Android library, replace `com.android.application` with `com.android.library` and omit
+`applicationId`; keep `namespace`, `compileSdk`, `minSdk`, and the Realm configuration. AGP 9's
+built-in Kotlin support is used, so do not add the legacy `org.jetbrains.kotlin.android` plugin
+merely to enable Kotlin in an Android module.
+
+### Kotlin DSL differences
+
+The repositories and wrapper values are the same. In a root `build.gradle.kts`:
+
+```kotlin
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1")
+    }
+}
+
+plugins {
+    id("com.android.application") version "9.1.1" apply false
+    id("com.android.library") version "9.1.1" apply false
+}
+```
+
+In an application module `build.gradle.kts`:
+
+```kotlin
+plugins {
+    id("com.android.application")
+}
+
+apply(plugin = "realm-android")
+
+android {
+    namespace = "com.example.app"
+    compileSdk = 37
+    defaultConfig {
+        applicationId = "com.example.app"
+        minSdk = 21
+        targetSdk = 37
+        ndk {
+            abiFilters += setOf("armeabi-v7a", "arm64-v8a", "x86_64")
+        }
+    }
+}
+
+extensions.configure(io.realm.gradle.RealmPluginExtension::class.java) {
+    setSyncEnabled(false)
+}
+```
+
+For `settings.gradle.kts`, use `id("...")`/`url = uri(...)` Kotlin syntax as usual; the required
+repositories remain `google()`, `mavenCentral()`, and `gradlePluginPortal()` under
+`pluginManagement`, with `google()` and `mavenCentral()` under
+`dependencyResolutionManagement`.
+
+### Migrating from official Realm Java 10.19.0
+
+1. Replace only the plugin classpath coordinate:
+   `io.realm:realm-gradle-plugin:10.19.0` →
+   `io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.1`.
+2. Remove explicit `io.realm:realm-android-library`, `realm-annotations`, processors, or Kotlin
+   extensions. Let `realm-android` inject the fork artifacts.
+3. Keep `apply plugin: 'realm-android'` and add `realm { syncEnabled = false }`.
+4. Set AGP 9.1.1, Gradle 9.6.1, JDK 17, SDK 37, and `minSdk 21` as shown above.
+5. Remove `x86` from ABI filters. Use an **x86_64** emulator for desktop Android testing.
+6. Keep the existing `io.realm.*` model and database API calls. The fork was compatibility-tested
+   against the 10.19.0 public API and local Realm file fixtures, including encrypted and
+   bidirectional file cases; the guarantee does not extend to excluded Sync/ObjectServer APIs.
+7. Back up production Realm files before any SDK migration and run application-specific schema,
+   migration, encryption, and rollback tests on representative copies.
+
+### Troubleshooting and verification
+
+After changing coordinates, clear stale daemons and cached resolution, then rebuild:
+
+```bash
+./gradlew --stop
+./gradlew --no-daemon --refresh-dependencies clean assemble
+```
+
+If resolution still references `io.realm`, inspect the app classpaths:
+
+```bash
+./gradlew :app:dependencyInsight \
+  --configuration debugRuntimeClasspath \
+  --dependency io.github.leminity.realm
+./gradlew :app:dependencies --configuration debugRuntimeClasspath
+```
+
+The resolved Realm modules must use `io.github.leminity.realm:...:10.19.0-agp9.1`; no upstream
+`io.realm:realm-*` module should remain. Also run the relevant unit/instrumentation suites on an
+API 37 x86_64 emulator or device before rollout.
+
+The `G011_OFFICIAL_GRADLE_75` value that may appear in release evidence is **oracle-only**: Gradle
+7.5 runs the unmodified official 10.19.0 fixture to produce compatibility inputs. It is never the
+fork build or consumer toolchain, which remains AGP 9.1.1 with Gradle 9.6.1.
+
+### Release immutability and further documentation
+
+Tag [`v10.19.0-agp9.1`](https://github.com/Leminity/realm-java/releases/tag/v10.19.0-agp9.1)
+is the immutable source of the binaries already published to Maven Central. This `agp9.1` branch
+may advance with maintenance-only CI or documentation fixes; a newer branch commit does **not**
+imply new binaries or a republished version.
+
+See the detailed [fork and release contract](docs/release/G010-fork-release.md) and the
+[GitHub release](https://github.com/Leminity/realm-java/releases/tag/v10.19.0-agp9.1) for
+provenance, artifact boundaries, and reproducible verification notes.
+
 ## Fork release contract
 
 This is an **unofficial Leminity maintenance fork** of upstream Realm Java. The reproducible
