@@ -68,11 +68,17 @@ hand; the plugin keeps their versions and group consistent.
 
 #### 1. Repositories
 
-In `settings.gradle`, make Google and Maven Central available to plugins and dependencies:
+In `settings.gradle`, make Google and Maven Central available to dependencies. The
+`pluginManagement` block is optional when the project declares AGP through `buildscript`; it is
+needed only when Android plugins are resolved through the `plugins { ... }` DSL.
+
+When used, `pluginManagement` must be the first executable block in `settings.gradle`. If the
+file also has a settings-level `plugins { ... }` block, keep that block immediately after
+`pluginManagement` and before `dependencyResolutionManagement`, `rootProject.name`, `include`,
+or any other statement:
 
 ```groovy
-// Required only when Android plugins are resolved through plugins { ... }.
-// Existing buildscript-based projects can omit this entire pluginManagement block.
+// Optional for buildscript-based projects. When present, this must be the first block.
 pluginManagement {
     repositories {
         google()
@@ -80,6 +86,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
+// If settings.gradle already contains plugins { ... }, keep it here.
+// plugins { ... }
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
