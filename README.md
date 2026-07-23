@@ -71,6 +71,8 @@ hand; the plugin keeps their versions and group consistent.
 In `settings.gradle`, make Google and Maven Central available to plugins and dependencies:
 
 ```groovy
+// Required only when Android plugins are resolved through plugins { ... }.
+// Existing buildscript-based projects can omit this entire pluginManagement block.
 pluginManagement {
     repositories {
         google()
