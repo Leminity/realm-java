@@ -207,7 +207,7 @@ class ManifestTests(unittest.TestCase):
             "tools/verify-toolchain.sh",
             "tools/verify-g003-independent-builds.sh",
             "tools/verify-g004-transformer-public-api.sh",
-            "./gradle-plugin/gradlew --project-dir gradle-plugin --no-daemon --console=plain cleanTest test",
+            "./gradle-plugin/gradlew --project-dir gradle-plugin --no-daemon --console=plain",
             "tools/publish_release.sh",
             "tools/g011-consume-six.sh",
             "tools/g011-verify-native-elf.sh",
@@ -232,11 +232,19 @@ class ManifestTests(unittest.TestCase):
         g004_step = workflow[
             workflow.index("tools/verify-g004-transformer-public-api.sh") : workflow.index("G005 realm-android plugin TestKit gate")
         ]
+        g005_step = workflow[
+            workflow.index("G005 realm-android plugin TestKit gate") : workflow.index("Fresh G008 signed six-artifact bundle")
+        ]
         publication_step = workflow[
             workflow.index("tools/publish_release.sh") : workflow.index("G011 exact-six fresh consumer gate")
         ]
         self.assertIn("--run", g003_step)
         self.assertIn("--run", g004_step)
+        self.assertIn('g005_maven_repository="$(mktemp -d "$RUNNER_TEMP/g005-maven-repository.XXXXXX")"', g005_step)
+        self.assertEqual(g005_step.count('"-Dmaven.repo.local=$g005_maven_repository"'), 2)
+        self.assertEqual(g005_step.count('"-Pg008StagingRepository=$g005_maven_repository"'), 2)
+        self.assertLess(g005_step.index("g008PublishTransformer"), g005_step.index("./gradle-plugin/gradlew"))
+        self.assertNotIn("$HOME/.m2", g005_step)
         self.assertIn("--signed-bundle", publication_step)
         self.assertIn("g008SigningKey", workflow)
         self.assertIn("--export-secret-keys", workflow)

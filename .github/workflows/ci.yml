@@ -117,9 +117,21 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$G011_EVIDENCE_ROOT/g005"
-          ./gradle-plugin/gradlew --project-dir gradle-plugin --no-daemon --console=plain cleanTest test \
+          g005_maven_repository="$(mktemp -d "$RUNNER_TEMP/g005-maven-repository.XXXXXX")"
+          trap 'rm -rf "$g005_maven_repository"' EXIT
+          ./gradlew --no-daemon --console=plain \
+            "-Dmaven.repo.local=$g005_maven_repository" \
+            "-Pg008StagingRepository=$g005_maven_repository" \
+            g008PublishTransformer \
+            2>&1 | tee "$G011_EVIDENCE_ROOT/g005/stage.log"
+          ./gradle-plugin/gradlew --project-dir gradle-plugin --no-daemon --console=plain \
+            "-Dmaven.repo.local=$g005_maven_repository" \
+            "-Pg008StagingRepository=$g005_maven_repository" \
+            cleanTest test \
             2>&1 | tee "$G011_EVIDENCE_ROOT/g005/gate.log"
           cp -a gradle-plugin/build/test-results/test "$G011_EVIDENCE_ROOT/g005/test-results"
+          rm -rf "$g005_maven_repository"
+          trap - EXIT
 
       - name: Fresh G008 signed six-artifact bundle
         env:
