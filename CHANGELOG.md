@@ -1,3 +1,14 @@
+## 10.19.0-agp9.3 (2026-07-24)
+
+### Fixed
+* Make the protected CI plugin gate self-stage the exact fork annotations and transformer into an
+  isolated Maven repository, avoiding ambient Maven Local state and deleted temporary repositories.
+
+### Compatibility
+* No product, Realm Core, Sync, ObjectServer, public API, file-format, toolchain, or native ABI
+  change from `10.19.0-agp9.2`.
+
+
 ## 10.19.0-agp9.2 (2026-07-24)
 
 ### Fixed

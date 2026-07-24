@@ -203,7 +203,7 @@ for invalid_pin in \
   fi
 done
 
-[[ "$(<version.txt)" == "10.19.0-agp9.2" ]]
+[[ "$(<version.txt)" == "10.19.0-agp9.3" ]]
 verify_current_fork_contract
 
 tools/verify-baseline.sh

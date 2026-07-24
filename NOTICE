@@ -14,7 +14,7 @@ Upstream text files changed by this fork carry this prominent inline notice:
 The changed `version.txt` entry cannot carry comments without changing its
 machine-readable contract. It is therefore identified explicitly here:
 
-* version.txt changes the upstream version to the fork version 10.19.0-agp9.2.
+* version.txt changes the upstream version to the fork version 10.19.0-agp9.3.
 
 The entry `realm/realm-library/src/main/cpp/realm-core` points to locally modified Realm Core source.
 The Leminity maintenance fork backports encrypted-file page-size portability from upstream Realm Core

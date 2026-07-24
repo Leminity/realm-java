@@ -20,7 +20,7 @@ unofficial maintenance fork; it is not a new upstream Realm release.
 
 | Item | Supported or verified value |
 | --- | --- |
-| Fork version | `10.19.0-agp9.2` |
+| Fork version | `10.19.0-agp9.3` |
 | Android Gradle Plugin | `9.1.1` |
 | Gradle wrapper | `9.6.1` |
 | Build JDK | JDK 17 |
@@ -39,11 +39,12 @@ OS/device combination was exhaustively tested.
 
 ### R8 consumer-rule correction
 
-`10.19.0-agp9.2` fixes an R8 ownership gap in the Realm AAR consumer metadata. Realm discovers
-classes annotated with `@RealmModule` through reflection, but the previous consumer rule did not
-retain their constructors. The Realm AAR now owns the exact constructor keep rule required by
-that behavior. Applications upgrading to `.2` should remove an equivalent application-local
-workaround; no broad `io.realm` keep rule is required.
+`10.19.0-agp9.2` fixed an R8 ownership gap in the Realm AAR consumer metadata, and
+`10.19.0-agp9.3` carries that correction forward. Realm discovers classes annotated with
+`@RealmModule` through reflection, but the earlier consumer rule did not retain their
+constructors. The Realm AAR now owns the exact constructor keep rule required by that behavior.
+Applications upgrading to `.3` should remove an equivalent application-local workaround; no
+broad `io.realm` keep rule is required.
 
 Only the local database is supported. Atlas Device Sync, ObjectServer, server-backed sessions,
 and their related build variants are excluded. Keep Sync explicitly disabled:
@@ -56,7 +57,7 @@ realm {
 
 ### Maven Central artifacts
 
-Use group `io.github.leminity.realm` and version `10.19.0-agp9.2`. The release contains exactly
+Use group `io.github.leminity.realm` and version `10.19.0-agp9.3`. The release contains exactly
 these six artifacts:
 
 - `realm-gradle-plugin`
@@ -122,7 +123,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.2'
+        classpath 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.3'
     }
 }
 
@@ -142,7 +143,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:9.1.1'
-        classpath 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.2'
+        classpath 'io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.3'
     }
 }
 ```
@@ -205,7 +206,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.2")
+        classpath("io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.3")
     }
 }
 
@@ -251,7 +252,7 @@ repositories remain `google()`, `mavenCentral()`, and `gradlePluginPortal()` und
 
 1. Replace only the plugin classpath coordinate:
    `io.realm:realm-gradle-plugin:10.19.0` →
-   `io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.2`.
+   `io.github.leminity.realm:realm-gradle-plugin:10.19.0-agp9.3`.
 2. Remove explicit `io.realm:realm-android-library`, `realm-annotations`, processors, or Kotlin
    extensions. Let `realm-android` inject the fork artifacts.
 3. Keep `apply plugin: 'realm-android'` and add `realm { syncEnabled = false }`.
@@ -261,8 +262,8 @@ repositories remain `google()`, `mavenCentral()`, and `gradlePluginPortal()` und
    against the 10.19.0 public API and local Realm file fixtures, including encrypted and
    bidirectional file cases; the guarantee does not extend to excluded Sync/ObjectServer APIs.
 7. If upgrading from `10.19.0-agp9.1`, remove any application-local copy of the
-   `@RealmModule` constructor keep rule after resolving `.2`; the rule is packaged by the Realm
-   AAR.
+   `@RealmModule` constructor keep rule after resolving `.3`; `.2` introduced the rule and `.3`
+   carries it forward in the Realm AAR.
 8. Back up production Realm files before any SDK migration and run application-specific schema,
    migration, encryption, and rollback tests on representative copies.
 
@@ -284,7 +285,7 @@ If resolution still references `io.realm`, inspect the app classpaths:
 ./gradlew :app:dependencies --configuration debugRuntimeClasspath
 ```
 
-The resolved Realm modules must use `io.github.leminity.realm:...:10.19.0-agp9.2`; no upstream
+The resolved Realm modules must use `io.github.leminity.realm:...:10.19.0-agp9.3`; no upstream
 `io.realm:realm-*` module should remain. Also run the relevant unit/instrumentation suites on an
 API 37 x86_64 emulator or device before rollout.
 
@@ -294,10 +295,10 @@ fork build or consumer toolchain, which remains AGP 9.1.1 with Gradle 9.6.1.
 
 ### Release immutability and further documentation
 
-Tag `v10.19.0-agp9.2` is the release-candidate tag input. It must be created only after the exact
+Tag `v10.19.0-agp9.3` is the release-candidate tag input. It must be created only after the exact
 candidate commit, Realm Core source, test results, and artifact hashes are sealed; after creation
-it must never move. The predecessor `v10.19.0-agp9.1` tag and its published artifacts remain
-immutable.
+it must never move. The predecessor `v10.19.0-agp9.2` tag remains immutable, and the
+published `10.19.0-agp9.1` artifacts remain immutable.
 
 See the detailed [fork and release contract](docs/release/G010-fork-release.md) and the
 release record for provenance, artifact boundaries, and reproducible verification notes.
@@ -307,7 +308,7 @@ release record for provenance, artifact boundaries, and reproducible verificatio
 This is an **unofficial Leminity maintenance fork** of upstream Realm Java. The reproducible
 fork/release contract, provenance, compatibility boundaries, and local-only verification
 commands are documented in [`docs/release/G010-fork-release.md`](docs/release/G010-fork-release.md).
-The fork is versioned as `10.19.0-agp9.2`; tag `v10.19.0-agp9.2` is its sealed tag input.
+The fork is versioned as `10.19.0-agp9.3`; tag `v10.19.0-agp9.3` is its sealed tag input.
 It descends from upstream tag `v10.19.0`. Historical integration milestone: `0e8bddf0a46827a7336a6a13406df8e35834db25`.
 Its current canonical Realm Core provenance is
 `a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47` (including historical behavior backport `d7b52ccb`).

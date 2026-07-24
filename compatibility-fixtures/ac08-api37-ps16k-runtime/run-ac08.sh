@@ -387,7 +387,7 @@ fork_gradle+=(-p "$PROJECT" --no-daemon --console=plain)
 [[ $MODE != local ]] && fork_env+=("GRADLE_USER_HOME=$GRADLE_USER_HOME")
 run "fork-build-$MODE" "${fork_env[@]}" "${fork_gradle[@]}" :fork-app:assembleDebug :fork-app:assembleDebugAndroidTest
 run "fork-resolution-$MODE" "${fork_env[@]}" "${fork_gradle[@]}" :fork-app:dependencies --configuration debugRuntimeClasspath
-grep -Fq 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.2' "$EVIDENCE/fork-resolution-$MODE.log" ||
+grep -Fq 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.3' "$EVIDENCE/fork-resolution-$MODE.log" ||
   fail "fork runtime did not resolve expected artifact in $MODE mode"
 if [[ $MODE == local ]]; then
   run g008-artifact-manifest find "$REPOSITORY/io/github/leminity/realm" -type f -maxdepth 6 -print

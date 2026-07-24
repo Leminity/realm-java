@@ -26,7 +26,7 @@ android {
 }
 
 dependencies {
-    implementation 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.2'
+    implementation 'io.github.leminity.realm:realm-android-library:10.19.0-agp9.3'
     androidTestImplementation 'androidx.test:runner:1.5.2'
     androidTestImplementation 'junit:junit:4.13.2'
 }

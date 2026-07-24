@@ -322,7 +322,7 @@ verify_fork_core_gitlinks() {
 }
 
 verify_current_fork_contract() {
-  [[ "$(<version.txt)" == "10.19.0-agp9.2" ]]
+  [[ "$(<version.txt)" == "10.19.0-agp9.3" ]]
   grep -qx 'GRADLE_BUILD_TOOLS=9.1.1' dependencies.list
   grep -qx 'gradle=9.6.1' dependencies.list
   grep -qx 'ndkVersion=29.0.14206865' dependencies.list
