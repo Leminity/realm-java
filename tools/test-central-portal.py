@@ -30,8 +30,8 @@ CORE_COMMIT = "b" * 40
 CI_ARTIFACT_SHA256 = "e" * 64
 CI_RUN_ID = "123456"
 CI_ARTIFACT_ID = "789012"
-TAG = "v10.19.0-agp9.1"
-VERSION = "10.19.0-agp9.1"
+TAG = "v10.19.0-agp9.2"
+VERSION = "10.19.0-agp9.2"
 BINDING = {
     "tag": TAG,
     "version": VERSION,
@@ -204,7 +204,7 @@ class CentralPortalTests(unittest.TestCase):
             REPOSITORY,
             self.admin_bypass_attestation,
             GATE_TIME,
-            "v10.19.0-agp9.1",
+            "v10.19.0-agp9.2",
             self.policy_audit,
         )
         self.consumer_command = self.root / "g011-deployment-consumer.sh"
@@ -215,9 +215,9 @@ class CentralPortalTests(unittest.TestCase):
 
     def _write_bound_bundle(self) -> tuple[Path, Path]:
         files = {
-            "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.jar": b"jar",
-            "io/github/leminity/realm/realm-annotations/10.19.0-agp9.1/realm-annotations-10.19.0-agp9.1.pom": b"pom",
-            "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar": b"public-aar",
+            "io/github/leminity/realm/realm-annotations/10.19.0-agp9.2/realm-annotations-10.19.0-agp9.2.jar": b"jar",
+            "io/github/leminity/realm/realm-annotations/10.19.0-agp9.2/realm-annotations-10.19.0-agp9.2.pom": b"pom",
+            "io/github/leminity/realm/realm-android-library/10.19.0-agp9.2/realm-android-library-10.19.0-agp9.2.aar": b"public-aar",
         }
         source_manifest = self.root / "source-manifest.json"
         source_manifest.write_text(
@@ -254,8 +254,8 @@ class CentralPortalTests(unittest.TestCase):
         prepared_result = CP.stage(
             bundle=self.bundle,
             source_manifest=self.source_manifest,
-            tag="v10.19.0-agp9.1",
-            version="10.19.0-agp9.1",
+            tag="v10.19.0-agp9.2",
+            version="10.19.0-agp9.2",
             commit=COMMIT,
             core_commit=CORE_COMMIT,
             runtime_provenance=self.runtime_provenance,
@@ -357,7 +357,7 @@ class CentralPortalTests(unittest.TestCase):
         self.assertEqual(len(control_calls), 3)
         upload_url = transport.calls[0][1]
         self.assertEqual(urlparse(upload_url).path, "/api/v1/publisher/upload")
-        self.assertEqual(parse_qs(urlparse(upload_url).query), {"name": ["v10.19.0-agp9.1"], "publishingType": ["USER_MANAGED"]})
+        self.assertEqual(parse_qs(urlparse(upload_url).query), {"name": ["v10.19.0-agp9.2"], "publishingType": ["USER_MANAGED"]})
         self.assertTrue(all("/status?id=deployment-123" in call[1] for call in control_calls[1:]))
         self.assertFalse(any(call[1].endswith("/api/v1/publisher/deployment/deployment-123") for call in transport.calls))
         self.assertEqual(transport.calls[0][2]["Authorization"], f"Bearer {SECRET}")
@@ -389,7 +389,7 @@ class CentralPortalTests(unittest.TestCase):
                 self.root
                 / "validated-evidence"
                 / "validated-deployment-mirror"
-                / "io/github/leminity/realm/realm-android-library/10.19.0-agp9.1/realm-android-library-10.19.0-agp9.1.aar"
+                / "io/github/leminity/realm/realm-android-library/10.19.0-agp9.2/realm-android-library-10.19.0-agp9.2.aar"
             ).is_file()
         )
 
@@ -401,8 +401,8 @@ class CentralPortalTests(unittest.TestCase):
             CP.stage(
                 bundle=self.bundle,
                 source_manifest=self.source_manifest,
-                tag="v10.19.0-agp9.1",
-                version="10.19.0-agp9.1",
+                tag="v10.19.0-agp9.2",
+                version="10.19.0-agp9.2",
                 commit=COMMIT,
                 core_commit=CORE_COMMIT,
                 runtime_provenance=self.runtime_provenance,
@@ -1020,9 +1020,9 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 "--source-manifest",
                 str(self.source_manifest),
                 "--tag",
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 "--version",
-                "10.19.0-agp9.1",
+                "10.19.0-agp9.2",
                 "--commit",
                 COMMIT,
                 "--core-commit",
@@ -1334,7 +1334,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 REPOSITORY,
                 self.admin_bypass_attestation,
                 GATE_TIME,
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 self.root / "wrong-reviewer-audit.json",
             )
 
@@ -1353,7 +1353,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 REPOSITORY,
                 self.admin_bypass_attestation,
                 GATE_TIME,
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 self.root / "multiple-reviewers-audit.json",
             )
 
@@ -1370,7 +1370,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 REPOSITORY,
                 self.admin_bypass_attestation,
                 GATE_TIME,
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 self.root / "prevented-self-review-audit.json",
             )
         broad = self.root / "broad-deployment-policies.json"
@@ -1395,7 +1395,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 REPOSITORY,
                 self.admin_bypass_attestation,
                 GATE_TIME,
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 self.root / "broad-policy-audit.json",
             )
 
@@ -1420,7 +1420,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 REPOSITORY,
                 self.admin_bypass_attestation,
                 GATE_TIME,
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 self.root / "branch-policy-audit.json",
             )
 
@@ -1434,7 +1434,7 @@ raise SystemExit(subprocess.run([sys.executable, '-c', sys.argv[1]], env=child).
                 REPOSITORY,
                 attestation,
                 GATE_TIME,
-                "v10.19.0-agp9.1",
+                "v10.19.0-agp9.2",
                 self.root / output,
             )
 

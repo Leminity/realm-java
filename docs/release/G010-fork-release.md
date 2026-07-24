@@ -7,14 +7,24 @@ support.
 ## Provenance and coordinates
 
 - Upstream baseline: tag `v10.19.0`.
-- Canonical release checkout: tag `v10.19.0-agp9.1`.
+- Release-candidate tag input: `v10.19.0-agp9.2`.
+- Immutable predecessor: tag `v10.19.0-agp9.1`.
 - Historical integration milestone: `0e8bddf0a46827a7336a6a13406df8e35834db25`.
 - Current canonical Realm Core source provenance: `a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47`; historical behavior backport: `d7b52ccb`.
-- Version: `10.19.0-agp9.1` (`version.txt`).
+- Version: `10.19.0-agp9.2` (`version.txt`).
 - Maven coordinates use group `io.github.leminity.realm`; the six fork artifacts are
   `realm-gradle-plugin`, `realm-transformer`, `realm-annotations`,
   `realm-annotations-processor`, `realm-android-library`, and
   `realm-android-kotlin-extensions`.
+
+## R8 consumer metadata
+
+Realm reflects over classes annotated with `@RealmModule`. In the predecessor release, the AAR
+consumer metadata kept those classes but did not retain their constructors, so R8 could remove
+the constructor needed by Realm at runtime. `10.19.0-agp9.2` packages the exact
+`@RealmModule` constructor keep rule in the Realm AAR. After upgrading to `.2`, consumers should
+remove any equivalent application-local workaround; a broad package keep is neither needed nor
+part of this release.
 
 ## Supported boundary
 
@@ -80,6 +90,10 @@ Every revision must record the exact source and Core SHAs, preserve the three-AB
 rerun the clean consumer and API 37 / 16 KiB fixture, and retain checksummed evidence. A
 revision that changes those inputs or boundaries requires a new documented revision rather
 than silently reusing this contract.
+
+The `.2` tag may be created only after its exact source commit has passed the release gates and
+been sealed as the tag input. Once created, it is immutable. The existing
+`v10.19.0-agp9.1` tag and published artifacts must not be moved or replaced.
 
 ## Archival upstream instructions
 

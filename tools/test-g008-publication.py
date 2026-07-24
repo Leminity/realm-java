@@ -92,9 +92,11 @@ class G008PublicationTests(unittest.TestCase):
         self.assertEqual(first, hashlib.sha256(bundle.read_bytes()).hexdigest())
 
     def test_extra_coordinate_is_rejected(self) -> None:
-        extra = self.repository / "io/github/leminity/realm/internal-build-transformer/10.19.0-agp9.1"
+        extra = self.repository / "io/github/leminity/realm/internal-build-transformer" / G008.VERSION
         extra.mkdir(parents=True)
-        (extra / "internal-build-transformer-10.19.0-agp9.1.jar").write_text("no", encoding="utf-8")
+        (extra / f"internal-build-transformer-{G008.VERSION}.jar").write_text(
+            "no", encoding="utf-8"
+        )
         with self.assertRaisesRegex(G008.ValidationError, "outside exact-six"):
             G008.validate_repository(self.repository, False, None)
 

@@ -1,3 +1,17 @@
+## 10.19.0-agp9.2 (2026-07-24)
+
+### Fixed
+* Package the exact `@RealmModule` constructor keep rule in the Realm AAR consumer metadata so
+  R8 retains constructors used by Realm reflection. Applications upgrading to this version can
+  remove an equivalent application-local workaround.
+
+### Compatibility
+* Base local Realm database only; Sync and ObjectServer remain unsupported and excluded.
+* Android Gradle Plugin 9.1.1, Gradle 9.6.1, JDK 17, SDK 37, `minSdk=21`,
+  NDK 29.0.14206865, and CMake 3.27.7.
+* Published native ABIs remain exactly `armeabi-v7a`, `arm64-v8a`, and `x86_64`.
+
+
 ## 10.19.0-SNAPSHOT (2024-09-13)
 
 ### Breaking Changes

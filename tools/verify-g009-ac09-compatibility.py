@@ -23,7 +23,7 @@ from pathlib import Path
 
 BASELINE_TAG = "v10.19.0"
 OFFICIAL_VERSION = "10.19.0"
-FORK_VERSION = "10.19.0-agp9.1"
+FORK_VERSION = "10.19.0-agp9.2"
 FORK_GROUP_PATH = Path("io/github/leminity/realm")
 ARTIFACTS = {
     "realm-gradle-plugin": ".jar",

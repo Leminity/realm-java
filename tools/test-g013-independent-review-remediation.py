@@ -16,7 +16,9 @@ FORMAT_CONSTRAINED = {
     "version.txt",
 }
 CORE_GITLINK = "realm/realm-library/src/main/cpp/realm-core"
-CANONICAL_RELEASE_TAG = "v10.19.0-agp9.1"
+CURRENT_VERSION = (ROOT / "version.txt").read_text(encoding="utf-8").strip()
+CANDIDATE_RELEASE_TAG = f"v{CURRENT_VERSION}"
+IMMUTABLE_PREDECESSOR_TAG = "v10.19.0-agp9.1"
 HISTORICAL_INTEGRATION_MILESTONE = "0e8bddf0a46827a7336a6a13406df8e35834db25"
 CANONICAL_CORE = "a5b7ed7bb8f0db4d362c7e45b2f38358a4aeab47"
 HISTORICAL_CORE_BACKPORT = "d7b52ccb"
@@ -60,6 +62,7 @@ class IndependentReviewRemediationTests(unittest.TestCase):
         self.assertIn(MODIFICATION_NOTICE, notice)
         for relative in sorted(FORMAT_CONSTRAINED):
             self.assertIn(relative, notice)
+        self.assertIn(f"fork version {CURRENT_VERSION}.", notice)
         self.assertIn("locally modified Realm Core source", notice)
         self.assertIn("c97091234d40efaaaf7d8d8349eb3c97012f6c9b", notice)
         self.assertIn("d7b52ccbada0283527db36143cfeab18692b4ed0", notice)
@@ -76,16 +79,16 @@ class IndependentReviewRemediationTests(unittest.TestCase):
         self.assertNotIn("git clone git@github.com:realm/realm-java.git", readme)
         self.assertNotIn("git clone https://github.com/realm/realm-java.git", readme)
 
-    def test_live_docs_bind_canonical_release_and_core_history(self) -> None:
+    def test_live_docs_bind_candidate_predecessor_and_core_history(self) -> None:
         for relative in LIVE_PROVENANCE_DOCS:
             with self.subTest(path=relative):
                 contents = (ROOT / relative).read_text(encoding="utf-8")
-                release_lines = [
-                    line for line in contents.splitlines()
-                    if "canonical release checkout" in line.lower()
-                ]
-                self.assertEqual(1, len(release_lines))
-                self.assertIn(CANONICAL_RELEASE_TAG, release_lines[0])
+                self.assertIn(CURRENT_VERSION, contents)
+                self.assertIn(CANDIDATE_RELEASE_TAG, contents)
+                self.assertIn("tag input", contents.lower())
+                self.assertIn(IMMUTABLE_PREDECESSOR_TAG, contents)
+                self.assertIn("immutable", contents.lower())
+                self.assertNotIn("canonical release checkout", contents.lower())
                 self.assertEqual(1, contents.count(HISTORICAL_INTEGRATION_MILESTONE))
                 integration_line = next(
                     line for line in contents.splitlines()
