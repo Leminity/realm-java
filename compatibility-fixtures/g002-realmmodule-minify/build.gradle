@@ -1,0 +1,17 @@
+def candidateRepository = providers.gradleProperty('candidateRepository').orNull
+if (candidateRepository == null || candidateRepository.trim().isEmpty()) {
+    throw new GradleException(
+        'G002 requires -PcandidateRepository=<local Maven-layout directory>'
+    )
+}
+
+buildscript {
+    repositories {
+        maven { url = uri(candidateRepository) }
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:9.1.1'
+    }
+}

@@ -1,0 +1,33 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+def candidateRepository = providers.gradleProperty('candidateRepository').orNull
+if (candidateRepository == null || candidateRepository.trim().isEmpty()) {
+    throw new GradleException(
+        'G002 requires -PcandidateRepository=<local Maven-layout directory>'
+    )
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        exclusiveContent {
+            forRepository {
+                maven { url = uri(candidateRepository) }
+            }
+            filter {
+                includeGroup 'io.github.leminity.realm'
+            }
+        }
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.name = 'realm-g002-minified-consumer'
+include ':app'

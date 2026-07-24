@@ -1,0 +1,35 @@
+def realmVersion = providers.gradleProperty('realmVersion').orNull
+if (realmVersion == null || realmVersion.trim().isEmpty()) {
+    throw new GradleException('G002 requires -PrealmVersion=<candidate version>')
+}
+
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'io.realm.g002.fixture'
+    compileSdk 37
+
+    defaultConfig {
+        applicationId 'io.realm.g002.fixture'
+        minSdk 21
+        targetSdk 37
+        versionCode 1
+        versionName '1.0'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt')
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation "io.github.leminity.realm:realm-android-library:${realmVersion}"
+}
