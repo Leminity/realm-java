@@ -63,6 +63,39 @@ for allowed in \
   fi
 done
 
+for allowed in \
+  'CHANGELOG.md' \
+  'compatibility-fixtures/ac07-bidirectional/fork-consumer/build.gradle' \
+  'compatibility-fixtures/ac08-api37-ps16k-runtime/README.md' \
+  'compatibility-fixtures/ac08-api37-ps16k-runtime/build.gradle' \
+  'compatibility-fixtures/ac08-api37-ps16k-runtime/fork-app/build.gradle' \
+  'compatibility-fixtures/g002-realmmodule-minify/app/build.gradle' \
+  'compatibility-fixtures/g002-realmmodule-minify/app/src/main/AndroidManifest.xml' \
+  'compatibility-fixtures/g002-realmmodule-minify/app/src/main/java/io/realm/DefaultRealmModule.java' \
+  'compatibility-fixtures/g002-realmmodule-minify/build.gradle' \
+  'compatibility-fixtures/g002-realmmodule-minify/gradle.properties' \
+  'compatibility-fixtures/g002-realmmodule-minify/settings.gradle' \
+  'realm/realm-library/proguard-rules-consumer-common.pro' \
+  'tools/test-g008-publication.py' \
+  'tools/test-verify-g002-realmmodule-constructor-rule.py' \
+  'tools/verify-g002-realmmodule-constructor-rule.sh' \
+  'tools/verify-g009-ac09-compatibility.py'; do
+  if ! is_post_review_allowed_path "$allowed"; then
+    printf 'approved G002/G003 candidate path was rejected: %s\n' "$allowed" >&2
+    exit 1
+  fi
+done
+
+for disallowed in \
+  'compatibility-fixtures/g002-realmmodule-minify/app/proguard-rules.pro' \
+  'realm/realm-library/proguard-rules-consumer-objectserver.pro' \
+  'tools/verify-g002-realmmodule-constructor-rule-unreviewed.sh'; do
+  if is_post_review_allowed_path "$disallowed"; then
+    printf 'adjacent unapproved G002/G003 path was accepted: %s\n' "$disallowed" >&2
+    exit 1
+  fi
+done
+
 if ! is_post_review_allowed_path \
   'compatibility-fixtures/official-10.19.0-generator/gradlew'; then
   printf 'reviewed official fixture wrapper mode path was rejected\n' >&2
@@ -169,6 +202,9 @@ for invalid_pin in \
     exit 1
   fi
 done
+
+[[ "$(<version.txt)" == "10.19.0-agp9.2" ]]
+verify_current_fork_contract
 
 tools/verify-baseline.sh
 echo 'baseline verifier regression tests: PASS'

@@ -77,15 +77,28 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   .github/workflows/ci.yml
   .github/workflows/pull-request.yml
   .github/workflows/release.yml
+  CHANGELOG.md
   NOTICE
+  compatibility-fixtures/ac07-bidirectional/fork-consumer/build.gradle
   compatibility-fixtures/ac07-bidirectional/run-ac07.sh
   compatibility-fixtures/official-10.19.0-generator/gradlew
+  compatibility-fixtures/ac08-api37-ps16k-runtime/README.md
+  compatibility-fixtures/ac08-api37-ps16k-runtime/build.gradle
+  compatibility-fixtures/ac08-api37-ps16k-runtime/fork-app/build.gradle
   compatibility-fixtures/ac08-api37-ps16k-runtime/run-ac08.sh
+  compatibility-fixtures/g002-realmmodule-minify/app/build.gradle
+  compatibility-fixtures/g002-realmmodule-minify/app/src/main/AndroidManifest.xml
+  compatibility-fixtures/g002-realmmodule-minify/app/src/main/java/io/realm/DefaultRealmModule.java
+  compatibility-fixtures/g002-realmmodule-minify/build.gradle
+  compatibility-fixtures/g002-realmmodule-minify/gradle.properties
+  compatibility-fixtures/g002-realmmodule-minify/settings.gradle
   docs/release/G010-fork-release.md
   evidence/provenance/g011-source-evidence-manifest.json
+  realm/realm-library/proguard-rules-consumer-common.pro
   tools/g011-evidence-manifest.py
   tools/central-portal.py
   tools/test-central-portal.py
+  tools/test-g008-publication.py
   tools/test-g011-evidence-manifest.py
   tools/__pycache__/g011-evidence-manifest.cpython-314.pyc
   tools/__pycache__/test-g011-evidence-manifest.cpython-314.pyc
@@ -94,7 +107,10 @@ readonly -a APPROVED_POST_REVIEW_PATHS=(
   tools/test-g013-workflow-trust.py
   tools/test-g014-release-binding.py
   tools/test-ac08-g011-parameterization.py
+  tools/test-verify-g002-realmmodule-constructor-rule.py
   tools/test-verify-g010-license.py
+  tools/verify-g002-realmmodule-constructor-rule.sh
+  tools/verify-g009-ac09-compatibility.py
   tools/test-verify-baseline.sh
   tools/verify-g010-license.py
   tools/verify-g010-scope.py
@@ -306,7 +322,7 @@ verify_fork_core_gitlinks() {
 }
 
 verify_current_fork_contract() {
-  [[ "$(<version.txt)" == "10.19.0-agp9.1" ]]
+  [[ "$(<version.txt)" == "10.19.0-agp9.2" ]]
   grep -qx 'GRADLE_BUILD_TOOLS=9.1.1' dependencies.list
   grep -qx 'gradle=9.6.1' dependencies.list
   grep -qx 'ndkVersion=29.0.14206865' dependencies.list
